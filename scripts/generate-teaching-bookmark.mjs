@@ -20,20 +20,16 @@ const readerCoreRaw = fs.readFileSync(READER_CORE_PATH, 'utf8');
 const readerHash = crypto.createHash('sha256').update(readerCoreRaw).digest('hex');
 console.log(`[generator] Reader core SHA-256: ${readerHash}`);
 
-// Transform ESM exports into an IIFE bookmarklet
+// Transform ESM exports into clean script body (without export and without execution call)
 // 1. Remove "export const " -> "const "
 // 2. Remove "export function " -> "function "
-// 3. Remove leading comments/docstrings if needed or keep clean
-let iifeBody = readerCoreRaw
+const readerCoreBody = readerCoreRaw
   .replace(/export\s+const\s+/g, 'const ')
   .replace(/export\s+function\s+/g, 'function ')
   .trim();
 
-// Append execution call with browser globals
-iifeBody += '\n\n// Trigger reader on active page\nrunTeachingReader(document, window.location);\n';
-
-// Wrap inside self-executing IIFE
-const rawBookmarkletScript = `(function(){\n${iifeBody}\n})();`;
+// Bookmarklet wraps the core reader body in an IIFE and triggers reader on active page
+const rawBookmarkletScript = `(function(){\n${readerCoreBody}\n\n// Trigger reader on active page\nrunTeachingReader(document, window.location);\n})();`;
 
 // Encode as valid javascript: URL
 // For readability and safety in Chrome bookmarks bar
@@ -383,7 +379,7 @@ const htmlContent = `<!DOCTYPE html>
 
   <!-- Embed Core Reader Logic for QA Testing -->
   <script>
-${rawBookmarkletScript}
+${readerCoreBody}
 
     // QA Helper function to test reader in pure mode
     function runFixtureTest(type) {

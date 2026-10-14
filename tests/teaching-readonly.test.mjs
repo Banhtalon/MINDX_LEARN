@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { JSDOM } from 'jsdom';
+import { JSDOM, VirtualConsole } from 'jsdom';
 
 import {
   TEACHING_ORIGIN,
@@ -516,4 +516,184 @@ test('Case 11: Public bookmarklet code maintains strict source parity with reade
   assert.ok(bookmarkletContent.includes('function runTeachingReader('));
   assert.ok(bookmarkletContent.includes(REQUIRED_LABELS.SAMPLE));
   assert.ok(bookmarkletContent.includes(REQUIRED_LABELS.READONLY));
+});
+
+// -----------------------------------------------------------------------------
+// Test Case 12: Hosted QA Guide interactive fixture buttons regression (JSDOM dangerously)
+// -----------------------------------------------------------------------------
+test('Case 12: Hosted QA Guide interactive fixture buttons update panel safely without errors, network, or storage', () => {
+  const indexPath = path.join(ROOT_DIR, 'public', 'teaching-readonly', 'index.html');
+  assert.ok(fs.existsSync(indexPath), 'public/teaching-readonly/index.html must exist');
+
+  const indexHtml = fs.readFileSync(indexPath, 'utf8');
+
+  // Monitor uncaught errors and JSDOM script execution errors
+  const uncaughtErrors = [];
+  const virtualConsole = new VirtualConsole();
+  virtualConsole.on('jsdomError', (err) => {
+    uncaughtErrors.push(err);
+  });
+  virtualConsole.on('error', (err) => {
+    uncaughtErrors.push(err);
+  });
+
+  const dom = new JSDOM(indexHtml, {
+    runScripts: 'dangerously',
+    virtualConsole,
+    url: 'http://localhost:3000/teaching-readonly/',
+  });
+
+  dom.window.addEventListener('error', (event) => {
+    uncaughtErrors.push(event.error || event.message);
+  });
+
+  // 1. Initial State: No panel on initial guide load (auto-run IIFE removed)
+  const initialPanel = dom.window.document.getElementById('teaching-readonly-spike-panel');
+  assert.equal(initialPanel, null, 'Must NOT show panel on initial guide page load');
+
+  // 2. Monitor Network and Storage (ban network and storage access during fixture tests)
+  let fetchCalled = false;
+  let xhrCalled = false;
+  dom.window.fetch = () => {
+    fetchCalled = true;
+    return Promise.reject(new Error('fetch forbidden'));
+  };
+  dom.window.XMLHttpRequest = class {
+    open() {
+      xhrCalled = true;
+    }
+    send() {
+      xhrCalled = true;
+    }
+  };
+
+  let storageCalled = false;
+  const spyStorage = (storageObj) => {
+    if (!storageObj) return;
+    const methods = ['getItem', 'setItem', 'removeItem', 'clear', 'key'];
+    for (const m of methods) {
+      const orig = storageObj[m];
+      storageObj[m] = function (...args) {
+        storageCalled = true;
+        return orig ? orig.apply(this, args) : null;
+      };
+    }
+  };
+
+  const trapStorage = (propName) => {
+    try {
+      let storageObj = null;
+      try {
+        storageObj = dom.window[propName];
+      } catch {
+        // Safe guard against setup error
+      }
+      if (storageObj) {
+        spyStorage(storageObj);
+      }
+
+      const originalGetter = Object.getOwnPropertyDescriptor(dom.window.Window.prototype, propName)?.get;
+      if (originalGetter) {
+        Object.defineProperty(dom.window, propName, {
+          get() {
+            storageCalled = true;
+            return originalGetter.call(this);
+          },
+          configurable: true,
+        });
+      } else if (storageObj) {
+        Object.defineProperty(dom.window, propName, {
+          get() {
+            storageCalled = true;
+            return storageObj;
+          },
+          configurable: true,
+        });
+      }
+    } catch {
+      // Fallback
+    }
+  };
+  trapStorage('localStorage');
+  trapStorage('sessionStorage');
+  storageCalled = false;
+
+  // 3. Locate the 5 real interactive fixture buttons in DOM
+  const btnValid3 = dom.window.document.querySelector('button[onclick*="valid_3"]');
+  const btnEmpty = dom.window.document.querySelector('button[onclick*="empty"]');
+  const btnLogin = dom.window.document.querySelector('button[onclick*="login"]');
+  const btnHeaders = dom.window.document.querySelector('button[onclick*="invalid_headers"]');
+  const btnOrigin = dom.window.document.querySelector('button[onclick*="wrong_origin"]');
+
+  assert.ok(btnValid3, 'Fixture 1 button (valid_3) must exist in DOM');
+  assert.ok(btnEmpty, 'Fixture 2 button (empty) must exist in DOM');
+  assert.ok(btnLogin, 'Fixture 3 button (login) must exist in DOM');
+  assert.ok(btnHeaders, 'Fixture 4 button (invalid_headers) must exist in DOM');
+  assert.ok(btnOrigin, 'Fixture 5 button (wrong_origin) must exist in DOM');
+
+  // 4. Click Button 1 (valid_3) -> panel displays 3 rows
+  btnValid3.click();
+  const panelValid = dom.window.document.getElementById('teaching-readonly-spike-panel');
+  assert.ok(panelValid, 'Panel must appear after clicking valid_3');
+  assert.ok(panelValid.textContent.includes('3 hàng'), 'Panel must show 3 visible rows for valid_3');
+  assert.ok(
+    panelValid.textContent.includes('Đã nhận diện đúng bảng học sinh') ||
+    panelValid.textContent.includes('Đọc thành công 3 hàng hiển thị'),
+    'Panel must display valid success confirmation'
+  );
+
+  // 5. Click Button 2 (empty) -> panel displays 0 rows
+  btnEmpty.click();
+  const panelEmpty = dom.window.document.getElementById('teaching-readonly-spike-panel');
+  assert.ok(panelEmpty, 'Panel must appear after clicking empty');
+  assert.ok(panelEmpty.textContent.includes('0 hàng'), 'Panel must show 0 visible rows for empty fixture');
+  assert.ok(
+    panelEmpty.textContent.includes('EMPTY_TABLE') ||
+    panelEmpty.textContent.includes('Không có dữ liệu') ||
+    panelEmpty.textContent.includes('0 dòng dữ liệu') ||
+    panelEmpty.textContent.includes('BẢNG KHÔNG CÓ HÀNG DỮ LIỆU'),
+    'Panel must display empty placeholder state'
+  );
+
+  // 6. Click Button 3 (login) -> panel displays LOGIN_REQUIRED
+  btnLogin.click();
+  const panelLogin = dom.window.document.getElementById('teaching-readonly-spike-panel');
+  assert.ok(panelLogin, 'Panel must appear after clicking login');
+  assert.ok(panelLogin.textContent.includes('LOGIN_REQUIRED'), 'Panel must show LOGIN_REQUIRED status code');
+
+  // 7. Click Button 4 (invalid_headers) -> panel displays INVALID_HEADERS
+  btnHeaders.click();
+  const panelHeaders = dom.window.document.getElementById('teaching-readonly-spike-panel');
+  assert.ok(panelHeaders, 'Panel must appear after clicking invalid_headers');
+  assert.ok(panelHeaders.textContent.includes('INVALID_HEADERS'), 'Panel must show INVALID_HEADERS status code');
+
+  // 8. Click Button 5 (wrong_origin) -> panel displays WRONG_ORIGIN
+  btnOrigin.click();
+  const panelOrigin = dom.window.document.getElementById('teaching-readonly-spike-panel');
+  assert.ok(panelOrigin, 'Panel must appear after clicking wrong_origin');
+  assert.ok(panelOrigin.textContent.includes('WRONG_ORIGIN'), 'Panel must show WRONG_ORIGIN status code');
+
+  // 9. Verify exactly ONE panel exists in DOM
+  const allPanels = dom.window.document.querySelectorAll('#teaching-readonly-spike-panel');
+  assert.equal(allPanels.length, 1, 'Only one panel must exist at any time across successive clicks');
+
+  // 10. Verify Close button on panel removes it from DOM
+  const closeBtn = panelOrigin.querySelector('button');
+  assert.ok(closeBtn, 'Close button must exist on the panel');
+  closeBtn.click();
+
+  const closedPanel = dom.window.document.getElementById('teaching-readonly-spike-panel');
+  assert.equal(closedPanel, null, 'Panel must be completely removed from DOM after clicking close');
+
+  // 11. Verify NO ReferenceError or uncaught errors during guide execution
+  assert.equal(
+    uncaughtErrors.length,
+    0,
+    `Guide must execute without ReferenceError or uncaught errors: ${uncaughtErrors.map((e) => e?.message || e).join('; ')}`
+  );
+
+  // 12. Verify NO network requests and NO storage operations occurred
+  assert.equal(fetchCalled, false, 'No fetch calls permitted during fixture tests');
+  assert.equal(xhrCalled, false, 'No XHR calls permitted during fixture tests');
+  assert.equal(storageCalled, false, 'No storage access permitted during fixture tests');
 });

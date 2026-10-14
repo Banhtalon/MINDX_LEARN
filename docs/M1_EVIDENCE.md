@@ -117,3 +117,24 @@
 - Commit mã nguồn đã được Luna duyệt: `0990b14` (`feat: implement milestone 1 test dashboard`), đã push thành công lên `origin/main` của `Banhtalon/MINDX_LEARN`.
 - Project TEST Vercel `mindx-learn-test` đã được kết nối với `Banhtalon/MINDX_LEARN` sau khi Owner đăng nhập Vercel. Không bật Analytics, Speed Insights, Git LFS, deploy hook hay gói trả phí.
 - Commit mã nguồn có trước thời điểm kết nối Git nên Vercel chưa tự tạo deployment. Commit tài liệu bằng chứng tiếp theo chỉ kích hoạt pipeline của Vercel; không đổi mã nguồn, fixture hay dữ liệu thử.
+
+## TEST chạy trên web và lượt đọc Teaching của Owner
+
+- Deployment Vercel `dpl_4VbN2dC8DnpXdXKokdGQBPsZ5PN7`: READY, commit `1574b13cc0fcff352810bff1e9b95f7f2d1591cf`; project riêng `mindx-learn-test`. URL TEST: https://mindx-learn-test.vercel.app . URL phiên bản: https://mindx-learn-test-hk3ck56gz-quangctm07-5456s-projects.vercel.app . Vercel gọi nhánh chính của project TEST là `production`; đây vẫn là project TEST fixture, chưa triển khai môi trường PROD trong kế hoạch.
+- Sol mở trang bằng trình duyệt, thấy đủ chỉ mục UI-01..13 và nhãn dữ liệu giả. Đường dẫn 13 màn hình, hướng dẫn tiện ích và robots.txt trả HTTP 200 trên Vercel. Ảnh dữ liệu giả cục bộ: `.workflow-local/m1/screenshots/hosted-home-1574b13.jpg`.
+- Owner lượt đầu bấm sai trang, nhận `WRONG_ORIGIN` và 0; tiện ích dừng đúng guard. Lượt này không tính là đọc Teaching thành công.
+- Sau hướng dẫn kéo nút thành dấu trang rồi bấm trên đúng `https://teachingmindx.top/hocsinh.php`, Owner xác nhận: `ĐÃ NHẬN DIỆN ĐÚNG BẢNG HỌC SINH (8 CỘT)`, đọc thành công 15 hàng hiển thị, tổng hàng DOM 15. Chỉ lưu phản hồi tổng hợp này; không thu nhận tên/mã học sinh, ảnh nguồn, mật khẩu, cookie hoặc payload thật. Đây là lượt đọc thử một trang hiện tại, không chứng minh toàn bộ danh sách/phân trang hay đồng bộ.
+- Sol phát hiện lỗi scope JavaScript trong nút fixture của trang hướng dẫn, đang giao gói M1-G cho Gemini sửa generator và thêm regression trên chính HTML đã sinh. Lỗi này không đổi core bookmarklet đã dùng cho lượt Owner; chưa dùng deployment cũ để xác nhận bản sửa G.
+
+## Gói M1-G — trang hướng dẫn thử các trường hợp giả
+
+- AGY Worker cấu hình `gemini-3.8-flash-high` / `high`, conversation `baf72261-0fe1-4d4e-a948-87f07ea91faf`, exit 0. Phạm vi generator, HTML hướng dẫn đã sinh và test. Mã ứng dụng, `reader-core.mjs` và giới hạn chỉ đọc Teaching giữ nguyên; reader hash `86a6d8577a23a5818b62732aa75a4bf51df892d5d229b1c8c24f789a2b6241cc`.
+- Tách phần hàm đọc khỏi lệnh tự thực thi: guide không tự chạy khi tải; 5 nút fixture gọi được hàm và cập nhật panel. Bookmarklet vẫn thực thi trên chính trang Teaching với origin/path guard cũ; phần sinh chỉ đổi một dòng trắng.
+- Sol chạy generator và `npm test`: exit 0, 16/16 đạt. Test mới chạy trên HTML thực đã sinh: ban đầu không panel; 3 hàng/empty/login/headers/origin cho kết quả đúng; panel đơn và đóng được; không ReferenceError, request mạng hay storage.
+- Owner xác nhận trên TEST `1574b13`: “xác nhận các trang mở được”; “xác nhận hiện chưa thấy Vercel yêu cầu thanh toán/nâng cấp, chưa nhập học sinh thật”. Các xác nhận đó bổ sung cho lượt đọc Teaching 15 hàng nêu trên. Bản sửa G chỉ ảnh hưởng guide; cần review/kiểm tra guide trên deployment mới trước khi chốt M1.
+
+## Gói M1-H — bảng hồ sơ không bị nút QA che
+
+- Luna kiểm tra drawer ở 1280×720 thấy nút QA nổi che một phần nút Lưu trữ khi cuộn cuối bảng hồ sơ; drawer và hộp xác nhận vẫn nằm trong màn hình tại ba cỡ yêu cầu.
+- Worker AGY cấu hình `gemini-3.8-flash-high` / `high`, conversation `67f453ba-3584-460b-9284-8cab58d24586`, exit 0. Sửa duy nhất `src/components/qa-controller.tsx`: lớp QA z-50 thành z-40, thấp hơn drawer/dialog z-50. Không thay logic vai trò/dữ liệu/lưu hoặc thêm thư viện.
+- Sol đối chiếu diff chỉ một lớp hiển thị; `npm run typecheck` và `npm run build` exit 0. Test 16/16 trước đó của G vẫn áp dụng vì H không đổi logic đã test. Chờ Luna kiểm tra lại trực quan trên deployment G+H cuối.

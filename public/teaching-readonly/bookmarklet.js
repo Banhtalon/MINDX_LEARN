@@ -592,5 +592,4 @@ function runTeachingReader(doc = (typeof document !== 'undefined' ? document : n
 
 // Trigger reader on active page
 runTeachingReader(document, window.location);
-
 })();

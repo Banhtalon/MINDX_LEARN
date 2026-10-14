@@ -77,7 +77,7 @@ export function QAController() {
   };
 
   return (
-    <aside className="fixed bottom-4 right-4 z-50 pointer-events-auto" aria-label="Bảng điều khiển thử tình huống">
+    <aside className="fixed bottom-4 right-4 z-40 pointer-events-auto" aria-label="Bảng điều khiển thử tình huống">
       {/* Floating Trigger Button */}
       {!isOpen && (
         <button

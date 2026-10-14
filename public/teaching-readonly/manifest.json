@@ -1,6 +1,6 @@
 {
   "generator": "scripts/generate-teaching-bookmark.mjs",
-  "generatedAt": "2026-10-14T04:21:46.116Z",
+  "generatedAt": "2026-10-14T06:10:45.383Z",
   "readerCoreHashSha256": "86a6d8577a23a5818b62732aa75a4bf51df892d5d229b1c8c24f789a2b6241cc",
   "expectedColumns": [
     "STT",
