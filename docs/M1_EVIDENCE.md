@@ -111,3 +111,9 @@
 - Đã thay liên kết cục bộ hard-code bằng `/teaching-readonly/index.html` cùng website; hướng dẫn trên UI nói rõ chỉ xem hướng dẫn, không kết nối hay đồng bộ thật.
 - Sol kiểm tra cục bộ lại: 14/14 đường dẫn Mốc 1 trả HTTP 200, gồm `/teaching-readonly/index.html`; quét UI-08 xác nhận không còn `127.0.0.1` và liên kết khớp chính xác.
 - Sau M1-F: `npm run typecheck`, `npm test` (15/15), `npm run build` đều exit 0. Đây là snapshot Luna cần duyệt trước commit/deploy.
+
+## Bàn giao mã và kết nối TEST
+
+- Commit mã nguồn đã được Luna duyệt: `0990b14` (`feat: implement milestone 1 test dashboard`), đã push thành công lên `origin/main` của `Banhtalon/MINDX_LEARN`.
+- Project TEST Vercel `mindx-learn-test` đã được kết nối với `Banhtalon/MINDX_LEARN` sau khi Owner đăng nhập Vercel. Không bật Analytics, Speed Insights, Git LFS, deploy hook hay gói trả phí.
+- Commit mã nguồn có trước thời điểm kết nối Git nên Vercel chưa tự tạo deployment. Commit tài liệu bằng chứng tiếp theo chỉ kích hoạt pipeline của Vercel; không đổi mã nguồn, fixture hay dữ liệu thử.
