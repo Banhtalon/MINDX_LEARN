@@ -96,8 +96,8 @@ export default function StudentQuizPage() {
     );
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const res = submitQuizAttempt(currentUser.id, lesson.id, answersArray);
+    setTimeout(async () => {
+      const res = await submitQuizAttempt(currentUser.id, lesson.id, answersArray);
       setIsSubmitting(false);
       setLastResult({
         score: res.score,

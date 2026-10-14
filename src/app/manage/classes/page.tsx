@@ -28,6 +28,8 @@ function ClassesManagementContent() {
 
   const {
     currentUser,
+    isLiveMode,
+    users,
     classes,
     courses,
     students,
@@ -51,6 +53,9 @@ function ClassesManagementContent() {
 
   const isAdmin = currentUser?.role === 'admin';
   const isTeacher = currentUser?.role === 'teacher';
+
+  // Active teacher accounts for assignment
+  const teachers = (users || []).filter((u) => u.role === 'teacher' && u.status === 'active');
 
   // Visible classes derived by role:
   // Admin sees all classes; Teacher only sees assigned classes
@@ -95,6 +100,15 @@ function ClassesManagementContent() {
   const [newClassCode, setNewClassCode] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [newClassCourseId, setNewClassCourseId] = useState<string>('');
+  const [newClassTeacherId, setNewClassTeacherId] = useState<string>('');
+
+  // Edit Class Modal (Admin only)
+  const [editClassModalOpen, setEditClassModalOpen] = useState(false);
+  const [editClassCode, setEditClassCode] = useState('');
+  const [editClassName, setEditClassName] = useState('');
+  const [editClassTeacherId, setEditClassTeacherId] = useState<string>('');
+  const [isUpdatingClass, setIsUpdatingClass] = useState(false);
+  const [updateClassError, setUpdateClassError] = useState<string | null>(null);
 
   // PIN CSV Download Modal
   const [pinCsvModalOpen, setPinCsvModalOpen] = useState(false);
@@ -140,15 +154,17 @@ function ClassesManagementContent() {
     if (!selectedClass || isIssuingPins) return;
     setIsIssuingPins(true);
     await new Promise((r) => setTimeout(r, 400));
-    const res = issueInitialPinsForClass(selectedClass.id);
+    const res = await issueInitialPinsForClass(selectedClass.id);
     setIsIssuingPins(false);
-    if (res.success && res.csvContent) {
-      setPinCsvData({
-        title: `CSV Cấp mã PIN lần đầu — Lớp ${selectedClass.code}`,
-        content: res.csvContent,
-        count: res.count,
-      });
-      setPinCsvModalOpen(true);
+    if (res.success) {
+      if (res.csvContent) {
+        setPinCsvData({
+          title: `CSV Cấp mã PIN lần đầu — Lớp ${selectedClass.code}`,
+          content: res.csvContent,
+          count: res.count,
+        });
+        setPinCsvModalOpen(true);
+      }
       setAlertNotice({ text: res.message, isError: false });
     } else {
       setAlertNotice({ text: res.message, isError: true });
@@ -160,15 +176,17 @@ function ClassesManagementContent() {
     if (isReissuingPin) return;
     setIsReissuingPin(true);
     await new Promise((r) => setTimeout(r, 400));
-    const res = reissuePinForSingleStudent(student.id);
+    const res = await reissuePinForSingleStudent(student.id);
     setIsReissuingPin(false);
-    if (res.success && res.csvContent) {
-      setPinCsvData({
-        title: `CSV Cấp lại mã PIN riêng — Học sinh ${student.fullName} (${student.studentCode})`,
-        content: res.csvContent,
-        count: 1,
-      });
-      setPinCsvModalOpen(true);
+    if (res.success) {
+      if (res.csvContent) {
+        setPinCsvData({
+          title: `CSV Cấp lại mã PIN riêng — Học sinh ${student.fullName} (${student.studentCode})`,
+          content: res.csvContent,
+          count: 1,
+        });
+        setPinCsvModalOpen(true);
+      }
       setSinglePinModalOpen(false);
       setAlertNotice({ text: res.message, isError: false });
     } else {
@@ -189,9 +207,9 @@ function ClassesManagementContent() {
   };
 
   // Handler: Export 14-session CSV
-  const handleExportCloseCsv = () => {
+  const handleExportCloseCsv = async () => {
     if (!selectedClass) return;
-    const res = exportCourseCloseCsv(selectedClass.id);
+    const res = await exportCourseCloseCsv(selectedClass.id);
     if (res.success && res.csvContent) {
       downloadCsvFile(`TongKet_14Buoi_${selectedClass.code}.csv`, res.csvContent);
       setAlertNotice({
@@ -208,7 +226,7 @@ function ClassesManagementContent() {
     if (!selectedClass || isClosingCourse) return;
     setIsClosingCourse(true);
     await new Promise((r) => setTimeout(r, 400));
-    const res = verifyAndExecuteCourseClose(selectedClass.id, confirmed14Sessions);
+    const res = await verifyAndExecuteCourseClose(selectedClass.id, confirmed14Sessions);
     setIsClosingCourse(false);
     setCloseConfirmModalOpen(false);
     if (res.success) {
@@ -231,7 +249,6 @@ function ClassesManagementContent() {
             <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800">
               {isAdmin ? 'Quản trị viên (Admin)' : 'Giáo viên'}
             </span>
-            <span className="text-xs text-slate-400 font-mono">[UI-04]</span>
           </div>
           <h1 className="text-xl font-extrabold text-slate-900 mt-1">
             Quản lý Lớp học, Danh sách học sinh & Cấp mã PIN
@@ -246,6 +263,10 @@ function ClassesManagementContent() {
           <button
             onClick={() => {
               setCreateClassError(null);
+              setNewClassCode('');
+              setNewClassName('');
+              setNewClassCourseId('');
+              setNewClassTeacherId('');
               setCreateClassModalOpen(true);
             }}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors self-start sm:self-auto"
@@ -355,18 +376,38 @@ function ClassesManagementContent() {
                 Sĩ số lớp: <span className="font-bold text-slate-800">{classStudents.length} học sinh</span> |
                 Tổng học sinh từng tham gia đợt:{' '}
                 <span className="font-bold text-slate-800">{batchStudents.length} học sinh</span> (gồm cả đã
-                chuyển/lưu trữ).
+                chuyển/lưu trữ) |
+                Giáo viên phụ trách:{' '}
+                <span className="font-bold text-slate-800">
+                  {users.find((u) => u.id === selectedClass.teacherId)?.name || 'Chưa phân công'}
+                </span>
               </p>
             </div>
 
-            {/* PIN Action Controls: ADMIN ONLY! Teacher has NO PIN buttons */}
+            {/* Class Actions (Admin only can edit class / assign teacher; PIN Actions Admin only) */}
             {isAdmin ? (
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
+                  onClick={() => {
+                    setEditClassCode(selectedClass.code);
+                    setEditClassName(selectedClass.name);
+                    setEditClassTeacherId(selectedClass.teacherId || '');
+                    setUpdateClassError(null);
+                    setEditClassModalOpen(true);
+                  }}
+                  className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  title="Sửa mã lớp, tên lớp và phân công giáo viên phụ trách"
+                >
+                  <IconFileText className="w-4 h-4" />
+                  <span>Sửa lớp / Phân công GV</span>
+                </button>
+
+                <button
+                  type="button"
                   disabled={isIssuingPins}
                   onClick={handleIssueInitialPins}
-                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   title="Chỉ tạo PIN cho các học sinh trong lớp chưa có mã PIN"
                 >
                   {isIssuingPins ? (
@@ -384,7 +425,7 @@ function ClassesManagementContent() {
               </div>
             ) : (
               <div className="text-xs text-slate-400 italic bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
-                (Quy tắc bảo mật: Giáo viên không có quyền cấp mã PIN hoặc xem lại CSV mã PIN)
+                (Quy tắc bảo mật: Giáo viên không có quyền cấp mã PIN, sửa lớp hoặc xem lại CSV mã PIN)
               </div>
             )}
           </div>
@@ -432,7 +473,7 @@ function ClassesManagementContent() {
                 ) : (
                   filteredStudents.map((st) => {
                     const progress = getStudentProgress(st.id);
-                    const hasPin = Boolean(st.pinHash);
+                    const hasPin = Boolean(st.hasPin ?? st.pinHash);
 
                     return (
                       <tr key={st.id} className="hover:bg-slate-50/80 transition-colors">
@@ -500,121 +541,137 @@ function ClassesManagementContent() {
 
       {/* Course Close Section: ADMIN ONLY (Mục 6 - Kế hoạch v3) */}
       {isAdmin && selectedClass && (
-        <div className="bg-white rounded-xl border border-rose-200 p-6 shadow-sm space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-rose-100 text-rose-700 shrink-0">
-              <IconAlertTriangle className="w-6 h-6" />
+        isLiveMode ? (
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 shadow-sm space-y-2 opacity-80">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-200 text-slate-700">
+                Mốc 5
+              </span>
+              <h3 className="text-base font-extrabold text-slate-800">
+                Khu vực Kết thúc khóa 14 buổi, Xuất CSV & Xóa dữ liệu cũ
+              </h3>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-slate-900">
-                  Khu vực Kết thúc khóa 14 buổi, Xuất CSV & Xóa dữ liệu cũ
-                </h3>
-                <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-xs">
-                  Chỉ Admin
-                </span>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Theo quy trình Mục 6 trong Kế hoạch v3: Tính năng xuất CSV tổng kết 14 buổi và xóa vĩnh viễn dữ liệu cũ thuộc phạm vi Mốc 5. Chức năng này được tạm khóa trong phiên bản Mốc 2 trực tiếp.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border border-rose-200 p-6 shadow-sm space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-xl bg-rose-100 text-rose-700 shrink-0">
+                <IconAlertTriangle className="w-6 h-6" />
               </div>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Theo quy trình Mục 6 trong Kế hoạch v3: Chỉ Admin được bắt đầu đóng đợt sau khi xác nhận lớp
-                đã học đủ 14 buổi theo lịch. CSV tổng kết phải bao gồm toàn bộ học sinh từng tham gia đợt (kể
-                cả em đã chuyển lớp/lưu trữ) với đúng 14 dòng/em.
-              </p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    Khu vực Kết thúc khóa 14 buổi, Xuất CSV & Xóa dữ liệu cũ
+                  </h3>
+                  <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-xs">
+                    Chỉ Admin
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Theo quy trình Mục 6 trong Kế hoạch v3: Chỉ Admin được bắt đầu đóng đợt sau khi xác nhận lớp
+                  đã học đủ 14 buổi theo lịch. CSV tổng kết phải bao gồm toàn bộ học sinh từng tham gia đợt (kể
+                  cả em đã chuyển lớp/lưu trữ) với đúng 14 dòng/em.
+                </p>
+              </div>
+            </div>
+
+            {/* Schedule Confirmation Checkbox */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={confirmed14Sessions}
+                  onChange={(e) => setConfirmed14Sessions(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                />
+                <div className="text-xs">
+                  <span className="font-bold text-slate-900 block">
+                    Admin xác nhận lớp {selectedClass.code} đã hoàn thành đủ 14 buổi theo lịch trình thực tế
+                  </span>
+                  <span className="text-slate-500">
+                    (Điều kiện tiên quyết trước khi mở quy trình kiểm tra CSV và xóa dữ liệu cũ. Không suy ra từ
+                    tỷ lệ nộp bài của học sinh.)
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            {/* Close Preview Card */}
+            {closePreview && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <span className="text-slate-400 block mb-0.5">Tổng số học sinh đợt học:</span>
+                  <span className="text-base font-black text-slate-900">
+                    {closePreview.totalParticipants} học sinh
+                  </span>
+                  <span className="block text-[11px] text-slate-500 mt-0.5">
+                    (Bao gồm cả học sinh đã chuyển/lưu trữ)
+                  </span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <span className="text-slate-400 block mb-0.5">Số dòng CSV dự kiến:</span>
+                  <span className="text-base font-black text-blue-600">
+                    {closePreview.totalParticipants * 14} dòng
+                  </span>
+                  <span className="block text-[11px] text-slate-500 mt-0.5">
+                    ({closePreview.totalParticipants} học sinh x 14 buổi chuẩn)
+                  </span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <span className="text-slate-400 block mb-0.5">Kết quả & Bài nộp sẽ xóa:</span>
+                  <span className="text-base font-black text-rose-600">
+                    {closePreview.quizResultsCount} quiz / {closePreview.submissionsCount} bài nộp
+                  </span>
+                  <span className="block text-[11px] text-slate-500 mt-0.5">Xóa vĩnh viễn không hoàn tác</span>
+                </div>
+              </div>
+            )}
+
+            {/* Red Warnings (Cảnh báo đỏ bài chưa nộp/chờ chấm) */}
+            {closePreview && closePreview.warnings.length > 0 && (
+              <div className="p-3.5 bg-rose-50 border border-rose-300 rounded-xl text-xs space-y-1">
+                <div className="font-bold text-rose-900 flex items-center gap-1.5">
+                  <IconAlertTriangle className="w-4 h-4 text-rose-600" />
+                  <span>CẢNH BÁO ĐỎ VỀ TIẾN ĐỘ BÀI LÀM CỦA HỌC SINH:</span>
+                </div>
+                <ul className="list-disc list-inside text-rose-800 space-y-0.5 pl-1">
+                  {closePreview.warnings.map((w, idx) => (
+                    <li key={idx}>{w}</li>
+                  ))}
+                </ul>
+                <p className="text-[11px] text-rose-700 italic pt-1">
+                  * Lưu ý: Tình trạng học sinh chưa nộp bài hoặc còn bài chờ chấm là cảnh báo để Admin cân nhắc,
+                  KHÔNG phải lỗi kỹ thuật chặn. Admin vẫn có toàn quyền xác nhận đóng khóa.
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons for Close Course */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleExportCloseCsv}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
+              >
+                <IconDownload className="w-4 h-4" />
+                <span>Xuất & Đối chiếu CSV 14 Buổi ({closePreview ? closePreview.totalParticipants * 14 : 0} dòng)</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={!confirmed14Sessions}
+                onClick={() => setCloseConfirmModalOpen(true)}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:hover:bg-rose-600 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
+              >
+                <IconAlertTriangle className="w-4 h-4" />
+                <span>Xác nhận Đóng khóa & Xóa vĩnh viễn dữ liệu cũ</span>
+              </button>
             </div>
           </div>
-
-          {/* Schedule Confirmation Checkbox */}
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={confirmed14Sessions}
-                onChange={(e) => setConfirmed14Sessions(e.target.checked)}
-                className="mt-0.5 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-              />
-              <div className="text-xs">
-                <span className="font-bold text-slate-900 block">
-                  Admin xác nhận lớp {selectedClass.code} đã hoàn thành đủ 14 buổi theo lịch trình thực tế
-                </span>
-                <span className="text-slate-500">
-                  (Điều kiện tiên quyết trước khi mở quy trình kiểm tra CSV và xóa dữ liệu cũ. Không suy ra từ
-                  tỷ lệ nộp bài của học sinh.)
-                </span>
-              </div>
-            </label>
-          </div>
-
-          {/* Close Preview Card */}
-          {closePreview && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block mb-0.5">Tổng số học sinh đợt học:</span>
-                <span className="text-base font-black text-slate-900">
-                  {closePreview.totalParticipants} học sinh
-                </span>
-                <span className="block text-[11px] text-slate-500 mt-0.5">
-                  (Bao gồm cả học sinh đã chuyển/lưu trữ)
-                </span>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block mb-0.5">Số dòng CSV dự kiến:</span>
-                <span className="text-base font-black text-blue-600">
-                  {closePreview.totalParticipants * 14} dòng
-                </span>
-                <span className="block text-[11px] text-slate-500 mt-0.5">
-                  ({closePreview.totalParticipants} học sinh x 14 buổi chuẩn)
-                </span>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block mb-0.5">Kết quả & Bài nộp sẽ xóa:</span>
-                <span className="text-base font-black text-rose-600">
-                  {closePreview.quizResultsCount} quiz / {closePreview.submissionsCount} bài nộp
-                </span>
-                <span className="block text-[11px] text-slate-500 mt-0.5">Xóa vĩnh viễn không hoàn tác</span>
-              </div>
-            </div>
-          )}
-
-          {/* Red Warnings (Cảnh báo đỏ bài chưa nộp/chờ chấm) */}
-          {closePreview && closePreview.warnings.length > 0 && (
-            <div className="p-3.5 bg-rose-50 border border-rose-300 rounded-xl text-xs space-y-1">
-              <div className="font-bold text-rose-900 flex items-center gap-1.5">
-                <IconAlertTriangle className="w-4 h-4 text-rose-600" />
-                <span>CẢNH BÁO ĐỎ VỀ TIẾN ĐỘ BÀI LÀM CỦA HỌC SINH:</span>
-              </div>
-              <ul className="list-disc list-inside text-rose-800 space-y-0.5 pl-1">
-                {closePreview.warnings.map((w, idx) => (
-                  <li key={idx}>{w}</li>
-                ))}
-              </ul>
-              <p className="text-[11px] text-rose-700 italic pt-1">
-                * Lưu ý: Tình trạng học sinh chưa nộp bài hoặc còn bài chờ chấm là cảnh báo để Admin cân nhắc,
-                KHÔNG phải lỗi kỹ thuật chặn. Admin vẫn có toàn quyền xác nhận đóng khóa.
-              </p>
-            </div>
-          )}
-
-          {/* Action Buttons for Close Course */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleExportCloseCsv}
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
-            >
-              <IconDownload className="w-4 h-4" />
-              <span>Xuất & Đối chiếu CSV 14 Buổi ({closePreview ? closePreview.totalParticipants * 14 : 0} dòng)</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={!confirmed14Sessions}
-              onClick={() => setCloseConfirmModalOpen(true)}
-              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:hover:bg-rose-600 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
-            >
-              <IconAlertTriangle className="w-4 h-4" />
-              <span>Xác nhận Đóng khóa & Xóa vĩnh viễn dữ liệu cũ</span>
-            </button>
-          </div>
-        </div>
+        )
       )}
 
       {/* Drawer: Student Detail & Actions */}
@@ -640,7 +697,14 @@ function ClassesManagementContent() {
                 Lớp hiện tại: <span className="font-bold text-slate-700">{selectedClass?.code}</span>
               </div>
               <div className="text-slate-500">
-                Mã PIN: {selectedStudent.pinHash ? 'Đã cấp (Mã hóa)' : 'Chưa có PIN'}
+                Mã PIN:{' '}
+                {selectedStudent.hasPin || selectedStudent.pinHash
+                  ? `Đã cấp${
+                      selectedStudent.pinIssuedAt
+                        ? ` (${new Date(selectedStudent.pinIssuedAt).toLocaleDateString('vi-VN')})`
+                        : ''
+                    }`
+                  : 'Chưa có PIN'}
               </div>
               {selectedStudent.notes && (
                 <div className="text-slate-500 italic">Ghi chú: {selectedStudent.notes}</div>
@@ -720,7 +784,7 @@ function ClassesManagementContent() {
                       onClick={async () => {
                         setIsTransferring(true);
                         await new Promise((r) => setTimeout(r, 400));
-                        const res = transferStudent(selectedStudent.id, targetTransferClassId);
+                        const res = await transferStudent(selectedStudent.id, targetTransferClassId);
                         setIsTransferring(false);
                         if (res.success) {
                           setDrawerOpen(false);
@@ -758,7 +822,7 @@ function ClassesManagementContent() {
                       if (confirm(`Xác nhận đặt lại kết quả của học sinh ${selectedStudent.fullName}?`)) {
                         setIsResetting(true);
                         await new Promise((r) => setTimeout(r, 400));
-                        const res = resetStudentProgress(selectedStudent.id);
+                        const res = await resetStudentProgress(selectedStudent.id);
                         setIsResetting(false);
                         if (res.success) {
                           setDrawerOpen(false);
@@ -799,7 +863,7 @@ function ClassesManagementContent() {
                       onClick={async () => {
                         setIsArchivingStudent(true);
                         await new Promise((r) => setTimeout(r, 400));
-                        const res = restoreStudent(selectedStudent.id);
+                        const res = await restoreStudent(selectedStudent.id);
                         setIsArchivingStudent(false);
                         if (res.success) {
                           setDrawerOpen(false);
@@ -825,7 +889,7 @@ function ClassesManagementContent() {
                       onClick={async () => {
                         setIsArchivingStudent(true);
                         await new Promise((r) => setTimeout(r, 400));
-                        const res = archiveStudent(selectedStudent.id);
+                        const res = await archiveStudent(selectedStudent.id);
                         setIsArchivingStudent(false);
                         if (res.success) {
                           setDrawerOpen(false);
@@ -906,10 +970,12 @@ function ClassesManagementContent() {
       <Modal
         isOpen={createClassModalOpen}
         onClose={() => {
-          setCreateClassModalOpen(false);
-          setCreateClassError(null);
+          if (!isCreatingClass) {
+            setCreateClassModalOpen(false);
+            setCreateClassError(null);
+          }
         }}
-        title="Tạo lớp học mới (Mô phỏng)"
+        title="Tạo lớp học mới"
       >
         <form
           onSubmit={async (e) => {
@@ -917,12 +983,11 @@ function ClassesManagementContent() {
             if (isCreatingClass) return;
             setIsCreatingClass(true);
             setCreateClassError(null);
-            await new Promise((r) => setTimeout(r, 400));
-            const res = createClass({
-              code: newClassCode,
-              name: newClassName,
+            const res = await createClass({
+              code: newClassCode.trim().toUpperCase(),
+              name: newClassName.trim(),
               courseId: newClassCourseId || null,
-              teacherId: null,
+              teacherId: newClassTeacherId ? newClassTeacherId.trim() : null,
             });
             setIsCreatingClass(false);
             if (res.success) {
@@ -931,6 +996,7 @@ function ClassesManagementContent() {
               setNewClassCode('');
               setNewClassName('');
               setNewClassCourseId('');
+              setNewClassTeacherId('');
             } else {
               setCreateClassError(res.message);
             }
@@ -945,35 +1011,67 @@ function ClassesManagementContent() {
           )}
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Mã lớp (Ví dụ: ROB-K14-04)</label>
+            <label htmlFor="create-class-code" className="block font-semibold text-slate-700 mb-1">
+              Mã lớp học (Ví dụ: ROB-K14-04)
+            </label>
             <input
+              id="create-class-code"
               type="text"
               required
+              disabled={isCreatingClass}
               value={newClassCode}
               onChange={(e) => setNewClassCode(e.target.value)}
               placeholder="ROB-K14-04"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg font-mono"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Tên lớp học</label>
+            <label htmlFor="create-class-name" className="block font-semibold text-slate-700 mb-1">
+              Tên lớp học
+            </label>
             <input
+              id="create-class-name"
               type="text"
               required
+              disabled={isCreatingClass}
               value={newClassName}
               onChange={(e) => setNewClassName(e.target.value)}
               placeholder="Lớp Robotics K14 Chiều Thứ 5"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Gán khóa học 14 buổi</label>
+            <label htmlFor="create-class-teacher" className="block font-semibold text-slate-700 mb-1">
+              Phân công giáo viên phụ trách (tùy chọn)
+            </label>
             <select
+              id="create-class-teacher"
+              disabled={isCreatingClass}
+              value={newClassTeacherId}
+              onChange={(e) => setNewClassTeacherId(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
+            >
+              <option value="">-- Chưa phân công giáo viên --</option>
+              {teachers.map((tea) => (
+                <option key={tea.id} value={tea.id}>
+                  {tea.name} ({tea.email || 'Giáo viên'})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="create-class-course" className="block font-semibold text-slate-700 mb-1">
+              Gán khóa học 14 buổi (tùy chọn)
+            </label>
+            <select
+              id="create-class-course"
+              disabled={isCreatingClass}
               value={newClassCourseId}
               onChange={(e) => setNewClassCourseId(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
             >
               <option value="">-- Chưa gán khóa học --</option>
               {courses.map((crs) => (
@@ -992,14 +1090,14 @@ function ClassesManagementContent() {
                 setCreateClassModalOpen(false);
                 setCreateClassError(null);
               }}
-              className="px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 min-h-[44px]"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={isCreatingClass}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               {isCreatingClass ? (
                 <>
@@ -1012,6 +1110,148 @@ function ClassesManagementContent() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Modal: Edit Class & Teacher Assignment (Admin only) */}
+      <Modal
+        isOpen={editClassModalOpen}
+        onClose={() => {
+          if (!isUpdatingClass) {
+            setEditClassModalOpen(false);
+            setUpdateClassError(null);
+          }
+        }}
+        title="Sửa lớp / Phân công giáo viên"
+      >
+        {selectedClass && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (isUpdatingClass) return;
+              setIsUpdatingClass(true);
+              setUpdateClassError(null);
+              const res = await updateClass(selectedClass.id, {
+                code: editClassCode.trim().toUpperCase(),
+                name: editClassName.trim(),
+                teacherId: editClassTeacherId ? editClassTeacherId.trim() : null,
+              });
+              setIsUpdatingClass(false);
+              if (res.success) {
+                setEditClassModalOpen(false);
+                setAlertNotice({ text: res.message, isError: false });
+              } else {
+                setUpdateClassError(res.message);
+              }
+            }}
+            className="space-y-4 text-xs"
+          >
+            {updateClassError && (
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                <IconAlertCircle className="w-4 h-4 shrink-0" />
+                <span className="font-semibold flex-1">{updateClassError}</span>
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="edit-class-code" className="block font-semibold text-slate-700 mb-1">
+                Mã lớp học
+              </label>
+              <input
+                id="edit-class-code"
+                type="text"
+                required
+                disabled={isUpdatingClass}
+                value={editClassCode}
+                onChange={(e) => setEditClassCode(e.target.value)}
+                placeholder="Ví dụ: ROB-K14-04"
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="edit-class-name" className="block font-semibold text-slate-700 mb-1">
+                Tên lớp học
+              </label>
+              <input
+                id="edit-class-name"
+                type="text"
+                required
+                disabled={isUpdatingClass}
+                value={editClassName}
+                onChange={(e) => setEditClassName(e.target.value)}
+                placeholder="Ví dụ: Lớp Robotics K14 Chiều Thứ 5"
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="edit-class-teacher" className="block font-semibold text-slate-700 mb-1">
+                Phân công giáo viên phụ trách
+              </label>
+              <select
+                id="edit-class-teacher"
+                disabled={isUpdatingClass}
+                value={editClassTeacherId}
+                onChange={(e) => setEditClassTeacherId(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
+              >
+                <option value="">-- Chưa phân công giáo viên (Để trống) --</option>
+                {teachers.map((tea) => (
+                  <option key={tea.id} value={tea.id}>
+                    {tea.name} ({tea.email || 'Giáo viên'})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Chọn giáo viên phụ trách lớp từ danh sách tài khoản đã kích hoạt. Chọn trống để hủy phân công.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="edit-class-course-info" className="block font-semibold text-slate-700 mb-1">
+                Khóa học liên kết (14 buổi)
+              </label>
+              <input
+                id="edit-class-course-info"
+                type="text"
+                disabled
+                value={selectedCourse ? selectedCourse.title : 'Chưa gán khóa học'}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed min-h-[44px]"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Gán hoặc thay đổi khóa học thuộc phạm vi Mốc 3.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t">
+              <button
+                type="button"
+                disabled={isUpdatingClass}
+                onClick={() => {
+                  setEditClassModalOpen(false);
+                  setUpdateClassError(null);
+                }}
+                className="px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 min-h-[44px]"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdatingClass}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
+                {isUpdatingClass ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Đang lưu...</span>
+                  </>
+                ) : (
+                  'Lưu thay đổi'
+                )}
+              </button>
+            </div>
+          </form>
+        )}
       </Modal>
 
       {/* Confirmation Dialog: Course Close & Permanent Wipe */}

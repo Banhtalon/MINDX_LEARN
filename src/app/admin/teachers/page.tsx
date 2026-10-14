@@ -52,7 +52,7 @@ export default function AdminTeachersPage() {
     setIsSaving(true);
     setModalError(null);
     await new Promise((r) => setTimeout(r, 400));
-    const res = createTeacher({
+    const res = await createTeacher({
       name,
       email,
       assignedClassIds: selectedClassIds,
@@ -205,7 +205,7 @@ export default function AdminTeachersPage() {
           setCreateModalOpen(false);
           setModalError(null);
         }}
-        title="Thêm tài khoản Giáo viên mới (Mô phỏng)"
+        title="Thêm tài khoản Giáo viên mới"
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs">
           {modalError && (
@@ -215,7 +215,7 @@ export default function AdminTeachersPage() {
             </div>
           )}
           <p className="text-slate-500 leading-relaxed">
-            Hệ thống sẽ mô phỏng gửi email chứa liên kết an toàn để giáo viên tự thiết lập mật khẩu lần đầu.
+            Hệ thống sẽ gửi email chứa liên kết an toàn để giáo viên tự thiết lập mật khẩu lần đầu.
             Mật khẩu không bao giờ được gửi qua tin nhắn.
           </p>
 
@@ -286,7 +286,7 @@ export default function AdminTeachersPage() {
                   <span>Đang lưu...</span>
                 </>
               ) : (
-                'Tạo và gửi link mời (Mô phỏng)'
+                'Tạo và gửi link mời'
               )}
             </button>
           </div>

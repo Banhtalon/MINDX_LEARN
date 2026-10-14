@@ -103,8 +103,8 @@ export default function StudentLessonDetailPage() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const res = submitPractice(currentUser.id, lesson.id, {
+    setTimeout(async () => {
+      const res = await submitPractice(currentUser.id, lesson.id, {
         type: submissionType,
         content: submitContent,
         notes,
