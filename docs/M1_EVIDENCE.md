@@ -138,3 +138,15 @@
 - Luna kiểm tra drawer ở 1280×720 thấy nút QA nổi che một phần nút Lưu trữ khi cuộn cuối bảng hồ sơ; drawer và hộp xác nhận vẫn nằm trong màn hình tại ba cỡ yêu cầu.
 - Worker AGY cấu hình `gemini-3.8-flash-high` / `high`, conversation `67f453ba-3584-460b-9284-8cab58d24586`, exit 0. Sửa duy nhất `src/components/qa-controller.tsx`: lớp QA z-50 thành z-40, thấp hơn drawer/dialog z-50. Không thay logic vai trò/dữ liệu/lưu hoặc thêm thư viện.
 - Sol đối chiếu diff chỉ một lớp hiển thị; `npm run typecheck` và `npm run build` exit 0. Test 16/16 trước đó của G vẫn áp dụng vì H không đổi logic đã test. Chờ Luna kiểm tra lại trực quan trên deployment G+H cuối.
+
+## Deployment cuối để Luna nghiệm thu
+
+- Commit mã cuối `7004bc386c3738ad829812a5d443700c735bb8e9`; deployment `dpl_GnsTZVP6pqwk93T7PZmyxpJL1PQQ` READY, project TEST `mindx-learn-test`, alias https://mindx-learn-test.vercel.app . URL phiên bản https://mindx-learn-test-foe1nzqbo-quangctm07-5456s-projects.vercel.app . Thời gian build Vercel khoảng 64 giây; không đổi gói dịch vụ.
+- Sol tải lại guide trên alias mới: không panel tự chạy ban đầu; bấm nút mẫu 3 hàng thấy bảng thành công 3 hàng, đúng nhãn chỉ đọc/không phải toàn bộ danh sách. Ảnh fake: `.workflow-local/m1/screenshots/hosted-guide-7004bc3-1440x900.jpg` và `.workflow-local/m1/screenshots/hosted-home-7004bc3.jpg`. Ảnh homepage dùng cỡ mặc định trình duyệt; chỉ ảnh guide được lưu ở cỡ 1440×900.
+- Luna đang review hosted và cập nhật hồ sơ riêng đúng snapshot cuối; xác nhận Owner đối với các luồng không đổi và bookmarklet-core không đổi được giữ theo mức tác động của G/H.
+
+## Nghiệm thu cuối Mốc 1 — 14/10/2026
+
+- Luna Max độc lập đã xác nhận 10/10 mục Mốc 1 và tự tick `PROJECT_PLAN.md`; chỉ checkbox Mốc 1 thay đổi, các mốc 2–6 giữ nguyên. Báo cáo chính: `docs/M1_REVIEW.md`, phần review cuối snapshot `7004bc3`.
+- Luna tự chạy lại typecheck, 16/16 test và build đúng source commit `7004bc3`; tất cả exit 0. Trình duyệt kiểm tra trực tiếp 13 route, vai trò, trạng thái mô phỏng, guide 5 nút và reload; drawer/hộp xác nhận đọc và bấm được ở cả ba viewport yêu cầu, QA không còn che nút. Ảnh cục bộ chỉ chứa fixture, tên `luna-*` trong `.workflow-local/m1/screenshots/`.
+- Hồ sơ/checklist được commit tiếp theo chỉ thay tài liệu; mã đang chạy vẫn chính là source đã review `7004bc3`. Dừng tại Mốc 1: chưa có đăng nhập/cơ sở dữ liệu thật, đồng bộ đầy đủ hoặc triển khai PROD. Lượt Teaching thật chỉ xác minh 15 hàng của trang hiện tại; dữ liệu thật không được ghi vào TEST.

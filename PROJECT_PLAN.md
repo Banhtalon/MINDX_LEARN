@@ -161,18 +161,18 @@ Tất cả ô bắt đầu để trống. Chỉ đánh dấu hoàn thành khi c�
 ### Mốc 1 — Nền tảng web và staging sớm
 
 - [x] Đọc lại source hiện có, giữ nguyên HTML thử và bản kế hoạch trước. **Kiểm tra:** hash HTML không đổi; có bản sao timestamped của kế hoạch trước khi sửa.
-- [ ] Spike Teaching chỉ đọc sau khi Owner tự đăng nhập và bấm nút trên giao diện/tiện ích cục bộ. **Kiểm tra:** Owner không mở F12, sao chép dữ liệu thô hoặc chạy lệnh; chỉ giữ báo cáo tổng hợp; không có tên/mã thật trong TEST, tệp hay log; lỗi kết nối thì dừng.
-- [ ] Tạo khung web với bốn khu Đăng nhập/Học sinh/Giáo viên/Admin và điều hướng theo vai trò. **Kiểm tra:** Owner mở được các luồng chính; mọi màn hình ghi rõ dữ liệu giả.
-- [ ] Dựng các trang chính UI-01 đến UI-13 theo bảng Mục 4, làm từng luồng có thể bấm và xem trạng thái. **Kiểm tra:** không yêu cầu xong toàn bộ mockup trước khi nối TEST; không có thao tác giả báo đã ghi dữ liệu thật.
-- [ ] Làm trạng thái tải, trống, lỗi/thử lại, hết phiên, không đủ quyền, đang lưu và lưu thất bại ở các luồng dữ liệu. **Kiểm tra:** dùng dữ liệu thiếu/lỗi giả, không hiện thành công giả.
-- [ ] Deploy bản staging sớm bằng dữ liệu giả; chọn nhà cung cấp tạm thời sau khi đọc giá/điều khoản và xác nhận không có phí chưa duyệt. **Kiểm tra:** Owner truy cập được qua web; chỉ có fixture; không index/công khai dữ liệu học sinh; secret không xuất hiện trong trình duyệt.
-- [ ] Kiểm tra giao diện desktop ở 1280×720, 1440×900 và 1920×1080. **Kiểm tra:** nút chính, bảng, drawer và hộp xác nhận không bị cắt.
+- [x] Spike Teaching chỉ đọc sau khi Owner tự đăng nhập và bấm nút trên giao diện/tiện ích cục bộ. **Kiểm tra:** Owner không mở F12, sao chép dữ liệu thô hoặc chạy lệnh; chỉ giữ báo cáo tổng hợp; không có tên/mã thật trong TEST, tệp hay log; lỗi kết nối thì dừng.
+- [x] Tạo khung web với bốn khu Đăng nhập/Học sinh/Giáo viên/Admin và điều hướng theo vai trò. **Kiểm tra:** Owner mở được các luồng chính; mọi màn hình ghi rõ dữ liệu giả.
+- [x] Dựng các trang chính UI-01 đến UI-13 theo bảng Mục 4, làm từng luồng có thể bấm và xem trạng thái. **Kiểm tra:** không yêu cầu xong toàn bộ mockup trước khi nối TEST; không có thao tác giả báo đã ghi dữ liệu thật.
+- [x] Làm trạng thái tải, trống, lỗi/thử lại, hết phiên, không đủ quyền, đang lưu và lưu thất bại ở các luồng dữ liệu. **Kiểm tra:** dùng dữ liệu thiếu/lỗi giả, không hiện thành công giả.
+- [x] Deploy bản staging sớm bằng dữ liệu giả; chọn nhà cung cấp tạm thời sau khi đọc giá/điều khoản và xác nhận không có phí chưa duyệt. **Kiểm tra:** Owner truy cập được qua web; chỉ có fixture; không index/công khai dữ liệu học sinh; secret không xuất hiện trong trình duyệt.
+- [x] Kiểm tra giao diện desktop ở 1280×720, 1440×900 và 1920×1080. **Kiểm tra:** nút chính, bảng, drawer và hộp xác nhận không bị cắt.
 
 **Nghiệm thu của Owner (Mốc 1)**
 
-- [ ] Mở được trang TEST và bấm qua các màn hình với nhãn “Dữ liệu giả”.
-- [ ] Đăng nhập Teaching trực tiếp, bấm nút thử đọc; báo cáo chỉ hiện số tổng hợp, không yêu cầu F12, sao chép JSON hoặc chạy lệnh.
-- [ ] Xác nhận chưa phát sinh phí và chưa ghi dữ liệu học sinh thật vào TEST.
+- [x] Mở được trang TEST và bấm qua các màn hình với nhãn “Dữ liệu giả”.
+- [x] Đăng nhập Teaching trực tiếp, bấm nút thử đọc; báo cáo chỉ hiện số tổng hợp, không yêu cầu F12, sao chép JSON hoặc chạy lệnh.
+- [x] Xác nhận chưa phát sinh phí và chưa ghi dữ liệu học sinh thật vào TEST.
 
 ### Mốc 2 — Supabase TEST, đăng nhập và phân quyền
 

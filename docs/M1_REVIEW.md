@@ -1,8 +1,40 @@
 # Review độc lập Mốc 1
 
-## Kết quả review snapshot sau M1-F — 14/10/2026
+## Kết quả review cuối — snapshot 7004bc3 — 14/10/2026
 
-**Verdict: Mốc 1 chưa hoàn thành.** Chỉ mục bảo toàn tài liệu (1/10 checkbox Mốc 1) được xác nhận và vẫn được tick. Chín mục còn lại giữ `[ ]`; không thay đổi checklist Mốc 2–6.
+**Verdict: Mốc 1 đạt; 10/10 checkbox Mốc 1 đã được xác minh và tick.** Phạm vi kết luận là bản TEST dùng fixture và lượt đọc thử Teaching chỉ đọc; không xác nhận đăng nhập/database thật, đồng bộ đầy đủ, PROD hoặc các mốc 2–6.
+
+- Reviewer độc lập: GPT-6 Luna (gpt-6-luna), reasoning max.
+- Mã nguồn: commit 7004bc386c3738ad829812a5d443700c735bb8e9 trên main. Deployment TEST dpl_GnsTZVP6pqwk93T7PZmyxpJL1PQQ ở trạng thái READY, project mindx-learn-test; alias https://mindx-learn-test.vercel.app và URL cố định https://mindx-learn-test-foe1nzqbo-quangctm07-5456s-projects.vercel.app.
+- Bảo toàn: teachingmindx-sync-trial.html SHA-256 A2E61907BE0DEFD79D44AE56C2C854FDFA8DD4F26FB0B24DC18E64FE3EAACAA5, đúng baseline. Bản lưu kế hoạch trước Mốc 1: .workflow-local/m1/PROJECT_PLAN.before-m1-20261014-103628.md, SHA-256 BAC97FE0CFD89332D9C1D73E1B1E727A78C6B422495E5FC7C1C44B3D89BBD5BF.
+- Kiểm tra đúng HEAD: npm run typecheck exit 0; npm test 16/16 pass, exit 0; npm run build exit 0 với Next.js 16.4.0 và đủ 13 route ứng dụng. Test có cảnh báo MODULE_TYPELESS_PACKAGE_JSON về nhận diện kiểu mô-đun; không test nào thất bại.
+- Trên URL cố định cuối, Luna thấy nhãn DỮ LIỆU GIẢ, ba lựa chọn vai trò và chỉ mục UI-01..13; đã mở trực tiếp cả 13 route. Trang học sinh đòi vai trò Học sinh khi đang ở phiên Admin. robots.txt trả User-agent: * / Disallow: /. Hướng dẫn UI-08 tải lại mà không tự chạy; năm fixture lần lượt cho kết quả 3 hàng/8 cột, bảng rỗng, yêu cầu đăng nhập, sai tiêu đề và sai origin. Test regression 16/16 xác nhận không có lỗi JavaScript, request mạng hoặc storage từ các nút fixture.
+- Lượt Owner trên https://teachingmindx.top/hocsinh.php xác nhận đúng bảng 8 cột, 15 hàng hiển thị và 15 hàng DOM. Chỉ ghi nhận số tổng hợp; đây là một lượt đọc trang hiện tại, không chứng minh đủ roster/phân trang hay đồng bộ. Core bookmarklet giữ nguyên qua G/H.
+- Owner xác nhận trên TEST 1574b13: “xác nhận các trang mở được”; “xác nhận hiện chưa thấy Vercel yêu cầu thanh toán/nâng cấp, chưa nhập học sinh thật”. G/H không đổi luồng vai trò/dữ liệu của ứng dụng, vì vậy xác nhận này vẫn áp dụng cho deployment cuối.
+- Luna kiểm tra drawer hồ sơ và hộp xác nhận đóng khóa tại viewport override 1280×720, 1440×900 và 1920×1080. Nút PIN lần đầu/cấp lại hiện đúng; sau H, nút QA không che nút trong drawer. Dialog vừa màn hình. Chỉ mở rồi hủy xác nhận đóng; không bấm xóa; ô xác nhận 14 buổi được trả về bỏ chọn.
+- Ảnh chỉ chứa fixture ở .workflow-local/m1/screenshots/: luna-guide-reload-no-panel.jpg, luna-guide-fixture1-3rows.jpg, luna-guide-fixture5-wrong-origin.jpg; luna-ui04-drawer-1280x720-bottom.jpg, luna-ui04-drawer-1440x900.jpg, luna-ui04-drawer-1920x1080.jpg; luna-ui04-close-confirm-1280x720.jpg, luna-ui04-close-confirm-1440x900.jpg, luna-ui04-close-confirm-1920x1080.jpg. Công cụ chụp lưu ảnh nhỏ hơn vài pixel so với viewport override; kích thước file lần lượt 1274×717, 1434×896 và 1914×1077. Bố cục/nút cần kiểm tra đều nằm trong ảnh và không bị cắt.
+
+| Checkbox Mốc 1 | Trạng thái | Bằng chứng chính |
+|---|---|---|
+| Bảo toàn tài liệu | [x] Đạt | Hash HTML và bản sao kế hoạch khớp baseline. |
+| Spike Teaching chỉ đọc | [x] Đạt | Owner tự chạy trên trang Teaching đúng; chỉ giữ báo cáo 15 hàng tổng hợp. |
+| Khung bốn khu và điều hướng vai trò | [x] Đạt | Bản TEST có ba nút vai trò, nhãn dữ liệu giả; Owner xác nhận các trang mở được. |
+| Các trang UI-01 đến UI-13 | [x] Đạt | 13 route trực tiếp mở được/gate theo vai trò; luồng mẫu được kiểm tra trên bản trước và ứng dụng không đổi ở G/H; guide cuối đã kiểm tra. |
+| Trạng thái tải, trống, lỗi, hết phiên, thiếu quyền, đang lưu và lưu thất bại | [x] Đạt | QA fixture dùng trạng thái giả; các luồng lưu/không lưu và trạng thái dùng chung được kiểm tra trên TEST; G/H không đổi logic. |
+| Đưa TEST lên staging | [x] Đạt | Deployment Vercel TEST READY, fixture-only, robots.txt chặn index; Owner xác nhận không thấy yêu cầu nâng cấp và chưa nhập dữ liệu thật. |
+| Ba kích thước desktop | [x] Đạt | Drawer/hộp xác nhận kiểm tra trực quan ở ba viewport; ảnh được liệt kê phía trên. |
+| Owner mở TEST và bấm các màn hình | [x] Đạt | Owner xác nhận “xác nhận các trang mở được” trên TEST có nhãn dữ liệu giả. |
+| Owner bấm thử đọc Teaching | [x] Đạt | Owner xác nhận nhận diện đúng bảng 8 cột, đếm 15 hàng của trang hiện tại. |
+| Owner xác nhận chi phí và dữ liệu thật không vào TEST | [x] Đạt | Owner xác nhận chưa thấy yêu cầu trả phí/nâng cấp, chưa nhập học sinh thật. |
+
+Không còn điều kiện Mốc 1 chờ bằng chứng. Giới hạn lượt Teaching vẫn là đọc trang hiện tại; đồng bộ đầy đủ và vận hành thật thuộc các mốc sau. Checklist Mốc 2–6 giữ nguyên [ ].
+## Lịch sử các snapshot trước deployment cuối
+
+Các nhận xét dưới đây ghi lại trạng thái ở thời điểm trước khi hoàn tất bản TEST cuối. Chúng được giữ để tra cứu, không thay thế verdict hiện tại ở đầu tệp.
+
+### Kết quả review snapshot sau M1-F — 14/10/2026
+
+**Verdict tại snapshot đó: Mốc 1 chưa hoàn thành.** Chỉ mục bảo toàn tài liệu (1/10 checkbox Mốc 1) được xác nhận và vẫn được tick. Chín mục còn lại giữ `[ ]`; không thay đổi checklist Mốc 2–6. Trạng thái này đã được thay bằng kết luận cuối ở đầu tệp.
 
 - Reviewer độc lập: GPT-6 Luna (`gpt-6-luna`), mức suy luận `max`.
 - Không có commit để tham chiếu: `main` chưa có commit và các tệp dự án hiện chưa được Git theo dõi. Để chốt đúng snapshot trước commit, SHA-256 manifest của 42 tệp trong `src/`, `public/`, `tests/`, `tools/`, `scripts/` và các cấu hình build/package (`package.json`, lockfile, TypeScript, Next, PostCSS, Tailwind, `.gitignore`, `.vercelignore`) là `987CBA27B871FEDC60EA7C644476CA14701251EAC8601461F4DB8B612254CF74`. Manifest được tính bằng cách sắp xếp đường dẫn tương đối, ghép mỗi dòng `đường-dẫn|SHA256-tệp`, rồi băm SHA-256 toàn bộ văn bản UTF-8.
@@ -28,7 +60,7 @@ Lượt xem lại trình duyệt cục bộ của Codex bị chính sách bảo 
 
 Các mục source-review bên dưới là ghi nhận lịch sử của snapshot trước các gói sửa C/D/F; trạng thái hiện tại được xác định bởi phần review mới này. Không dùng chúng thay cho kiểm tra browser hoặc nghiệm thu Owner.
 
-## Đánh giá đề xuất spike Teaching bằng bookmarklet (chưa thực hiện)
+### Đánh giá đề xuất spike Teaching bằng bookmarklet (chưa thực hiện tại snapshot đó)
 
 Bookmarklet chỉ đọc DOM có thể đáp ứng mục “thử đọc Teaching” ở Mốc 1 nếu Owner tự đăng nhập và bấm trên đúng trang; mã chỉ đọc bảng đang hiển thị, đếm trong lúc chạy và chỉ hiện kết quả tổng hợp ngay trên trang. Không gọi `fetch`/XHR, không đọc cookie/storage, không gửi dữ liệu ra ngoài, không ghi vào nguồn, clipboard hay tệp. Báo rõ số hàng là của trang hiện tại; chỉ nêu trang hiện tại/tổng trang nếu giao diện nguồn thể hiện rõ, không suy ra tổng số học sinh từ đó.
 
@@ -36,7 +68,7 @@ Spike như vậy chỉ xác nhận đường đọc hẹp qua phiên Owner cho t
 
 Tham chiếu giới hạn trình duyệt: [Same-origin policy (MDN)](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Same-origin_policy) nêu script từ URL `javascript:` kế thừa origin trang chứa nó; [Content Security Policy (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP) nêu CSP có thể chặn `javascript:` URL.
 
-## Review source giao diện sớm — 14/10/2026 (chưa phải kết luận cuối)
+### Review source giao diện sớm — 14/10/2026 (snapshot cũ, chưa phải kết luận cuối)
 
 Đã đọc tĩnh một số trang và thành phần dùng chung trên snapshot hiện có để báo lỗi sớm cho Sol. Các file dưới đây có thời điểm sửa từ 10:44 đến 10:52 ngày 14/10/2026; hash tại lúc kiểm tra được ghi để đối chiếu lại. Vì gói B đang chỉnh mã và trang thử chưa chạy ổn định, các lỗi này chưa được xác nhận trên trình duyệt và phải kiểm tra lại đúng bản bàn giao. Không thay đổi checkbox nghiệm thu.
 
@@ -48,7 +80,7 @@ Tham chiếu giới hạn trình duyệt: [Same-origin policy (MDN)](https://dev
 Hash snapshot: `src/app/student/course/page.tsx` `D95381113CBB4EBA8A98CCB3821316C747CADEFBDE9EC61FE2640A8AEA180EF6`; `src/app/student/lessons/[lessonId]/page.tsx` `1B48FBF1561741A6D0B258203F4DF43CAE30B438BE7C3D5295ACF4F17BEB97D4`; `src/app/student/lessons/[lessonId]/quiz/page.tsx` `2DB9631C65BD452D2293896B5F93C96AFBE8321D7474CD567C1B20A1C7EE1C18`; `src/app/manage/classes/page.tsx` `E6A07655B2291234193C569FEC8B37A62CC8040D9FFEBFCF5522AA19DC76B0A2`; `src/app/admin/teachers/page.tsx` `9EB41997FFAE9CB0BDFB22910AFE3D38FDCDE599703966B95D3A1D5CEB1F9B3F`; `src/components/modal.tsx` `B090BFC61B99BD4209B95FBBA24591615F47A30FCA7CCA0CE559A58477CC7136`.
 
 
-## Kiểm tra sớm trạng thái dùng chung — chưa phải kết luận cuối
+### Kiểm tra sớm trạng thái dùng chung — snapshot cũ, chưa phải kết luận cuối
 
 PROJECT_PLAN.md §4 yêu cầu mọi trang có trạng thái tải, rỗng, lỗi/thử lại, không đủ quyền, hết phiên, đang lưu và lưu thất bại. Trong snapshot đọc lần này, `src/app/layout.tsx` chỉ bọc `StoreProvider`, `Navbar`, nội dung trang và `QAController`; không có lớp trạng thái chung cho các trang. `src/lib/store.tsx` chỉ đổi `delayMs` khi chọn Loading; tìm kiếm source thấy delay được dùng ở đăng nhập, gửi/chấm bài và quiz, nhưng UI-05 `/admin/courses` không đọc trạng thái này. Vì vậy chọn Loading ở QAController vẫn để trang khóa học hiện như bình thường. Khi chọn Dữ liệu rỗng, Provider đưa danh sách khóa/bài về rỗng, nhưng UI-05 vẫn hiện bảng 14 vị trí không có dòng hay thông báo “chưa có dữ liệu”. Các lỗi mạng/hết phiên/thiếu quyền/lỗi lưu hiện chủ yếu được trả về từ hàm thao tác ghi; không có phản hồi chung cho trang đang đọc.
 
@@ -57,7 +89,7 @@ Cụ thể hơn, `session_expired` chỉ làm `checkQABlock` từ chối thao t�
 Hash snapshot: `src/app/layout.tsx` `65C4C341BFA4CD2892EB0C7CF1B367933C4864ED592F1A8219A91F1F35590E8B`; `src/app/admin/courses/page.tsx` `A8015A7F8F3B1F3A458E3E26162080A8080F2CB77B7E2168BF4B02E012EB9395`; `src/lib/store.tsx` `A0A28BD27B0F922EDECC07DC7B11681150EBA5960036862A79572CDCFF4198DD`; `src/components/qa-controller.tsx` `4BBEF573C1304F3E0984F897E8E0A31F311C4F2C215FDD29DF899F468548B2F9`. Đây là review source-only; chưa chạy browser với trạng thái QA này và chưa tick nghiệm thu.
 
 
-## Finding UI-05 trong snapshot trước khi bổ sung tạo/sửa khóa
+### Finding UI-05 trong snapshot trước khi bổ sung tạo/sửa khóa
 
 Đối chiếu `PROJECT_PLAN.md` §4, dòng 92 với `PROMPT_MOC_1.md` §C, dòng 64 và 68: Mốc 1 yêu cầu luồng chính UI-05 bấm thử được; thao tác chưa có xử lý thật được phép mô phỏng bằng dữ liệu giả. Snapshot cũ chỉ chọn ngầm khóa đầu tiên, hiện một curriculum và 14 hàng buổi học/link sang UI-06. Không có danh sách/chọn khóa hoặc nút tạo/sửa khóa. Vì vậy Admin chưa thể thử phần UI-05 “tạo/sửa khóa” trong snapshot đó, dù việc lưu vào cơ sở dữ liệu thật có thể chờ Mốc 3. Gói sửa tối thiểu khi ấy là thêm danh sách/chọn khóa và thao tác tạo/sửa khóa bằng dữ liệu giả; vẫn giữ 14 vị trí Buổi 1–14 cố định. Đây là finding source-only của snapshot cũ, không phải trạng thái source hiện tại và không phải bằng chứng nghiệm thu toàn bộ UI-05. Snapshot review mới nhất phía trên ghi nhận thao tác tạo/sửa đã được bổ sung và Sol đã thử tạo khóa 14 buổi rồi sửa tên thành công.
 
