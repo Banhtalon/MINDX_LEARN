@@ -1,0 +1,47 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js build output
+/.next/
+/out/
+
+# Production build
+/build
+
+# Vercel deployment cache
+.vercel
+
+# Local workflow and task packets
+.workflow-local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment & local secrets
+.env*
+.DS_Store
+Thumbs.db
+*.pem
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Owner files & Backups
+PROJECT_PLAN.*.md
+!PROJECT_PLAN.md
+!PROMPT_MOC_1.md
+
+# Historical survey data (kept local, excluded from repository and deployment)
+teachingmindx-sync-trial.html
+
+# Temporary scratch
+scratch/

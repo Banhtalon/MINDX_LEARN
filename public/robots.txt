@@ -1,0 +1,3 @@
+# MINDX LEARN TEST Environment - DO NOT INDEX
+User-agent: *
+Disallow: /

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiện Ích Cục Bộ Đếm Teaching — MINDX LEARN [Mốc 1]</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --border: #e2e8f0;
+      --rose: #e11d48;
+      --emerald: #15803d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: var(--slate-800);
+      line-height: 1.6;
+      padding: 32px 16px;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #ffffff;
+      padding: 28px 32px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .content {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bookmark-cta {
+      background: #eff6ff;
+      border: 2px dashed #93c5fd;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .bookmarklet-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+      cursor: grab;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .bookmarklet-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+    .steps-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .step-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      background: #e0e7ff;
+      color: #3730a3;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-text {
+      font-size: 13px;
+      color: var(--slate-700);
+    }
+    .step-text strong {
+      color: var(--slate-900);
+    }
+    .notice-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #92400e;
+    }
+    .notice-box strong {
+      color: #78350f;
+    }
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .rule-card {
+      background: var(--slate-50);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+    .rule-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--slate-900);
+    }
+    .qa-box {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 20px;
+    }
+    .qa-btn {
+      padding: 8px 14px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--slate-700);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      transition: all 0.15s ease;
+    }
+    .qa-btn:hover {
+      background: #f1f5f9;
+      color: var(--slate-900);
+    }
+    .source-link {
+      color: var(--primary);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">MỐC 1 — SPIKE KỸ THUẬT CỤC BỘ</div>
+      <h1>Tiện Ích Đếm Số Học Sinh Teaching (Read-Only)</h1>
+      <p>Tiện ích cục bộ tự chứa mã nguồn, chạy trực tiếp trên trình duyệt của Owner. Tuyệt đối không gửi dữ liệu ra ngoài.</p>
+    </div>
+
+    <div class="content">
+      <!-- Drag & Drop CTA -->
+      <div class="bookmark-cta">
+        <p style="font-size: 13px; color: #1e40af; font-weight: 600;">
+          Kéo nút bên dưới thả vào Thanh Dấu Trang (Bookmarks Bar) trên trình duyệt Chrome:
+        </p>
+        <a href="javascript:(function()%7B%0A%2F**%0A%20*%20Core%20reader%20logic%20for%20Teaching%20MindX%20read-only%20DOM%20spike%20(Milestone%201%20-%20C2%20%2F%20E2)%0A%20*%0A%20*%20SPECIFICATION%20%26%20SAFETY%20CONTRACT%20(M1-E2%20Hardened)%3A%0A%20*%201.%20STRICT%20ORIGIN%20%26%20PATH%20GUARD%3A%0A%20*%20%20%20%20-%20Only%20accepts%20exact%20origin%20'https%3A%2F%2Fteachingmindx.top'%20and%20exact%20pathname%20'%2Fhocsinh.php'.%0A%20*%20%20%20%20-%20Rejects%20variations%20(%2Fnot-hocsinh.php%2C%20%2Fhocsinh.php-extra%2C%20%2Fadmin%2Fhocsinh.php).%0A%20*%20%20%20%20-%20Returns%20FIXED%20error%20message%20without%20echoing%20arbitrary%20origin%20or%20pathname%20into%20the%20panel.%0A%20*%202.%20TABLE%20MATCHING%20EVIDENCE%3A%0A%20*%20%20%20%20-%20Matches%208%20expected%20columns%20from%202026-10-14%20DOM%20inspection%3A%0A%20*%20%20%20%20%20%20%5B'STT'%2C%20'T%C3%AAn%20h%E1%BB%8Dc%20sinh'%2C%20'M%C3%A3%20l%E1%BB%9Bp'%2C%20'Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh'%2C%20'GV%20ch%C3%ADnh'%2C%20'Tr%E1%BB%A3%20gi%E1%BA%A3ng'%2C%20'Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp'%2C%20'Thao%20t%C3%A1c'%5D%0A%20*%20%20%20%20-%20Error%20message%20reports%20only%20column%20count%2C%20never%20echoes%20unvalidated%2Farbitrary%20header%20text.%0A%20*%20%20%20%20-%20Valid%20result%20exposes%20only%20static%20metadata%20columns.%0A%20*%203.%20ZERO%20PERSONAL%20DATA%20EXTRACTION%20(NO%20TEXTCONTENT%20ON%20DATA%20CELLS)%3A%0A%20*%20%20%20%20-%20Counts%20valid%20rows%20using%20DOM%20structure%20%26%20attributes%20only.%0A%20*%20%20%20%20-%20Never%20accesses%20row.textContent%20or%20cell.textContent%20for%20data%20rows.%0A%20*%20%20%20%20-%20Empty%20placeholder%20detected%20strictly%20via%20.dataTables_empty%20or%20single%20cell%20colspan%20%3E%3D%208.%0A%20*%20%20%20%20-%20Single%20data%20row%20with%208%20cells%20is%20counted%20as%201%20student%20row%20without%20reading%20any%20text.%0A%20*%204.%20STRUCTURED%20SOURCE%20PAGINATION%20PARSING%3A%0A%20*%20%20%20%20-%20Parses%20strictly%20formatted%20pagination%20numbers%20(start%2C%20end%2C%20total).%0A%20*%20%20%20%20-%20Re-renders%20as%20static%20Vietnamese%20text%20%2B%20numbers.%0A%20*%20%20%20%20-%20Rejects%20any%20string%20with%20filter%2Fsearch%20clauses%20or%20adverse%20names%2FIDs%2C%20falling%20back%20to%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'.%0A%20*%205.%20PURE%20CLIENT%20DOM%3A%0A%20*%20%20%20%20-%20Absolutely%20NO%20fetch%20%2F%20XHR%20%2F%20network%20requests.%0A%20*%20%20%20%20-%20Absolutely%20NO%20localStorage%20%2F%20sessionStorage%20%2F%20cookie%20%2F%20IndexedDB.%0A%20*%20%20%20%20-%20Absolutely%20NO%20console%20output%20of%20student%20data.%0A%20*%20%20%20%20-%20Absolutely%20NO%20clipboard%20or%20download%20payload.%0A%20*%20%20%20%20-%20Safe%20DOM%20manipulation%20using%20document.createElement%20and%20textContent%20ONLY.%0A%20*%206.%20NO%20CACHE%3A%0A%20*%20%20%20%20-%20Fresh%20run%20on%20every%20click%3B%20removes%20existing%20panel%20if%20present.%0A%20*%207.%20REQUIRED%20LABELS%3A%0A%20*%20%20%20%20-%20'%C4%90%E1%BB%8Dc%20m%E1%BA%ABu%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i'%0A%20*%20%20%20%20-%20'Kh%C3%B4ng%20ph%E1%BA%A3i%20to%C3%A0n%20b%E1%BB%99%20danh%20s%C3%A1ch'%0A%20*%20%20%20%20-%20'Ch%E1%BB%89%20%C4%91%E1%BB%8Dc%20%E2%80%94%20kh%C3%B4ng%20ghi%20TEST'%0A%20*%2F%0A%0Aconst%20TEACHING_ORIGIN%20%3D%20'https%3A%2F%2Fteachingmindx.top'%3B%0Aconst%20TEACHING_PATH%20%3D%20'%2Fhocsinh.php'%3B%0A%0Aconst%20EXPECTED_COLUMNS%20%3D%20%5B%0A%20%20'STT'%2C%0A%20%20'T%C3%AAn%20h%E1%BB%8Dc%20sinh'%2C%0A%20%20'M%C3%A3%20l%E1%BB%9Bp'%2C%0A%20%20'Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh'%2C%0A%20%20'GV%20ch%C3%ADnh'%2C%0A%20%20'Tr%E1%BB%A3%20gi%E1%BA%A3ng'%2C%0A%20%20'Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp'%2C%0A%20%20'Thao%20t%C3%A1c'%2C%0A%5D%3B%0A%0Aconst%20REQUIRED_LABELS%20%3D%20%7B%0A%20%20SAMPLE%3A%20'%C4%90%E1%BB%8Dc%20m%E1%BA%ABu%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i'%2C%0A%20%20NOT_FULL%3A%20'Kh%C3%B4ng%20ph%E1%BA%A3i%20to%C3%A0n%20b%E1%BB%99%20danh%20s%C3%A1ch'%2C%0A%20%20READONLY%3A%20'Ch%E1%BB%89%20%C4%91%E1%BB%8Dc%20%E2%80%94%20kh%C3%B4ng%20ghi%20TEST'%2C%0A%7D%3B%0A%0A%2F**%0A%20*%20Parses%20source%20pagination%20notice%20safely.%0A%20*%20Only%20accepts%20clean%20numeric%20patterns%20(start%2C%20end%2C%20total)%3B%20rejects%20search%2Ffilter%20noise.%0A%20*%20Never%20echoes%20raw%20text%20that%20could%20contain%20student%20names%2FIDs.%0A%20*%0A%20*%20%40param%20%7BElement%7Cnull%7D%20infoEl%0A%20*%20%40returns%20%7Bstring%7D%20Safe%20summary%20string%20or%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%0A%20*%2F%0Afunction%20parseSafePaginationNotice(infoEl)%20%7B%0A%20%20if%20(!infoEl)%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%0A%20%20const%20raw%20%3D%20(infoEl.textContent%20%7C%7C%20'').trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20')%3B%0A%20%20if%20(!raw)%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%0A%20%20%2F%2F%20Reject%20noise%20that%20might%20contain%20student%20names%2C%20search%20keywords%2C%20or%20filter%20fragments%0A%20%20if%20(%2Ffiltered%7Cl%E1%BB%8Dc%7Csearch%7Ct%C3%ACm%2Fi.test(raw))%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Strict%20regex%3A%20matches%20only%20standard%20pagination%20statements%0A%20%20%2F%2F%20English%3A%20Showing%201%20to%2025%20of%20120%20entries%0A%20%20%2F%2F%20Vietnamese%3A%20Hi%E1%BB%83n%20th%E1%BB%8B%201%20%C4%91%E1%BA%BFn%2025%20trong%20%5Bt%E1%BB%95ng%20s%E1%BB%91%5D%20120%20b%E1%BA%A3n%20ghi%2Fh%E1%BB%8Dc%20sinh%0A%20%20const%20pattern%20%3D%20%2F%5E(%3F%3AShowing%7CHi%E1%BB%83n%20th%E1%BB%8B)%5Cs%2B(%5Cd%2B)%5Cs%2B(%3F%3Ato%7C%C4%91%E1%BA%BFn)%5Cs%2B(%5Cd%2B)%5Cs%2B(%3F%3Aof%7Ctrong%7Ctr%C3%AAn%7Ctrong%20t%E1%BB%95ng%20s%E1%BB%91)%5Cs%2B(%5Cd%2B)%5Cs*(%3F%3Aentries%7Cb%E1%BA%A3n%20ghi%7Ch%E1%BB%8Dc%20sinh%7Cm%E1%BB%A5c)%3F%5C.%3F%24%2Fi%3B%0A%20%20const%20match%20%3D%20raw.match(pattern)%3B%0A%0A%20%20if%20(!match)%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20const%20startNum%20%3D%20Number(match%5B1%5D)%3B%0A%20%20const%20endNum%20%3D%20Number(match%5B2%5D)%3B%0A%20%20const%20totalNum%20%3D%20Number(match%5B3%5D)%3B%0A%0A%20%20if%20(Number.isNaN(startNum)%20%7C%7C%20Number.isNaN(endNum)%20%7C%7C%20Number.isNaN(totalNum))%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20return%20%60Hi%E1%BB%83n%20th%E1%BB%8B%20%24%7BstartNum%7D%20-%20%24%7BendNum%7D%20tr%C3%AAn%20t%E1%BB%95ng%20s%E1%BB%91%20%24%7BtotalNum%7D%20b%E1%BA%A3n%20ghi%20(DOM%20ngu%E1%BB%93n)%60%3B%0A%7D%0A%0A%2F**%0A%20*%20Inspects%20a%20Document%20and%20Location%20for%20Teaching%20MindX%20student%20roster%20structure.%0A%20*%20Pure%20inspection%20function%3A%20safe%20for%20unit%20testing%20with%20JSDOM%20and%20live%20browser%20execution.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%20-%20DOM%20Document%20object%0A%20*%20%40param%20%7BLocation%7CObject%7D%20loc%20-%20Location%20object%20(%7B%20origin%2C%20pathname%20%7D)%0A%20*%20%40returns%20%7BObject%7D%20Inspection%20result%20summary%20(numbers%20and%20status%20ONLY)%0A%20*%2F%0Afunction%20inspectTeachingDom(doc%2C%20loc)%20%7B%0A%20%20const%20timestamp%20%3D%20new%20Date().toISOString()%3B%0A%0A%20%20%2F%2F%20Guard%201%3A%20Strict%20Origin%20%26%20Exact%20Pathname%20Verification%0A%20%20const%20origin%20%3D%20loc%3F.origin%20%7C%7C%20''%3B%0A%20%20const%20pathname%20%3D%20loc%3F.pathname%20%7C%7C%20''%3B%0A%20%20const%20isExactOrigin%20%3D%20origin%20%3D%3D%3D%20TEACHING_ORIGIN%3B%0A%20%20const%20isExactPath%20%3D%20pathname%20%3D%3D%3D%20TEACHING_PATH%3B%0A%0A%20%20if%20(!isExactOrigin%20%7C%7C%20!isExactPath)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'WRONG_ORIGIN'%2C%0A%20%20%20%20%20%20%2F%2F%20FIXED%20message%3A%20never%20echoes%20arbitrary%20origin%20or%20pathname%20into%20the%20panel%0A%20%20%20%20%20%20message%3A%20%60Sai%20%C4%91%E1%BB%8Ba%20ch%E1%BB%89%20trang.%20Ti%E1%BB%87n%20%C3%ADch%20ch%E1%BB%89%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20tr%C3%AAn%20%24%7BTEACHING_ORIGIN%7D%24%7BTEACHING_PATH%7D%60%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%202%3A%20Login%20Screen%20Detection%20(Checks%20input%20type%20without%20reading%20passwords)%0A%20%20const%20passwordInput%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('input%5Btype%3D%22password%22%5D')%20%3A%20null%3B%0A%20%20const%20loginForm%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('form%5Baction*%3D%22login%22%5D%2C%20form.login-form%2C%20%23login-form')%20%3A%20null%3B%0A%20%20if%20(passwordInput%20%7C%7C%20loginForm)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'LOGIN_REQUIRED'%2C%0A%20%20%20%20%20%20message%3A%20'Ph%C3%A1t%20hi%E1%BB%87n%20m%C3%A0n%20h%C3%ACnh%20%C4%91%C4%83ng%20nh%E1%BA%ADp.%20Vui%20l%C3%B2ng%20%C4%91%C4%83ng%20nh%E1%BA%ADp%20Teaching%20MindX%20tr%C6%B0%E1%BB%9Bc%20khi%20b%E1%BA%A5m%20ti%E1%BB%87n%20%C3%ADch.'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%203%3A%20Locate%20Table%20and%20Validate%20Column%20Structure%0A%20%20const%20tables%20%3D%20doc%3F.querySelectorAll%20%3F%20Array.from(doc.querySelectorAll('table'))%20%3A%20%5B%5D%3B%0A%20%20if%20(tables.length%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'TABLE_NOT_FOUND'%2C%0A%20%20%20%20%20%20message%3A%20'Kh%C3%B4ng%20t%C3%ACm%20th%E1%BA%A5y%20b%E1%BA%A3ng%20d%E1%BB%AF%20li%E1%BB%87u%20h%E1%BB%8Dc%20sinh%20n%C3%A0o%20tr%C3%AAn%20trang.'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20let%20targetTable%20%3D%20null%3B%0A%20%20let%20detectedHeaderCount%20%3D%200%3B%0A%20%20let%20headerMatch%20%3D%20false%3B%0A%0A%20%20for%20(const%20table%20of%20tables)%20%7B%0A%20%20%20%20const%20headerCells%20%3D%20Array.from(table.querySelectorAll('thead%20th%2C%20thead%20td%2C%20tr%3Afirst-child%20th'))%3B%0A%20%20%20%20const%20headers%20%3D%20headerCells.map((th)%20%3D%3E%20(th.textContent%20%7C%7C%20'').trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20'))%3B%0A%20%20%20%20detectedHeaderCount%20%3D%20headers.length%3B%0A%0A%20%20%20%20if%20(headers.length%20%3D%3D%3D%20EXPECTED_COLUMNS.length)%20%7B%0A%20%20%20%20%20%20const%20matchesAll%20%3D%20EXPECTED_COLUMNS.every((expectedCol%2C%20idx)%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20const%20detected%20%3D%20(headers%5Bidx%5D%20%7C%7C%20'').toLowerCase()%3B%0A%20%20%20%20%20%20%20%20return%20detected%20%3D%3D%3D%20expectedCol.toLowerCase()%3B%0A%20%20%20%20%20%20%7D)%3B%0A%0A%20%20%20%20%20%20if%20(matchesAll)%20%7B%0A%20%20%20%20%20%20%20%20targetTable%20%3D%20table%3B%0A%20%20%20%20%20%20%20%20headerMatch%20%3D%20true%3B%0A%20%20%20%20%20%20%20%20break%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20if%20(!headerMatch%20%7C%7C%20!targetTable)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'INVALID_HEADERS'%2C%0A%20%20%20%20%20%20%2F%2F%20Fixed%20error%20message%3A%20does%20NOT%20echo%20arbitrary%20header%20text%2C%20reports%20only%20column%20count%0A%20%20%20%20%20%20message%3A%20%60C%E1%BA%A5u%20tr%C3%BAc%20b%E1%BA%A3ng%20kh%C3%B4ng%20kh%E1%BB%9Bp%20m%E1%BA%ABu%20%C4%91%E1%BB%91i%20so%C3%A1t%20ng%C3%A0y%2014%2F10%2F2026%20(y%C3%AAu%20c%E1%BA%A7u%20%C4%91%C3%BAng%208%20c%E1%BB%99t%3A%20STT%2C%20T%C3%AAn%20h%E1%BB%8Dc%20sinh%2C%20M%C3%A3%20l%E1%BB%9Bp%2C%20Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh%2C%20GV%20ch%C3%ADnh%2C%20Tr%E1%BB%A3%20gi%E1%BA%A3ng%2C%20Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp%2C%20Thao%20t%C3%A1c).%20Ph%C3%A1t%20hi%E1%BB%87n%20b%E1%BA%A3ng%20c%C3%B3%20%24%7BdetectedHeaderCount%7D%20c%E1%BB%99t%20kh%C3%B4ng%20h%E1%BB%A3p%20l%E1%BB%87.%60%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%20%2F%2F%20Do%20NOT%20return%20unvalidated%20header%20text%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%204%3A%20Inspect%20Rows%20%26%20Count%20Visible%20Rows%20Safely%0A%20%20%2F%2F%20Get%20body%20rows%2C%20excluding%20header%20row%0A%20%20let%20rowElements%20%3D%20%5B%5D%3B%0A%20%20const%20tbody%20%3D%20targetTable.querySelector('tbody')%3B%0A%20%20if%20(tbody)%20%7B%0A%20%20%20%20rowElements%20%3D%20Array.from(tbody.querySelectorAll('tr'))%3B%0A%20%20%7D%20else%20%7B%0A%20%20%20%20const%20allTrs%20%3D%20Array.from(targetTable.querySelectorAll('tr'))%3B%0A%20%20%20%20rowElements%20%3D%20allTrs.slice(1)%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Check%20empty%20table%20condition%20(0%20rows)%0A%20%20if%20(rowElements.length%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20true%2C%0A%20%20%20%20%20%20code%3A%20'EMPTY_TABLE'%2C%0A%20%20%20%20%20%20message%3A%20'B%E1%BA%A3ng%20h%E1%BB%8Dc%20sinh%20hi%E1%BB%87n%20t%E1%BA%A1i%20r%E1%BB%97ng%20(0%20d%C3%B2ng%20d%E1%BB%AF%20li%E1%BB%87u).'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20true%2C%0A%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Check%20single%20row%20placeholder%20ONLY%20via%20structural%20classes%20and%20attributes%0A%20%20%2F%2F%20CRITICAL%3A%20NEVER%20read%20singleRow.textContent%20or%20cell.textContent%20(prevents%20reading%20personal%20data%20of%20a%20single%20student)%0A%20%20if%20(rowElements.length%20%3D%3D%3D%201)%20%7B%0A%20%20%20%20const%20singleRow%20%3D%20rowElements%5B0%5D%3B%0A%20%20%20%20const%20isEmptyClass%20%3D%20singleRow.querySelector('.dataTables_empty')%20!%3D%3D%20null%3B%0A%20%20%20%20const%20singleRowCells%20%3D%20Array.from(singleRow.querySelectorAll('td%2C%20th'))%3B%0A%0A%20%20%20%20const%20isColspanPlaceholder%20%3D%20singleRowCells.length%20%3D%3D%3D%201%20%26%26%20(%0A%20%20%20%20%20%20(singleRowCells%5B0%5D.colSpan%20%26%26%20singleRowCells%5B0%5D.colSpan%20%3E%3D%208)%20%7C%7C%0A%20%20%20%20%20%20singleRowCells%5B0%5D.getAttribute('colspan')%20%3D%3D%3D%20'8'%0A%20%20%20%20)%3B%0A%0A%20%20%20%20if%20(isEmptyClass%20%7C%7C%20isColspanPlaceholder)%20%7B%0A%20%20%20%20%20%20return%20%7B%0A%20%20%20%20%20%20%20%20success%3A%20true%2C%0A%20%20%20%20%20%20%20%20code%3A%20'EMPTY_TABLE'%2C%0A%20%20%20%20%20%20%20%20message%3A%20'B%E1%BA%A3ng%20hi%E1%BB%83n%20th%E1%BB%8B%20tr%E1%BA%A1ng%20th%C3%A1i%20placeholder%3A%20Kh%C3%B4ng%20c%C3%B3%20d%E1%BB%AF%20li%E1%BB%87u.'%2C%0A%20%20%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20%20%20isPlaceholder%3A%20true%2C%0A%20%20%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20%2F%2F%20Validate%20each%20row%20structure%20and%20count%20visible%20rows%0A%20%20%2F%2F%20NEVER%20read%20textContent%20of%20data%20rows%20or%20individual%20cells!%0A%20%20let%20totalRowsCount%20%3D%200%3B%0A%20%20let%20visibleCount%20%3D%200%3B%0A%0A%20%20for%20(const%20row%20of%20rowElements)%20%7B%0A%20%20%20%20const%20cells%20%3D%20Array.from(row.querySelectorAll('td%2C%20th'))%3B%0A%0A%20%20%20%20%2F%2F%20Structure%20integrity%20check%3A%20each%20row%20MUST%20have%20exactly%208%20cells%0A%20%20%20%20if%20(cells.length%20!%3D%3D%20EXPECTED_COLUMNS.length)%20%7B%0A%20%20%20%20%20%20return%20%7B%0A%20%20%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20%20%20code%3A%20'INVALID_ROW_STRUCTURE'%2C%0A%20%20%20%20%20%20%20%20message%3A%20%60H%C3%A0ng%20d%E1%BB%AF%20li%E1%BB%87u%20th%E1%BB%A9%20%24%7BtotalRowsCount%20%2B%201%7D%20c%C3%B3%20s%E1%BB%91%20c%E1%BB%99t%20kh%C3%B4ng%20kh%E1%BB%9Bp%20(%24%7Bcells.length%7D%20thay%20v%C3%AC%208%20c%E1%BB%99t).%20C%E1%BA%A5u%20tr%C3%BAc%20b%E1%BA%A3ng%20ngu%E1%BB%93n%20%C4%91%C3%A3%20thay%20%C4%91%E1%BB%95i.%60%2C%0A%20%20%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20%20%20totalRowsCount%2C%0A%20%20%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Determine%20visibility%20safely%20without%20reading%20textContent%20or%20personal%20data%0A%20%20%20%20let%20isRowVisible%20%3D%20true%3B%0A%20%20%20%20if%20(row.style%20%26%26%20row.style.display%20%3D%3D%3D%20'none')%20%7B%0A%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%7D%20else%20if%20(row.hidden%20%7C%7C%20(typeof%20row.hasAttribute%20%3D%3D%3D%20'function'%20%26%26%20row.hasAttribute('hidden')))%20%7B%0A%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%7D%20else%20if%20(typeof%20doc.defaultView%3F.getComputedStyle%20%3D%3D%3D%20'function')%20%7B%0A%20%20%20%20%20%20try%20%7B%0A%20%20%20%20%20%20%20%20const%20computed%20%3D%20doc.defaultView.getComputedStyle(row)%3B%0A%20%20%20%20%20%20%20%20if%20(computed%20%26%26%20(computed.display%20%3D%3D%3D%20'none'%20%7C%7C%20computed.visibility%20%3D%3D%3D%20'hidden'))%20%7B%0A%20%20%20%20%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%20catch%20%7B%0A%20%20%20%20%20%20%20%20%2F%2F%20Fallback%20to%20inline%20display%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20totalRowsCount%2B%2B%3B%0A%20%20%20%20if%20(isRowVisible)%20%7B%0A%20%20%20%20%20%20visibleCount%2B%2B%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%205%3A%20Safe%20Pagination%20Notice%20Parsing%20(Strict%20template%20with%20numbers%20only)%0A%20%20const%20infoEl%20%3D%20doc.querySelector('.dataTables_info%2C%20%5Brole%3D%22status%22%5D.table-info%2C%20.pagination-info')%3B%0A%20%20const%20sourceTotalNotice%20%3D%20parseSafePaginationNotice(infoEl)%3B%0A%0A%20%20return%20%7B%0A%20%20%20%20success%3A%20true%2C%0A%20%20%20%20code%3A%20'OK'%2C%0A%20%20%20%20message%3A%20%60%C4%90%C3%A3%20%C4%91%E1%BB%91i%20so%C3%A1t%20%C4%91%C3%BAng%20c%E1%BA%A5u%20tr%C3%BAc%208%20c%E1%BB%99t.%20%C4%90%E1%BB%8Dc%20th%C3%A0nh%20c%C3%B4ng%20%24%7BvisibleCount%7D%20h%C3%A0ng%20hi%E1%BB%83n%20th%E1%BB%8B%20tr%C3%AAn%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i.%60%2C%0A%20%20%20%20visibleCount%2C%0A%20%20%20%20totalRowsCount%2C%0A%20%20%20%20sourceTotalNotice%2C%0A%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20timestamp%2C%0A%20%20%7D%3B%0A%7D%0A%0A%2F**%0A%20*%20Creates%20and%20renders%20the%20in-place%20floating%20panel%20on%20the%20DOM%20using%20textContent%20%26%20createElement%20ONLY.%0A%20*%20Removes%20any%20previous%20panel%20to%20prevent%20stale%20caching.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%20-%20DOM%20Document%20object%0A%20*%20%40param%20%7BObject%7D%20result%20-%20Result%20from%20inspectTeachingDom%0A%20*%20%40returns%20%7BHTMLElement%7D%20The%20created%20panel%20element%0A%20*%2F%0Afunction%20renderTeachingPanel(doc%2C%20result)%20%7B%0A%20%20const%20PANEL_ID%20%3D%20'teaching-readonly-spike-panel'%3B%0A%0A%20%20%2F%2F%20Fresh%20run%3A%20remove%20old%20panel%20if%20present%0A%20%20const%20existing%20%3D%20doc.getElementById(PANEL_ID)%3B%0A%20%20if%20(existing%20%26%26%20typeof%20existing.remove%20%3D%3D%3D%20'function')%20%7B%0A%20%20%20%20existing.remove()%3B%0A%20%20%7D%0A%0A%20%20const%20panel%20%3D%20doc.createElement('div')%3B%0A%20%20panel.id%20%3D%20PANEL_ID%3B%0A%20%20panel.setAttribute('role'%2C%20'dialog')%3B%0A%20%20panel.setAttribute('aria-label'%2C%20'B%E1%BA%A3ng%20th%C3%B4ng%20b%C3%A1o%20ti%E1%BB%87n%20%C3%ADch%20%C4%91%E1%BB%8Dc%20Teaching%20c%E1%BB%A5c%20b%E1%BB%99')%3B%0A%0A%20%20%2F%2F%20Strict%20inline%20styling%20for%20clean%20floating%20overlay%0A%20%20panel.style.position%20%3D%20'fixed'%3B%0A%20%20panel.style.top%20%3D%20'16px'%3B%0A%20%20panel.style.right%20%3D%20'16px'%3B%0A%20%20panel.style.width%20%3D%20'390px'%3B%0A%20%20panel.style.maxWidth%20%3D%20'calc(100vw%20-%2032px)'%3B%0A%20%20panel.style.backgroundColor%20%3D%20'%23ffffff'%3B%0A%20%20panel.style.color%20%3D%20'%230f172a'%3B%0A%20%20panel.style.border%20%3D%20result.success%20%3F%20'2px%20solid%20%232563eb'%20%3A%20'2px%20solid%20%23e11d48'%3B%0A%20%20panel.style.borderRadius%20%3D%20'12px'%3B%0A%20%20panel.style.boxShadow%20%3D%20'0%2020px%2025px%20-5px%20rgba(0%2C%200%2C%200%2C%200.25)%2C%200%208px%2010px%20-6px%20rgba(0%2C%200%2C%200%2C%200.2)'%3B%0A%20%20panel.style.zIndex%20%3D%20'2147483647'%3B%0A%20%20panel.style.fontFamily%20%3D%20'system-ui%2C%20-apple-system%2C%20BlinkMacSystemFont%2C%20%22Segoe%20UI%22%2C%20Roboto%2C%20sans-serif'%3B%0A%20%20panel.style.fontSize%20%3D%20'13px'%3B%0A%20%20panel.style.lineHeight%20%3D%20'1.45'%3B%0A%20%20panel.style.padding%20%3D%20'16px'%3B%0A%20%20panel.style.boxSizing%20%3D%20'border-box'%3B%0A%0A%20%20%2F%2F%201.%20Header%20Container%0A%20%20const%20header%20%3D%20doc.createElement('div')%3B%0A%20%20header.style.display%20%3D%20'flex'%3B%0A%20%20header.style.alignItems%20%3D%20'flex-start'%3B%0A%20%20header.style.justifyContent%20%3D%20'space-between'%3B%0A%20%20header.style.gap%20%3D%20'8px'%3B%0A%20%20header.style.paddingBottom%20%3D%20'10px'%3B%0A%20%20header.style.borderBottom%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%0A%20%20const%20titleGroup%20%3D%20doc.createElement('div')%3B%0A%0A%20%20const%20badge%20%3D%20doc.createElement('div')%3B%0A%20%20badge.textContent%20%3D%20'M%E1%BB%90C%201%20%E2%80%94%20SPIKE%20C%E1%BB%A4C%20B%E1%BB%98%20CH%E1%BB%88%20%C4%90%E1%BB%8CC'%3B%0A%20%20badge.style.fontSize%20%3D%20'10px'%3B%0A%20%20badge.style.fontWeight%20%3D%20'700'%3B%0A%20%20badge.style.letterSpacing%20%3D%20'0.5px'%3B%0A%20%20badge.style.color%20%3D%20result.success%20%3F%20'%231d4ed8'%20%3A%20'%23be123c'%3B%0A%20%20badge.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20const%20title%20%3D%20doc.createElement('div')%3B%0A%20%20title.textContent%20%3D%20'Ti%E1%BB%87n%20%C3%ADch%20%C4%90%E1%BA%BFm%20H%E1%BB%8Dc%20Sinh%20Teaching'%3B%0A%20%20title.style.fontSize%20%3D%20'15px'%3B%0A%20%20title.style.fontWeight%20%3D%20'800'%3B%0A%20%20title.style.color%20%3D%20'%230f172a'%3B%0A%0A%20%20titleGroup.appendChild(badge)%3B%0A%20%20titleGroup.appendChild(title)%3B%0A%0A%20%20%2F%2F%20Close%20button%0A%20%20const%20closeBtn%20%3D%20doc.createElement('button')%3B%0A%20%20closeBtn.type%20%3D%20'button'%3B%0A%20%20closeBtn.textContent%20%3D%20'%E2%9C%95%20%C4%90%C3%B3ng'%3B%0A%20%20closeBtn.style.background%20%3D%20'%23f1f5f9'%3B%0A%20%20closeBtn.style.color%20%3D%20'%23475569'%3B%0A%20%20closeBtn.style.border%20%3D%20'1px%20solid%20%23cbd5e1'%3B%0A%20%20closeBtn.style.borderRadius%20%3D%20'6px'%3B%0A%20%20closeBtn.style.padding%20%3D%20'4px%208px'%3B%0A%20%20closeBtn.style.fontSize%20%3D%20'11px'%3B%0A%20%20closeBtn.style.fontWeight%20%3D%20'600'%3B%0A%20%20closeBtn.style.cursor%20%3D%20'pointer'%3B%0A%20%20closeBtn.onclick%20%3D%20()%20%3D%3E%20%7B%0A%20%20%20%20panel.remove()%3B%0A%20%20%7D%3B%0A%0A%20%20header.appendChild(titleGroup)%3B%0A%20%20header.appendChild(closeBtn)%3B%0A%20%20panel.appendChild(header)%3B%0A%0A%20%20%2F%2F%202.%20Mandatory%20Warning%20Badges%0A%20%20const%20badgesRow%20%3D%20doc.createElement('div')%3B%0A%20%20badgesRow.style.display%20%3D%20'flex'%3B%0A%20%20badgesRow.style.flexWrap%20%3D%20'wrap'%3B%0A%20%20badgesRow.style.gap%20%3D%20'6px'%3B%0A%20%20badgesRow.style.marginTop%20%3D%20'10px'%3B%0A%0A%20%20const%20labels%20%3D%20%5BREQUIRED_LABELS.SAMPLE%2C%20REQUIRED_LABELS.NOT_FULL%2C%20REQUIRED_LABELS.READONLY%5D%3B%0A%20%20for%20(const%20labelText%20of%20labels)%20%7B%0A%20%20%20%20const%20lbl%20%3D%20doc.createElement('span')%3B%0A%20%20%20%20lbl.textContent%20%3D%20labelText%3B%0A%20%20%20%20lbl.style.display%20%3D%20'inline-block'%3B%0A%20%20%20%20lbl.style.padding%20%3D%20'2px%206px'%3B%0A%20%20%20%20lbl.style.fontSize%20%3D%20'10.5px'%3B%0A%20%20%20%20lbl.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20lbl.style.borderRadius%20%3D%20'4px'%3B%0A%20%20%20%20lbl.style.backgroundColor%20%3D%20'%23eff6ff'%3B%0A%20%20%20%20lbl.style.color%20%3D%20'%231e40af'%3B%0A%20%20%20%20lbl.style.border%20%3D%20'1px%20solid%20%23bfdbfe'%3B%0A%20%20%20%20badgesRow.appendChild(lbl)%3B%0A%20%20%7D%0A%20%20panel.appendChild(badgesRow)%3B%0A%0A%20%20%2F%2F%203.%20Status%20Alert%20Box%0A%20%20const%20statusBox%20%3D%20doc.createElement('div')%3B%0A%20%20statusBox.style.marginTop%20%3D%20'12px'%3B%0A%20%20statusBox.style.padding%20%3D%20'10px%2012px'%3B%0A%20%20statusBox.style.borderRadius%20%3D%20'8px'%3B%0A%20%20statusBox.style.fontSize%20%3D%20'12px'%3B%0A%20%20statusBox.style.fontWeight%20%3D%20'500'%3B%0A%0A%20%20if%20(result.success)%20%7B%0A%20%20%20%20statusBox.style.backgroundColor%20%3D%20'%23f0fdf4'%3B%0A%20%20%20%20statusBox.style.border%20%3D%20'1px%20solid%20%2386efac'%3B%0A%20%20%20%20statusBox.style.color%20%3D%20'%23166534'%3B%0A%0A%20%20%20%20const%20statusTitle%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusTitle.textContent%20%3D%20result.isPlaceholder%0A%20%20%20%20%20%20%3F%20'%E2%84%B9%20TH%C3%94NG%20B%C3%81O%3A%20B%E1%BA%A2NG%20KH%C3%94NG%20C%C3%93%20H%C3%80NG%20D%E1%BB%AE%20LI%E1%BB%86U'%0A%20%20%20%20%20%20%3A%20'%E2%9C%93%20%C4%90%C3%83%20NH%E1%BA%ACN%20DI%E1%BB%86N%20%C4%90%C3%9ANG%20B%E1%BA%A2NG%20H%E1%BB%8CC%20SINH%20(8%20C%E1%BB%98T)'%3B%0A%20%20%20%20statusTitle.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20statusTitle.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20%20%20const%20statusDesc%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusDesc.textContent%20%3D%20result.message%3B%0A%0A%20%20%20%20statusBox.appendChild(statusTitle)%3B%0A%20%20%20%20statusBox.appendChild(statusDesc)%3B%0A%20%20%7D%20else%20%7B%0A%20%20%20%20statusBox.style.backgroundColor%20%3D%20'%23fff1f2'%3B%0A%20%20%20%20statusBox.style.border%20%3D%20'1px%20solid%20%23fecdd3'%3B%0A%20%20%20%20statusBox.style.color%20%3D%20'%239f1239'%3B%0A%0A%20%20%20%20const%20statusTitle%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusTitle.textContent%20%3D%20%60%E2%9C%95%20D%E1%BB%AANG%20L%C6%AF%E1%BB%A2T%20%C4%90%E1%BB%8CC%20(%24%7Bresult.code%7D)%60%3B%0A%20%20%20%20statusTitle.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20statusTitle.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20%20%20const%20statusDesc%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusDesc.textContent%20%3D%20result.message%3B%0A%0A%20%20%20%20statusBox.appendChild(statusTitle)%3B%0A%20%20%20%20statusBox.appendChild(statusDesc)%3B%0A%20%20%7D%0A%20%20panel.appendChild(statusBox)%3B%0A%0A%20%20%2F%2F%204.%20Metrics%20Grid%20(Visible%20Count%2C%20DOM%20Rows)%0A%20%20const%20metricsGrid%20%3D%20doc.createElement('div')%3B%0A%20%20metricsGrid.style.marginTop%20%3D%20'12px'%3B%0A%20%20metricsGrid.style.display%20%3D%20'grid'%3B%0A%20%20metricsGrid.style.gridTemplateColumns%20%3D%20'1fr%201fr'%3B%0A%20%20metricsGrid.style.gap%20%3D%20'8px'%3B%0A%0A%20%20%2F%2F%20Visible%20Count%20Card%0A%20%20const%20visibleCard%20%3D%20doc.createElement('div')%3B%0A%20%20visibleCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20visibleCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20visibleCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20visibleCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20visibleTitle%20%3D%20doc.createElement('div')%3B%0A%20%20visibleTitle.textContent%20%3D%20'S%E1%BB%91%20h%C3%A0ng%20nh%C3%ACn%20th%E1%BA%A5y%3A'%3B%0A%20%20visibleTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20visibleTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20visibleValue%20%3D%20doc.createElement('div')%3B%0A%20%20visibleValue.textContent%20%3D%20%60%24%7Bresult.visibleCount%7D%20h%C3%A0ng%60%3B%0A%20%20visibleValue.style.fontSize%20%3D%20'18px'%3B%0A%20%20visibleValue.style.fontWeight%20%3D%20'800'%3B%0A%20%20visibleValue.style.color%20%3D%20result.success%20%3F%20'%2315803d'%20%3A%20'%2394a3b8'%3B%0A%0A%20%20visibleCard.appendChild(visibleTitle)%3B%0A%20%20visibleCard.appendChild(visibleValue)%3B%0A%0A%20%20%2F%2F%20Total%20DOM%20Rows%20Card%0A%20%20const%20totalCard%20%3D%20doc.createElement('div')%3B%0A%20%20totalCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20totalCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20totalCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20totalCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20totalTitle%20%3D%20doc.createElement('div')%3B%0A%20%20totalTitle.textContent%20%3D%20'T%E1%BB%95ng%20h%C3%A0ng%20trong%20DOM%3A'%3B%0A%20%20totalTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20totalTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20totalValue%20%3D%20doc.createElement('div')%3B%0A%20%20totalValue.textContent%20%3D%20%60%24%7Bresult.totalRowsCount%7D%20h%C3%A0ng%60%3B%0A%20%20totalValue.style.fontSize%20%3D%20'18px'%3B%0A%20%20totalValue.style.fontWeight%20%3D%20'800'%3B%0A%20%20totalValue.style.color%20%3D%20'%23334155'%3B%0A%0A%20%20totalCard.appendChild(totalTitle)%3B%0A%20%20totalCard.appendChild(totalValue)%3B%0A%0A%20%20metricsGrid.appendChild(visibleCard)%3B%0A%20%20metricsGrid.appendChild(totalCard)%3B%0A%20%20panel.appendChild(metricsGrid)%3B%0A%0A%20%20%2F%2F%205.%20Source%20Pagination%20%2F%20Total%20Notice%20Card%0A%20%20const%20paginationCard%20%3D%20doc.createElement('div')%3B%0A%20%20paginationCard.style.marginTop%20%3D%20'8px'%3B%0A%20%20paginationCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20paginationCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20paginationCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20paginationCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20paginationTitle%20%3D%20doc.createElement('div')%3B%0A%20%20paginationTitle.textContent%20%3D%20'Th%C3%B4ng%20b%C3%A1o%20ph%C3%A2n%20trang%20ngu%E1%BB%93n%20(DOM)%3A'%3B%0A%20%20paginationTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20paginationTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20paginationVal%20%3D%20doc.createElement('div')%3B%0A%20%20paginationVal.textContent%20%3D%20result.sourceTotalNotice%3B%0A%20%20paginationVal.style.fontSize%20%3D%20'12px'%3B%0A%20%20paginationVal.style.fontWeight%20%3D%20'600'%3B%0A%20%20paginationVal.style.color%20%3D%20'%231e293b'%3B%0A%20%20paginationVal.style.marginTop%20%3D%20'2px'%3B%0A%0A%20%20paginationCard.appendChild(paginationTitle)%3B%0A%20%20paginationCard.appendChild(paginationVal)%3B%0A%20%20panel.appendChild(paginationCard)%3B%0A%0A%20%20%2F%2F%206.%20Safety%20Commitments%20Notice%0A%20%20const%20safetyNote%20%3D%20doc.createElement('div')%3B%0A%20%20safetyNote.style.marginTop%20%3D%20'12px'%3B%0A%20%20safetyNote.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20safetyNote.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20safetyNote.style.borderRadius%20%3D%20'6px'%3B%0A%20%20safetyNote.style.borderLeft%20%3D%20'3px%20solid%20%233b82f6'%3B%0A%20%20safetyNote.style.fontSize%20%3D%20'11px'%3B%0A%20%20safetyNote.style.color%20%3D%20'%23475569'%3B%0A%20%20safetyNote.textContent%20%3D%0A%20%20%20%20'Cam%20k%E1%BA%BFt%20an%20to%C3%A0n%3A%20Ti%E1%BB%87n%20%C3%ADch%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20thu%E1%BA%A7n%20t%C3%BAy%20trong%20tr%C3%ACnh%20duy%E1%BB%87t.%20Kh%C3%B4ng%20%C4%91%E1%BB%8Dc%20m%E1%BA%ADt%20kh%E1%BA%A9u%2Fcookie%2C%20kh%C3%B4ng%20tr%C3%ADch%20xu%E1%BA%A5t%20h%E1%BB%8D%20t%C3%AAn%2FID%20h%E1%BB%8Dc%20sinh%2C%20kh%C3%B4ng%20g%E1%BB%ADi%20d%E1%BB%AF%20li%E1%BB%87u%20ra%20m%E1%BA%A1ng.'%3B%0A%20%20panel.appendChild(safetyNote)%3B%0A%0A%20%20%2F%2F%207.%20Footer%20timestamp%0A%20%20const%20footer%20%3D%20doc.createElement('div')%3B%0A%20%20footer.style.marginTop%20%3D%20'10px'%3B%0A%20%20footer.style.fontSize%20%3D%20'10px'%3B%0A%20%20footer.style.color%20%3D%20'%2394a3b8'%3B%0A%20%20footer.style.textAlign%20%3D%20'right'%3B%0A%20%20footer.textContent%20%3D%20%60Th%E1%BB%9Di%20%C4%91i%E1%BB%83m%20ki%E1%BB%83m%20tra%3A%20%24%7Bresult.timestamp%7D%60%3B%0A%20%20panel.appendChild(footer)%3B%0A%0A%20%20return%20panel%3B%0A%7D%0A%0A%2F**%0A%20*%20Top-level%20reader%20execution%20function.%0A%20*%20Called%20directly%20in%20the%20browser%20bookmarklet%20context%20or%20in%20QA%20fixture%20pages.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20%5Bdoc%3Ddocument%5D%20-%20Target%20Document%0A%20*%20%40param%20%7BLocation%7D%20%5Bloc%3Dwindow.location%5D%20-%20Target%20Location%0A%20*%20%40returns%20%7BObject%7D%20Inspection%20result%0A%20*%2F%0Afunction%20runTeachingReader(doc%20%3D%20(typeof%20document%20!%3D%3D%20'undefined'%20%3F%20document%20%3A%20null)%2C%20loc%20%3D%20(typeof%20window%20!%3D%3D%20'undefined'%20%3F%20window.location%20%3A%20null))%20%7B%0A%20%20if%20(!doc)%20%7B%0A%20%20%20%20return%20%7B%20success%3A%20false%2C%20code%3A%20'NO_DOCUMENT'%2C%20message%3A%20'Kh%C3%B4ng%20t%C3%ACm%20th%E1%BA%A5y%20%C4%91%E1%BB%91i%20t%C6%B0%E1%BB%A3ng%20Document.'%20%7D%3B%0A%20%20%7D%0A%20%20const%20result%20%3D%20inspectTeachingDom(doc%2C%20loc)%3B%0A%20%20const%20panel%20%3D%20renderTeachingPanel(doc%2C%20result)%3B%0A%20%20if%20(doc.body)%20%7B%0A%20%20%20%20doc.body.appendChild(panel)%3B%0A%20%20%7D%0A%20%20return%20result%3B%0A%7D%0A%0A%2F%2F%20Trigger%20reader%20on%20active%20page%0ArunTeachingReader(document%2C%20window.location)%3B%0A%0A%7D)()%3B" class="bookmarklet-btn" title="Kéo nút này vào thanh dấu trang Chrome">
+          📑 Thử đọc Teaching
+        </a>
+        <p style="font-size: 11px; color: #64748b;">
+          (Mẹo: Nhấn phím <code>Ctrl + Shift + B</code> nếu thanh dấu trang Chrome chưa hiển thị)
+        </p>
+      </div>
+
+      <!-- 3-Step Instructions -->
+      <div>
+        <h2 class="section-title">
+          <span>📋 Hướng dẫn Owner 3 bước thực hiện</span>
+        </h2>
+        <ul class="steps-list">
+          <li class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-text">
+              <strong>Kéo nút dấu trang:</strong> Kéo nút <strong>"Thử đọc Teaching"</strong> ở trên thả vào thanh dấu trang trình duyệt Chrome của bạn. Không cần mở F12, không copy mã code, không cần Terminal.
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-text">
+              <strong>Mở trang Teaching MindX:</strong> Truy cập địa chỉ nguồn:
+              <a href="https://teachingmindx.top/hocsinh.php" target="_blank" rel="noopener noreferrer" class="source-link">
+                https://teachingmindx.top/hocsinh.php
+              </a>. Nếu phiên làm việc chưa mở, hãy tự đăng nhập tài khoản Teaching bình thường.
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-text">
+              <strong>Bấm dấu trang để đọc:</strong> Khi đang ở đúng trang danh sách học sinh, nhấp chuột vào dấu trang <strong>"Thử đọc Teaching"</strong> trên thanh dấu trang. Bảng thông tin nhỏ sẽ xuất hiện ngay tại góc màn hình hiển thị số hàng đếm được trên trang hiện tại.
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Boundaries & Safety Notices -->
+      <div>
+        <h2 class="section-title">
+          <span>🛡️ Cam kết an toàn & Giới hạn Mốc 1</span>
+        </h2>
+        <div class="rules-grid">
+          <div class="rule-card">
+            <strong>✓ Đọc mẫu trang hiện tại</strong>
+            Tiện ích chỉ đếm số hàng đang hiển thị trong DOM của trang hiện tại, không tự động click sang trang khác.
+          </div>
+          <div class="rule-card">
+            <strong>✓ Không phải toàn bộ danh sách</strong>
+            Không nhân mẫu ra tổng, không tự giả định số lượng chưa hiển thị. Báo cáo phân trang chỉ dùng khi có thông báo DOM rõ ràng.
+          </div>
+          <div class="rule-card">
+            <strong>✓ Chỉ đọc — không ghi TEST</strong>
+            Không tạo, sửa hay xóa bất kỳ dữ liệu nào trên Teaching hay trên hệ thống webapp MINDX LEARN.
+          </div>
+          <div class="rule-card">
+            <strong>✓ Không trích xuất dữ liệu nhạy cảm</strong>
+            Không đọc họ tên, không đọc mã số học sinh, không đọc mật khẩu form. Tuyệt đối không gửi dữ liệu ra mạng.
+          </div>
+        </div>
+      </div>
+
+      <!-- CSP Warning Notice -->
+      <div class="notice-box">
+        <strong>⚠️ Lưu ý về chính sách CSP (Content Security Policy):</strong>
+        Nếu trình duyệt hoặc cấu hình bảo mật máy tính chặn bookmarklet thực thi mã <code>javascript:</code>, vui lòng <strong>dừng lại và thông báo cho kỹ thuật viên</strong>. Tuyệt đối không sử dụng các giải pháp vượt rào bảo mật.
+      </div>
+
+      <!-- QA Interactive Fixture Testing Area -->
+      <div class="qa-box">
+        <h2 class="section-title" style="margin-bottom: 8px;">
+          <span>🧪 Khu vực Thử nghiệm Cục bộ (QA Fixture)</span>
+        </h2>
+        <p style="font-size: 12px; color: var(--slate-600); margin-bottom: 14px;">
+          Kiểm chứng hành vi của Reader trên các cấu trúc giả lập khác nhau ngay tại trang này mà không cần kết nối tới Teaching thật:
+        </p>
+
+        <div>
+          <button type="button" class="qa-btn" onclick="runFixtureTest('valid_3')">▶ Thử Fixture 1: Đúng 3 hàng</button>
+          <button type="button" class="qa-btn" onclick="runFixtureTest('empty')">▶ Thử Fixture 2: Bảng rỗng</button>
+          <button type="button" class="qa-btn" onclick="runFixtureTest('login')">▶ Thử Fixture 3: Trang đăng nhập</button>
+          <button type="button" class="qa-btn" onclick="runFixtureTest('invalid_headers')">▶ Thử Fixture 4: Sai tiêu đề cột</button>
+          <button type="button" class="qa-btn" onclick="runFixtureTest('wrong_origin')">▶ Thử Fixture 5: Sai Origin</button>
+        </div>
+
+        <!-- Hidden DOM Containers for QA Fixtures -->
+        <div id="qa-fixture-container" style="margin-top: 14px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; display: none;">
+          <div id="qa-fixture-dom"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Embed Core Reader Logic for QA Testing -->
+  <script>
+(function(){
+/**
+ * Core reader logic for Teaching MindX read-only DOM spike (Milestone 1 - C2 / E2)
+ *
+ * SPECIFICATION & SAFETY CONTRACT (M1-E2 Hardened):
+ * 1. STRICT ORIGIN & PATH GUARD:
+ *    - Only accepts exact origin 'https://teachingmindx.top' and exact pathname '/hocsinh.php'.
+ *    - Rejects variations (/not-hocsinh.php, /hocsinh.php-extra, /admin/hocsinh.php).
+ *    - Returns FIXED error message without echoing arbitrary origin or pathname into the panel.
+ * 2. TABLE MATCHING EVIDENCE:
+ *    - Matches 8 expected columns from 2026-10-14 DOM inspection:
+ *      ['STT', 'Tên học sinh', 'Mã lớp', 'Trạng thái học sinh', 'GV chính', 'Trợ giảng', 'Trạng thái lớp', 'Thao tác']
+ *    - Error message reports only column count, never echoes unvalidated/arbitrary header text.
+ *    - Valid result exposes only static metadata columns.
+ * 3. ZERO PERSONAL DATA EXTRACTION (NO TEXTCONTENT ON DATA CELLS):
+ *    - Counts valid rows using DOM structure & attributes only.
+ *    - Never accesses row.textContent or cell.textContent for data rows.
+ *    - Empty placeholder detected strictly via .dataTables_empty or single cell colspan >= 8.
+ *    - Single data row with 8 cells is counted as 1 student row without reading any text.
+ * 4. STRUCTURED SOURCE PAGINATION PARSING:
+ *    - Parses strictly formatted pagination numbers (start, end, total).
+ *    - Re-renders as static Vietnamese text + numbers.
+ *    - Rejects any string with filter/search clauses or adverse names/IDs, falling back to 'Chưa xác định'.
+ * 5. PURE CLIENT DOM:
+ *    - Absolutely NO fetch / XHR / network requests.
+ *    - Absolutely NO localStorage / sessionStorage / cookie / IndexedDB.
+ *    - Absolutely NO console output of student data.
+ *    - Absolutely NO clipboard or download payload.
+ *    - Safe DOM manipulation using document.createElement and textContent ONLY.
+ * 6. NO CACHE:
+ *    - Fresh run on every click; removes existing panel if present.
+ * 7. REQUIRED LABELS:
+ *    - 'Đọc mẫu trang hiện tại'
+ *    - 'Không phải toàn bộ danh sách'
+ *    - 'Chỉ đọc — không ghi TEST'
+ */
+
+const TEACHING_ORIGIN = 'https://teachingmindx.top';
+const TEACHING_PATH = '/hocsinh.php';
+
+const EXPECTED_COLUMNS = [
+  'STT',
+  'Tên học sinh',
+  'Mã lớp',
+  'Trạng thái học sinh',
+  'GV chính',
+  'Trợ giảng',
+  'Trạng thái lớp',
+  'Thao tác',
+];
+
+const REQUIRED_LABELS = {
+  SAMPLE: 'Đọc mẫu trang hiện tại',
+  NOT_FULL: 'Không phải toàn bộ danh sách',
+  READONLY: 'Chỉ đọc — không ghi TEST',
+};
+
+/**
+ * Parses source pagination notice safely.
+ * Only accepts clean numeric patterns (start, end, total); rejects search/filter noise.
+ * Never echoes raw text that could contain student names/IDs.
+ *
+ * @param {Element|null} infoEl
+ * @returns {string} Safe summary string or 'Chưa xác định'
+ */
+function parseSafePaginationNotice(infoEl) {
+  if (!infoEl) return 'Chưa xác định';
+
+  const raw = (infoEl.textContent || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return 'Chưa xác định';
+
+  // Reject noise that might contain student names, search keywords, or filter fragments
+  if (/filtered|lọc|search|tìm/i.test(raw)) {
+    return 'Chưa xác định';
+  }
+
+  // Strict regex: matches only standard pagination statements
+  // English: Showing 1 to 25 of 120 entries
+  // Vietnamese: Hiển thị 1 đến 25 trong [tổng số] 120 bản ghi/học sinh
+  const pattern = /^(?:Showing|Hiển thị)\s+(\d+)\s+(?:to|đến)\s+(\d+)\s+(?:of|trong|trên|trong tổng số)\s+(\d+)\s*(?:entries|bản ghi|học sinh|mục)?\.?$/i;
+  const match = raw.match(pattern);
+
+  if (!match) {
+    return 'Chưa xác định';
+  }
+
+  const startNum = Number(match[1]);
+  const endNum = Number(match[2]);
+  const totalNum = Number(match[3]);
+
+  if (Number.isNaN(startNum) || Number.isNaN(endNum) || Number.isNaN(totalNum)) {
+    return 'Chưa xác định';
+  }
+
+  return `Hiển thị ${startNum} - ${endNum} trên tổng số ${totalNum} bản ghi (DOM nguồn)`;
+}
+
+/**
+ * Inspects a Document and Location for Teaching MindX student roster structure.
+ * Pure inspection function: safe for unit testing with JSDOM and live browser execution.
+ *
+ * @param {Document} doc - DOM Document object
+ * @param {Location|Object} loc - Location object ({ origin, pathname })
+ * @returns {Object} Inspection result summary (numbers and status ONLY)
+ */
+function inspectTeachingDom(doc, loc) {
+  const timestamp = new Date().toISOString();
+
+  // Guard 1: Strict Origin & Exact Pathname Verification
+  const origin = loc?.origin || '';
+  const pathname = loc?.pathname || '';
+  const isExactOrigin = origin === TEACHING_ORIGIN;
+  const isExactPath = pathname === TEACHING_PATH;
+
+  if (!isExactOrigin || !isExactPath) {
+    return {
+      success: false,
+      code: 'WRONG_ORIGIN',
+      // FIXED message: never echoes arbitrary origin or pathname into the panel
+      message: `Sai địa chỉ trang. Tiện ích chỉ hoạt động trên ${TEACHING_ORIGIN}${TEACHING_PATH}`,
+      visibleCount: 0,
+      totalRowsCount: 0,
+      sourceTotalNotice: 'Chưa xác định',
+      isPlaceholder: false,
+      detectedColumns: [],
+      timestamp,
+    };
+  }
+
+  // Guard 2: Login Screen Detection (Checks input type without reading passwords)
+  const passwordInput = doc?.querySelector ? doc.querySelector('input[type="password"]') : null;
+  const loginForm = doc?.querySelector ? doc.querySelector('form[action*="login"], form.login-form, #login-form') : null;
+  if (passwordInput || loginForm) {
+    return {
+      success: false,
+      code: 'LOGIN_REQUIRED',
+      message: 'Phát hiện màn hình đăng nhập. Vui lòng đăng nhập Teaching MindX trước khi bấm tiện ích.',
+      visibleCount: 0,
+      totalRowsCount: 0,
+      sourceTotalNotice: 'Chưa xác định',
+      isPlaceholder: false,
+      detectedColumns: [],
+      timestamp,
+    };
+  }
+
+  // Guard 3: Locate Table and Validate Column Structure
+  const tables = doc?.querySelectorAll ? Array.from(doc.querySelectorAll('table')) : [];
+  if (tables.length === 0) {
+    return {
+      success: false,
+      code: 'TABLE_NOT_FOUND',
+      message: 'Không tìm thấy bảng dữ liệu học sinh nào trên trang.',
+      visibleCount: 0,
+      totalRowsCount: 0,
+      sourceTotalNotice: 'Chưa xác định',
+      isPlaceholder: false,
+      detectedColumns: [],
+      timestamp,
+    };
+  }
+
+  let targetTable = null;
+  let detectedHeaderCount = 0;
+  let headerMatch = false;
+
+  for (const table of tables) {
+    const headerCells = Array.from(table.querySelectorAll('thead th, thead td, tr:first-child th'));
+    const headers = headerCells.map((th) => (th.textContent || '').trim().replace(/\s+/g, ' '));
+    detectedHeaderCount = headers.length;
+
+    if (headers.length === EXPECTED_COLUMNS.length) {
+      const matchesAll = EXPECTED_COLUMNS.every((expectedCol, idx) => {
+        const detected = (headers[idx] || '').toLowerCase();
+        return detected === expectedCol.toLowerCase();
+      });
+
+      if (matchesAll) {
+        targetTable = table;
+        headerMatch = true;
+        break;
+      }
+    }
+  }
+
+  if (!headerMatch || !targetTable) {
+    return {
+      success: false,
+      code: 'INVALID_HEADERS',
+      // Fixed error message: does NOT echo arbitrary header text, reports only column count
+      message: `Cấu trúc bảng không khớp mẫu đối soát ngày 14/10/2026 (yêu cầu đúng 8 cột: STT, Tên học sinh, Mã lớp, Trạng thái học sinh, GV chính, Trợ giảng, Trạng thái lớp, Thao tác). Phát hiện bảng có ${detectedHeaderCount} cột không hợp lệ.`,
+      visibleCount: 0,
+      totalRowsCount: 0,
+      sourceTotalNotice: 'Chưa xác định',
+      isPlaceholder: false,
+      detectedColumns: [], // Do NOT return unvalidated header text
+      timestamp,
+    };
+  }
+
+  // Guard 4: Inspect Rows & Count Visible Rows Safely
+  // Get body rows, excluding header row
+  let rowElements = [];
+  const tbody = targetTable.querySelector('tbody');
+  if (tbody) {
+    rowElements = Array.from(tbody.querySelectorAll('tr'));
+  } else {
+    const allTrs = Array.from(targetTable.querySelectorAll('tr'));
+    rowElements = allTrs.slice(1);
+  }
+
+  // Check empty table condition (0 rows)
+  if (rowElements.length === 0) {
+    return {
+      success: true,
+      code: 'EMPTY_TABLE',
+      message: 'Bảng học sinh hiện tại rỗng (0 dòng dữ liệu).',
+      visibleCount: 0,
+      totalRowsCount: 0,
+      sourceTotalNotice: 'Chưa xác định',
+      isPlaceholder: true,
+      detectedColumns: EXPECTED_COLUMNS,
+      timestamp,
+    };
+  }
+
+  // Check single row placeholder ONLY via structural classes and attributes
+  // CRITICAL: NEVER read singleRow.textContent or cell.textContent (prevents reading personal data of a single student)
+  if (rowElements.length === 1) {
+    const singleRow = rowElements[0];
+    const isEmptyClass = singleRow.querySelector('.dataTables_empty') !== null;
+    const singleRowCells = Array.from(singleRow.querySelectorAll('td, th'));
+
+    const isColspanPlaceholder = singleRowCells.length === 1 && (
+      (singleRowCells[0].colSpan && singleRowCells[0].colSpan >= 8) ||
+      singleRowCells[0].getAttribute('colspan') === '8'
+    );
+
+    if (isEmptyClass || isColspanPlaceholder) {
+      return {
+        success: true,
+        code: 'EMPTY_TABLE',
+        message: 'Bảng hiển thị trạng thái placeholder: Không có dữ liệu.',
+        visibleCount: 0,
+        totalRowsCount: 0,
+        sourceTotalNotice: 'Chưa xác định',
+        isPlaceholder: true,
+        detectedColumns: EXPECTED_COLUMNS,
+        timestamp,
+      };
+    }
+  }
+
+  // Validate each row structure and count visible rows
+  // NEVER read textContent of data rows or individual cells!
+  let totalRowsCount = 0;
+  let visibleCount = 0;
+
+  for (const row of rowElements) {
+    const cells = Array.from(row.querySelectorAll('td, th'));
+
+    // Structure integrity check: each row MUST have exactly 8 cells
+    if (cells.length !== EXPECTED_COLUMNS.length) {
+      return {
+        success: false,
+        code: 'INVALID_ROW_STRUCTURE',
+        message: `Hàng dữ liệu thứ ${totalRowsCount + 1} có số cột không khớp (${cells.length} thay vì 8 cột). Cấu trúc bảng nguồn đã thay đổi.`,
+        visibleCount: 0,
+        totalRowsCount,
+        sourceTotalNotice: 'Chưa xác định',
+        isPlaceholder: false,
+        detectedColumns: EXPECTED_COLUMNS,
+        timestamp,
+      };
+    }
+
+    // Determine visibility safely without reading textContent or personal data
+    let isRowVisible = true;
+    if (row.style && row.style.display === 'none') {
+      isRowVisible = false;
+    } else if (row.hidden || (typeof row.hasAttribute === 'function' && row.hasAttribute('hidden'))) {
+      isRowVisible = false;
+    } else if (typeof doc.defaultView?.getComputedStyle === 'function') {
+      try {
+        const computed = doc.defaultView.getComputedStyle(row);
+        if (computed && (computed.display === 'none' || computed.visibility === 'hidden')) {
+          isRowVisible = false;
+        }
+      } catch {
+        // Fallback to inline display
+      }
+    }
+
+    totalRowsCount++;
+    if (isRowVisible) {
+      visibleCount++;
+    }
+  }
+
+  // Guard 5: Safe Pagination Notice Parsing (Strict template with numbers only)
+  const infoEl = doc.querySelector('.dataTables_info, [role="status"].table-info, .pagination-info');
+  const sourceTotalNotice = parseSafePaginationNotice(infoEl);
+
+  return {
+    success: true,
+    code: 'OK',
+    message: `Đã đối soát đúng cấu trúc 8 cột. Đọc thành công ${visibleCount} hàng hiển thị trên trang hiện tại.`,
+    visibleCount,
+    totalRowsCount,
+    sourceTotalNotice,
+    isPlaceholder: false,
+    detectedColumns: EXPECTED_COLUMNS,
+    timestamp,
+  };
+}
+
+/**
+ * Creates and renders the in-place floating panel on the DOM using textContent & createElement ONLY.
+ * Removes any previous panel to prevent stale caching.
+ *
+ * @param {Document} doc - DOM Document object
+ * @param {Object} result - Result from inspectTeachingDom
+ * @returns {HTMLElement} The created panel element
+ */
+function renderTeachingPanel(doc, result) {
+  const PANEL_ID = 'teaching-readonly-spike-panel';
+
+  // Fresh run: remove old panel if present
+  const existing = doc.getElementById(PANEL_ID);
+  if (existing && typeof existing.remove === 'function') {
+    existing.remove();
+  }
+
+  const panel = doc.createElement('div');
+  panel.id = PANEL_ID;
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', 'Bảng thông báo tiện ích đọc Teaching cục bộ');
+
+  // Strict inline styling for clean floating overlay
+  panel.style.position = 'fixed';
+  panel.style.top = '16px';
+  panel.style.right = '16px';
+  panel.style.width = '390px';
+  panel.style.maxWidth = 'calc(100vw - 32px)';
+  panel.style.backgroundColor = '#ffffff';
+  panel.style.color = '#0f172a';
+  panel.style.border = result.success ? '2px solid #2563eb' : '2px solid #e11d48';
+  panel.style.borderRadius = '12px';
+  panel.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2)';
+  panel.style.zIndex = '2147483647';
+  panel.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  panel.style.fontSize = '13px';
+  panel.style.lineHeight = '1.45';
+  panel.style.padding = '16px';
+  panel.style.boxSizing = 'border-box';
+
+  // 1. Header Container
+  const header = doc.createElement('div');
+  header.style.display = 'flex';
+  header.style.alignItems = 'flex-start';
+  header.style.justifyContent = 'space-between';
+  header.style.gap = '8px';
+  header.style.paddingBottom = '10px';
+  header.style.borderBottom = '1px solid #e2e8f0';
+
+  const titleGroup = doc.createElement('div');
+
+  const badge = doc.createElement('div');
+  badge.textContent = 'MỐC 1 — SPIKE CỤC BỘ CHỈ ĐỌC';
+  badge.style.fontSize = '10px';
+  badge.style.fontWeight = '700';
+  badge.style.letterSpacing = '0.5px';
+  badge.style.color = result.success ? '#1d4ed8' : '#be123c';
+  badge.style.marginBottom = '2px';
+
+  const title = doc.createElement('div');
+  title.textContent = 'Tiện ích Đếm Học Sinh Teaching';
+  title.style.fontSize = '15px';
+  title.style.fontWeight = '800';
+  title.style.color = '#0f172a';
+
+  titleGroup.appendChild(badge);
+  titleGroup.appendChild(title);
+
+  // Close button
+  const closeBtn = doc.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.textContent = '✕ Đóng';
+  closeBtn.style.background = '#f1f5f9';
+  closeBtn.style.color = '#475569';
+  closeBtn.style.border = '1px solid #cbd5e1';
+  closeBtn.style.borderRadius = '6px';
+  closeBtn.style.padding = '4px 8px';
+  closeBtn.style.fontSize = '11px';
+  closeBtn.style.fontWeight = '600';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.onclick = () => {
+    panel.remove();
+  };
+
+  header.appendChild(titleGroup);
+  header.appendChild(closeBtn);
+  panel.appendChild(header);
+
+  // 2. Mandatory Warning Badges
+  const badgesRow = doc.createElement('div');
+  badgesRow.style.display = 'flex';
+  badgesRow.style.flexWrap = 'wrap';
+  badgesRow.style.gap = '6px';
+  badgesRow.style.marginTop = '10px';
+
+  const labels = [REQUIRED_LABELS.SAMPLE, REQUIRED_LABELS.NOT_FULL, REQUIRED_LABELS.READONLY];
+  for (const labelText of labels) {
+    const lbl = doc.createElement('span');
+    lbl.textContent = labelText;
+    lbl.style.display = 'inline-block';
+    lbl.style.padding = '2px 6px';
+    lbl.style.fontSize = '10.5px';
+    lbl.style.fontWeight = '700';
+    lbl.style.borderRadius = '4px';
+    lbl.style.backgroundColor = '#eff6ff';
+    lbl.style.color = '#1e40af';
+    lbl.style.border = '1px solid #bfdbfe';
+    badgesRow.appendChild(lbl);
+  }
+  panel.appendChild(badgesRow);
+
+  // 3. Status Alert Box
+  const statusBox = doc.createElement('div');
+  statusBox.style.marginTop = '12px';
+  statusBox.style.padding = '10px 12px';
+  statusBox.style.borderRadius = '8px';
+  statusBox.style.fontSize = '12px';
+  statusBox.style.fontWeight = '500';
+
+  if (result.success) {
+    statusBox.style.backgroundColor = '#f0fdf4';
+    statusBox.style.border = '1px solid #86efac';
+    statusBox.style.color = '#166534';
+
+    const statusTitle = doc.createElement('div');
+    statusTitle.textContent = result.isPlaceholder
+      ? 'ℹ THÔNG BÁO: BẢNG KHÔNG CÓ HÀNG DỮ LIỆU'
+      : '✓ ĐÃ NHẬN DIỆN ĐÚNG BẢNG HỌC SINH (8 CỘT)';
+    statusTitle.style.fontWeight = '700';
+    statusTitle.style.marginBottom = '2px';
+
+    const statusDesc = doc.createElement('div');
+    statusDesc.textContent = result.message;
+
+    statusBox.appendChild(statusTitle);
+    statusBox.appendChild(statusDesc);
+  } else {
+    statusBox.style.backgroundColor = '#fff1f2';
+    statusBox.style.border = '1px solid #fecdd3';
+    statusBox.style.color = '#9f1239';
+
+    const statusTitle = doc.createElement('div');
+    statusTitle.textContent = `✕ DỪNG LƯỢT ĐỌC (${result.code})`;
+    statusTitle.style.fontWeight = '700';
+    statusTitle.style.marginBottom = '2px';
+
+    const statusDesc = doc.createElement('div');
+    statusDesc.textContent = result.message;
+
+    statusBox.appendChild(statusTitle);
+    statusBox.appendChild(statusDesc);
+  }
+  panel.appendChild(statusBox);
+
+  // 4. Metrics Grid (Visible Count, DOM Rows)
+  const metricsGrid = doc.createElement('div');
+  metricsGrid.style.marginTop = '12px';
+  metricsGrid.style.display = 'grid';
+  metricsGrid.style.gridTemplateColumns = '1fr 1fr';
+  metricsGrid.style.gap = '8px';
+
+  // Visible Count Card
+  const visibleCard = doc.createElement('div');
+  visibleCard.style.padding = '8px 10px';
+  visibleCard.style.backgroundColor = '#f8fafc';
+  visibleCard.style.border = '1px solid #e2e8f0';
+  visibleCard.style.borderRadius = '8px';
+
+  const visibleTitle = doc.createElement('div');
+  visibleTitle.textContent = 'Số hàng nhìn thấy:';
+  visibleTitle.style.fontSize = '11px';
+  visibleTitle.style.color = '#64748b';
+
+  const visibleValue = doc.createElement('div');
+  visibleValue.textContent = `${result.visibleCount} hàng`;
+  visibleValue.style.fontSize = '18px';
+  visibleValue.style.fontWeight = '800';
+  visibleValue.style.color = result.success ? '#15803d' : '#94a3b8';
+
+  visibleCard.appendChild(visibleTitle);
+  visibleCard.appendChild(visibleValue);
+
+  // Total DOM Rows Card
+  const totalCard = doc.createElement('div');
+  totalCard.style.padding = '8px 10px';
+  totalCard.style.backgroundColor = '#f8fafc';
+  totalCard.style.border = '1px solid #e2e8f0';
+  totalCard.style.borderRadius = '8px';
+
+  const totalTitle = doc.createElement('div');
+  totalTitle.textContent = 'Tổng hàng trong DOM:';
+  totalTitle.style.fontSize = '11px';
+  totalTitle.style.color = '#64748b';
+
+  const totalValue = doc.createElement('div');
+  totalValue.textContent = `${result.totalRowsCount} hàng`;
+  totalValue.style.fontSize = '18px';
+  totalValue.style.fontWeight = '800';
+  totalValue.style.color = '#334155';
+
+  totalCard.appendChild(totalTitle);
+  totalCard.appendChild(totalValue);
+
+  metricsGrid.appendChild(visibleCard);
+  metricsGrid.appendChild(totalCard);
+  panel.appendChild(metricsGrid);
+
+  // 5. Source Pagination / Total Notice Card
+  const paginationCard = doc.createElement('div');
+  paginationCard.style.marginTop = '8px';
+  paginationCard.style.padding = '8px 10px';
+  paginationCard.style.backgroundColor = '#f8fafc';
+  paginationCard.style.border = '1px solid #e2e8f0';
+  paginationCard.style.borderRadius = '8px';
+
+  const paginationTitle = doc.createElement('div');
+  paginationTitle.textContent = 'Thông báo phân trang nguồn (DOM):';
+  paginationTitle.style.fontSize = '11px';
+  paginationTitle.style.color = '#64748b';
+
+  const paginationVal = doc.createElement('div');
+  paginationVal.textContent = result.sourceTotalNotice;
+  paginationVal.style.fontSize = '12px';
+  paginationVal.style.fontWeight = '600';
+  paginationVal.style.color = '#1e293b';
+  paginationVal.style.marginTop = '2px';
+
+  paginationCard.appendChild(paginationTitle);
+  paginationCard.appendChild(paginationVal);
+  panel.appendChild(paginationCard);
+
+  // 6. Safety Commitments Notice
+  const safetyNote = doc.createElement('div');
+  safetyNote.style.marginTop = '12px';
+  safetyNote.style.padding = '8px 10px';
+  safetyNote.style.backgroundColor = '#f8fafc';
+  safetyNote.style.borderRadius = '6px';
+  safetyNote.style.borderLeft = '3px solid #3b82f6';
+  safetyNote.style.fontSize = '11px';
+  safetyNote.style.color = '#475569';
+  safetyNote.textContent =
+    'Cam kết an toàn: Tiện ích hoạt động thuần túy trong trình duyệt. Không đọc mật khẩu/cookie, không trích xuất họ tên/ID học sinh, không gửi dữ liệu ra mạng.';
+  panel.appendChild(safetyNote);
+
+  // 7. Footer timestamp
+  const footer = doc.createElement('div');
+  footer.style.marginTop = '10px';
+  footer.style.fontSize = '10px';
+  footer.style.color = '#94a3b8';
+  footer.style.textAlign = 'right';
+  footer.textContent = `Thời điểm kiểm tra: ${result.timestamp}`;
+  panel.appendChild(footer);
+
+  return panel;
+}
+
+/**
+ * Top-level reader execution function.
+ * Called directly in the browser bookmarklet context or in QA fixture pages.
+ *
+ * @param {Document} [doc=document] - Target Document
+ * @param {Location} [loc=window.location] - Target Location
+ * @returns {Object} Inspection result
+ */
+function runTeachingReader(doc = (typeof document !== 'undefined' ? document : null), loc = (typeof window !== 'undefined' ? window.location : null)) {
+  if (!doc) {
+    return { success: false, code: 'NO_DOCUMENT', message: 'Không tìm thấy đối tượng Document.' };
+  }
+  const result = inspectTeachingDom(doc, loc);
+  const panel = renderTeachingPanel(doc, result);
+  if (doc.body) {
+    doc.body.appendChild(panel);
+  }
+  return result;
+}
+
+// Trigger reader on active page
+runTeachingReader(document, window.location);
+
+})();
+
+    // QA Helper function to test reader in pure mode
+    function runFixtureTest(type) {
+      const container = document.getElementById('qa-fixture-container');
+      const domMount = document.getElementById('qa-fixture-dom');
+      container.style.display = 'block';
+      domMount.innerHTML = '';
+
+      // Default mock location for QA: simulates exact matching origin
+      let mockLoc = {
+        origin: 'https://teachingmindx.top',
+        pathname: '/hocsinh.php'
+      };
+
+      if (type === 'wrong_origin') {
+        mockLoc = { origin: 'http://127.0.0.1:3008', pathname: '/teaching-readonly/' };
+      } else if (type === 'login') {
+        domMount.innerHTML = '<form id="login-form"><input type="password" name="pw" value="fake" /></form>';
+      } else if (type === 'empty') {
+        domMount.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th><th>Tên học sinh</th><th>Mã lớp</th><th>Trạng thái học sinh</th>
+                <th>GV chính</th><th>Trợ giảng</th><th>Trạng thái lớp</th><th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="8" class="dataTables_empty">Không có dữ liệu</td></tr>
+            </tbody>
+          </table>
+        `;
+      } else if (type === 'invalid_headers') {
+        domMount.innerHTML = `
+          <table>
+            <thead>
+              <tr><th>Mã</th><th>Họ tên</th><th>Điểm</th></tr>
+            </thead>
+            <tbody><tr><td>1</td><td>Test</td><td>10</td></tr></tbody>
+          </table>
+        `;
+      } else if (type === 'valid_3') {
+        domMount.innerHTML = `
+          <div class="dataTables_info">Hiển thị 1 đến 3 trong 3 bản ghi</div>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th><th>Tên học sinh</th><th>Mã lớp</th><th>Trạng thái học sinh</th>
+                <th>GV chính</th><th>Trợ giảng</th><th>Trạng thái lớp</th><th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Học sinh Giả 1</td><td>ROB-K14-01</td><td>Đang học</td><td>GV 1</td><td>TG 1</td><td>Running</td><td>Xem</td></tr>
+              <tr><td>2</td><td>Học sinh Giả 2</td><td>ROB-K14-01</td><td>Đang học</td><td>GV 1</td><td>TG 1</td><td>Running</td><td>Xem</td></tr>
+              <tr><td>3</td><td>Học sinh Giả 3</td><td>ROB-K14-02</td><td>Đang học</td><td>GV 2</td><td>TG 2</td><td>Running</td><td>Xem</td></tr>
+            </tbody>
+          </table>
+        `;
+      }
+
+      // Execute reader with target document & mock location
+      const result = inspectTeachingDom(domMount, mockLoc);
+      const panel = renderTeachingPanel(document, result);
+      document.body.appendChild(panel);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "generator": "scripts/generate-teaching-bookmark.mjs",
+  "generatedAt": "2026-10-14T04:21:46.116Z",
+  "readerCoreHashSha256": "86a6d8577a23a5818b62732aa75a4bf51df892d5d229b1c8c24f789a2b6241cc",
+  "expectedColumns": [
+    "STT",
+    "Tên học sinh",
+    "Mã lớp",
+    "Trạng thái học sinh",
+    "GV chính",
+    "Trợ giảng",
+    "Trạng thái lớp",
+    "Thao tác"
+  ],
+  "originGuard": "https://teachingmindx.top/hocsinh.php",
+  "labels": [
+    "Đọc mẫu trang hiện tại",
+    "Không phải toàn bộ danh sách",
+    "Chỉ đọc — không ghi TEST"
+  ]
+}

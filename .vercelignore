@@ -1,0 +1,14 @@
+# Vercel Deployment Ignore
+node_modules
+.workflow-local
+.git
+.github
+tests
+teachingmindx-sync-trial.html
+PROJECT_PLAN*
+PROMPT*
+README.md
+scratch
+.env*
+*.pem
+*.log

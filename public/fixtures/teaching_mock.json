@@ -1,0 +1,64 @@
+{
+  "description": "Mock DataTables response simulation for Teaching MindX synchronization (TEST Fixture)",
+  "draw": 1,
+  "recordsTotal": 8,
+  "recordsFiltered": 8,
+  "data": [
+    {
+      "id": "MX_STU_101",
+      "student_name": "Nguyễn Văn Giả 01",
+      "class_code": "ROB-K14-01",
+      "status": "Đang học",
+      "class_status": "Running"
+    },
+    {
+      "id": "MX_STU_102",
+      "student_name": "Trần Thị Giả 02",
+      "class_code": "ROB-K14-01",
+      "status": "Đang học",
+      "class_status": "Running"
+    },
+    {
+      "id": "MX_STU_103",
+      "student_name": "Lê Hoàng Giả 03",
+      "class_code": "ROB-K14-01",
+      "status": "Đang học",
+      "class_status": "Running"
+    },
+    {
+      "id": "MX_STU_104",
+      "student_name": "Phạm Minh Giả 04",
+      "class_code": "ROB-K14-02",
+      "status": "Đang học",
+      "class_status": "Running"
+    },
+    {
+      "id": "MX_STU_105",
+      "student_name": "Vũ Hải Giả 05",
+      "class_code": "WEB-K10-01",
+      "status": "Đang học",
+      "class_status": "Running"
+    },
+    {
+      "id": "MX_STU_106",
+      "student_name": "Đỗ Thu Giả 06",
+      "class_code": "ROB-K14-02",
+      "status": "Đã nghỉ học",
+      "class_status": "Running"
+    },
+    {
+      "id": "MX_STU_107",
+      "student_name": "Hoàng Anh Giả 07",
+      "class_code": "ROB-K14-03",
+      "status": "Đang học",
+      "class_status": "Closed"
+    },
+    {
+      "id": "MX_STU_108",
+      "student_name": "Bùi Đức Giả 08",
+      "class_code": "ROB-K14-01",
+      "status": "Đang học",
+      "class_status": "Running"
+    }
+  ]
+}
