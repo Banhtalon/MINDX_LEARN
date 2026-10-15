@@ -2,11 +2,11 @@
 
 ## Trạng thái hiện tại
 
-- Mốc 2 chưa nghiệm thu; tất cả checkbox giữ chưa tick. Nội dung bên dưới là nhật ký theo thời điểm, không dùng trạng thái ban đầu làm tình trạng hiện tại.
-- Source cuối A11/B15 được Luna duyệt để TEST, C9/C10/C11 được duyệt phần thử. Deno check, typecheck, build và 132/132 test đạt. Các giới hạn tải/email/Owner vẫn giữ mở.
-- Supabase TEST đã có migration 1/2, backend v1, Owner Admin và fixture. Bản sửa fixture migration 3 cùng Edge A11 sẽ áp dụng sau checkpoint này; Next TEST vẫn Mốc 1 cho tới khi deployment mới READY.
-- Lượt tải đã đo 188/200 qua 4 lượt song song; 12 bị Auth hạn chế. Giữ mức Auth150/5phút, không gọi là tải200 đồng thời hoặc đạt Mốc6.
-
+- Mốc 2 chưa nghiệm thu; tất cả checkbox giữ chưa tick. Phần nhật ký bên dưới ghi theo từng thời điểm; các câu “chưa deploy” trong nhật ký cũ không mô tả bản đang chạy.
+- Bản TEST https://mindx-learn-test.vercel.app đã READY: deployment `dpl_B79eGzBgsmSUxWShTnVWECbwzgAn`, source commit `8245a81616708b42f27421942b190bed2083cdd4`, nhánh `codex/moc-2`; kiểm tra lại metadata ngày 15/10/2026. PR nháp: https://github.com/Banhtalon/MINDX_LEARN/pull/1 .
+- Supabase TEST đã áp dụng cả ba migration và Edge v2 A11. Luna duyệt A11/B15 cho TEST theo hash; build/typecheck/Deno và 132 test đạt ở snapshot sản phẩm này. B17 sửa vòng đời con trỏ hộp thoại; 136/136 test, typecheck và build đạt. C15 chỉ sửa công cụ đo, không thay dịch vụ đăng nhập.
+- Có bằng chứng riêng về quyền dữ liệu trực tiếp, PIN/CSV, phiên cũ, giới hạn tài khoản/IP, logout giả và tranh chấp cấp PIN. Lượt full hosted C13 đã có receipt: 28 đạt, 1 lỗi tải, 1 chưa thử trong harness, 1 chờ Owner. Tải 199/200 đăng nhập và xác minh phiên, 0 lượt429, 1 lỗi chưa rõ nguyên nhân; không coi là đạt200/200. [Số liệu tổng hợp](M2_RUNTIME_RESULTS.json).
+- Owner đã xác nhận nhập email ổn và đăng nhập Admin được sau bản sửa B17, theo hướng dẫn Quên mật khẩu/đặt lại qua email ngày15/10. Cấp/tải CSV và cấp lại PIN qua giao diện còn chờ. Giữ TEST, dữ liệu học sinh giả, giới hạn Auth hiện tại; chưa mở PROD hoặc chuyển Mốc3–6.
 
 ## Phạm vi và điểm bắt đầu
 
@@ -106,3 +106,33 @@ Mọi checkbox Mốc 2 hiện chưa đủ bằng chứng: source, migration/RLS,
 - A9 phân loại đúng lỗi provider429 thành RATE_LIMITED và trường hợp cấp PIN đầu đã hết học sinh chưa cấp thành NO_UNISSUED_STUDENTS; Deno check đạt, chờ Luna. B13 121 test toàn dự án đạt nhưng typecheck không đạt vì exported helper trong route; B14 đang chuyển sang helper dùng chung và bỏ test chép lại. Chưa deploy snapshot lỗi.
 - Bằng chứng local m2-race-proof.json: hai pin-prepare thật song song cùng lớp QA, đúng một200/1target và một409 OPERATION_LOCKED, không commit/PIN/CSV. Đây là bằng chứng riêng, harness vẫn đánh dấu chưa thử tranh chấp để không sửa báo cáo cũ.
 - Kiểm tra 36 file src/public không thấy 3 giá trị bí mật thực tế. Backup mã A9/B13 trước sửa tiếp ở workflow-local; không chứa env.
+
+## Bản TEST đã triển khai và kiểm tra bổ sung ngày 15/10/2026
+
+- Cloud migration thứ ba: version `20261014174106`, tên `m2_fixture_pin_state_fix`; tương ứng local `20261014173008_m2_fixture_pin_state_fix.sql`, SHA256 `F2C06050501612856179C7018FF7E87B6DB64BA063428AD104D5C072C278B3F1`. Chỉ sửa marker của fixture chưa có ánh xạ Auth; không sửa lịch sử hai migration trước.
+- Edge A11 v2: index SHA256 `0E7331723A1C24CEE82E62D472CAC8B3121F837125564447CCABB665F28548AD`; domain SHA256 `BA07A5CC8AD26F5AE84E2FB498111A8A5620DC97B497602F38AF13E0B64B9BA8`. B15 crypto SHA256 `A0FA3D59958DBF0A3771B8523CE0CD18EABEF1D41CCB27EA263CD735F469C097`.
+- Vercel nhận 42 tệp sản phẩm/687627 byte; không gửi `.env`, QA, SQL hoặc báo cáo riêng. Hai URL và ba secret phía máy chủ đã cấu hình riêng cho TEST. Kiểm tra HTTP hosted 6/6 đạt; không có phiên thì trả user null; tác vụ nội bộ không mở qua BFF.
+- Receipt local A11/B15/C9: 31 mục, 28 PASS, 0 FAIL, 2 mục chưa thử trong harness (tranh chấp và tải), 1 chờ Owner email. Đây là Next trên máy nối Supabase TEST, không phải full hosted.
+- Hosted IP proof riêng: 240/240 yêu cầu sai trả 401 trong 36153 ms; lượt 241 và lượt đổi header giả tiếp theo đều 429 RATE_LIMITED, tổng 40949 ms. Không tăng hạn mức. Logout với JWT giả 401, phiên hợp lệ không bị vô hiệu hóa.
+- Phép thử mới Edge v2 A11: hai yêu cầu pin-prepare song song cùng fixture cho đúng một 200/1 học sinh và một 409 OPERATION_LOCKED; chỉ chuẩn bị thao tác, không tạo CSV. Học sinh fixture chưa cấp PIN archive/restore qua hosted BFF đều 200; khôi phục active và vẫn chưa cấp PIN.
+- Browser hosted: Admin và Giáo viên kiểm tra ba kích thước 1280×720/1440×900/1920×1080; Giáo viên chỉ thấy lớp được phân công và không có nút cấp PIN. Học sinh đăng nhập bằng PIN riêng, chỉ thấy khu học sinh, trang chưa có khóa học báo rõ; ba kích thước không tràn ngang. Hồ sơ học sinh 1280 không tràn; đã đăng xuất, xóa ghi đè kích thước trình duyệt. Ảnh nằm trong thư mục bằng chứng local, không đưa dữ liệu đăng nhập lên GitHub.
+- C13 hash `C67D5AB9435745D79E49326D7D2EC8E432988FBB0C2B3C2DCFE0944355B6F1EC`: 24 luồng đồng thời, tổng 241 yêu cầu đo IP, vẫn đúng241 yêu cầu/240x401+1x429, cửa sổ<60giây. Overrun sạch là NOT_TESTED;500 / phản hồi sai/lỗi mạng vẫn FAIL. Luna duyệt phạm vi công cụ; Root kiểm tra trực tiếp nhánh nguồn 4/4 đạt.
+- Đối soát dữ liệu ngày 15/10: không có học sinh ngoài fixture. Advisor vẫn cảnh báo 5 helper SECURITY DEFINER phục vụ RLS được authenticated gọi: chúng chỉ trả profile/role/phân công của tài khoản hiện hành qua auth.uid(), search_path đã ghim. Leaked-password protection chưa bật; đây không phải chứng nhận an toàn, không tự nâng gói.
+- Lượt hosted C13 kết thúc exit1/FAILED: 31 mục, 28 PASS, 1 FAIL (tải), 1 NOT_TESTED (tranh chấp đã có proof riêng), 1 MANUAL_PENDING (email Owner). 200 tài khoản được tạo; 199 đăng nhập +199 xác minh phiên, 0 lượt429, 1 login fail, thời gian338112ms,4 luồng đồng thời. Kết quả nguyên vẹn ở [M2_RUNTIME_RESULTS.json](M2_RUNTIME_RESULTS.json); stderr footer chen vào JSON trong rawlog được loại đúng một dòng khi trích, không đổi số liệu/trạng thái. Không gọi là200 kết nối đồng thời hoặc đạt tải.
+- Đối soát log khung10:05:50–10:12UTC15/10: Auth622 phản hồi đều200; Edge553x200+1x500 (6070ms); Postgres3LOG00000, Vercel không có lỗi runtime được ghi. Chưa có correlation để khẳng định Edge500 chính là lượt login thất bại, chưa xác định nguyên nhân. C14 được giao thêm thống kê lỗi an toàn theo bước/status/code cho lượt đo sau; không tự retry hoặc làm xanh kết quả cũ.
+- Owner báo ô email Quên mật khẩu bị mất con trỏ khi nhập. Root tái hiện trên tab thử riêng: ký tự nhập làm focus về nút đóng, dialog vẫn mở. Hook shared modal phụ thuộc callback onClose thay theo mỗi render. B17 đã sửa tối thiểu vòng đời focus; 4/4 kiểm tra thực tế đạt, bản cũ chạy cùng bộ thử chỉ lỗi đúng ca gõ chữ. Toàn bộ136/136 test, typecheck và build đạt; Luna đã duyệt và bản sửa đã READY trên TEST source8245a81. Root gõ liên tục email giả trên web ở1280×720/1440×900/1920×1080: con trỏ giữ đúng ô nhập; Tab vòng về nút đóng, Escape đóng và trả focus về nút mở. Chưa gửi email trong phép thử này. Email và thao tác CSV Owner vẫn chưa nghiệm thu.
+
+
+## Kiểm tra sau bản sửa con trỏ B17
+
+- Deployment TEST `dpl_B79eGzBgsmSUxWShTnVWECbwzgAn` READY, source `8245a81616708b42f27421942b190bed2083cdd4`, alias giữ https://mindx-learn-test.vercel.app . Gói42tệp/687874byte; chỉ component hộp thoại thay đổi so với gói sản phẩm trước. Không đưa env hoặc báo cáo QA vào deployment.
+- HTTP BFF sau deploy6/6 đạt. Bằng chứng browser `hosted-focus-b17-proof-20261015.json` và ảnh `forgot-fixed-b17-1280.png`/1440/1920 lưu riêng tại thư mục local. Gõ từng ký tự bằng bàn phím vẫn giữ con trỏ; screenshot xác nhận đầy đủ chuỗi giả. Trình duyệt che giá trị input trong DOM đọc nên không dùng độ dài DOM bị che làm bằng chứng nội dung nhập.
+- C15 được Luna duyệt chạy chẩn đoán tập trung, chỉ setup1.1–1.3 và load6.1 từ nguyên văn mã đã review. Giữ guard, import helper thật,200fixture/4luồng/no retry/strict200PASS, bảo đảm đã qua62giây từ lượt thử giới hạn trước. Receipt riêng ghi FOCUSED_LOAD_ONLY; không thay receipt C13FAILED hay nghiệm thu Mốc2. Kết quả riêng C15 đã lưu: setup1.1–1.3 và load6.1 đều đạt,200seed/200login/200session,0 lỗi/0 lượt429,342774ms,4luồng,no retry,exit0/FOCUSED_LOAD_PASSED. Receipt này không thay fullC13FAILED; một lỗi cũ không xuất hiện lại và chưa xác định nguyên nhân.
+- Owner đã trả lời “Nhập ổn và đăng nhập được” sau hướng dẫn tải lại trang/Quên mật khẩu/đặt lại qua thư. Ghi nhận email/đăng nhập đạt bằng xác nhận Owner. Đang hướng dẫn cấp lần đầu cho hai fixture chưa có PIN trong lớp TEST giao diện; chưa nghiệm thu CSV/cấp lạiPIN, chưa tick toànM2.
+
+
+### Kết quả tải riêng và nghiệm thu email
+
+Lượt C15 tập trung chạy nguyên văn setup1.1–1.3 và load6.1 từ source hash `2F23C549619E17C6110B5A3984B8338F8C706329DE50C107DA903FA3C64B2096` trên sản phẩm B17 source8245a81. Kết quả200/200 đăng nhập và xác minh phiên,0x429/0fail,342774ms,4luồng,no retry; chỉ4mục được chạy và cả4PASS,exit0. Xem `focusedDiagnosticReceipt` trong [M2_RUNTIME_RESULTS.json](M2_RUNTIME_RESULTS.json). FullC13vẫnFAILED199/200, lỗi đơn lẻ chưa rõ nguyên nhân; chưa coi là fullsuitePASS hay200kết nối đồng thời.
+
+Owner đã xác nhận luồng nhập email/đăng nhập sau sửa. Các bước còn chờ: Owner cấp/tảiCSV cho fixture chưaPIN, xem tài khoản giả và cấp lại riêng một em, xác nhận TEST chỉ dữ liệu giả. Reviewer chưa tick các mục chưa đủ bằng chứng.
