@@ -2,11 +2,11 @@
 
 ## Trạng thái hiện tại
 
-- Mốc 2 chưa nghiệm thu; tất cả checkbox giữ chưa tick. Phần nhật ký bên dưới ghi theo từng thời điểm; các câu “chưa deploy” trong nhật ký cũ không mô tả bản đang chạy.
+- Mốc 2 chưa nghiệm thu toàn bộ. Luna đã xác nhận 8/9 mục kỹ thuật và 4/4 mục nghiệm thu Owner, trong đó hai mục cuối AI thực hiện theo ủy quyền. Còn mở luồng Admin tạo/mời giáo viên; lỗi tải đơn lẻ cũ vẫn chưa rõ nguyên nhân. Phần nhật ký bên dưới ghi theo từng thời điểm; các câu “chưa deploy” trong nhật ký cũ không mô tả bản đang chạy.
 - Bản TEST https://mindx-learn-test.vercel.app đã READY: deployment `dpl_B79eGzBgsmSUxWShTnVWECbwzgAn`, source commit `8245a81616708b42f27421942b190bed2083cdd4`, nhánh `codex/moc-2`; kiểm tra lại metadata ngày 15/10/2026. PR nháp: https://github.com/Banhtalon/MINDX_LEARN/pull/1 .
 - Supabase TEST đã áp dụng cả ba migration và Edge v2 A11. Luna duyệt A11/B15 cho TEST theo hash; build/typecheck/Deno và 132 test đạt ở snapshot sản phẩm này. B17 sửa vòng đời con trỏ hộp thoại; 136/136 test, typecheck và build đạt. C15 chỉ sửa công cụ đo, không thay dịch vụ đăng nhập.
 - Có bằng chứng riêng về quyền dữ liệu trực tiếp, PIN/CSV, phiên cũ, giới hạn tài khoản/IP, logout giả và tranh chấp cấp PIN. Lượt full hosted C13 đã có receipt: 28 đạt, 1 lỗi tải, 1 chưa thử trong harness, 1 chờ Owner. Tải 199/200 đăng nhập và xác minh phiên, 0 lượt429, 1 lỗi chưa rõ nguyên nhân; không coi là đạt200/200. [Số liệu tổng hợp](M2_RUNTIME_RESULTS.json).
-- Owner đã xác nhận nhập email ổn và đăng nhập Admin được sau bản sửa B17, theo hướng dẫn Quên mật khẩu/đặt lại qua email ngày15/10. Cấp/tải CSV và cấp lại PIN qua giao diện còn chờ. Giữ TEST, dữ liệu học sinh giả, giới hạn Auth hiện tại; chưa mở PROD hoặc chuyển Mốc3–6.
+- Owner đã xác nhận nhập email ổn và đăng nhập Admin được sau bản sửa B17, theo hướng dẫn Quên mật khẩu/đặt lại qua email ngày15/10. Cấp/tải CSV lần đầu cho hai học sinh giả đã được Owner xác nhận; Owner đã ủy quyền AI tự kiểm tra xem tài khoản học sinh và cấp lại PIN; bằng chứng riêng đã đạt, khác với thao tác Owner trực tiếp. Giữ TEST, dữ liệu học sinh giả, giới hạn Auth hiện tại; chưa mở PROD hoặc chuyển Mốc3–6.
 
 ## Phạm vi và điểm bắt đầu
 
@@ -135,4 +135,25 @@ Mọi checkbox Mốc 2 hiện chưa đủ bằng chứng: source, migration/RLS,
 
 Lượt C15 tập trung chạy nguyên văn setup1.1–1.3 và load6.1 từ source hash `2F23C549619E17C6110B5A3984B8338F8C706329DE50C107DA903FA3C64B2096` trên sản phẩm B17 source8245a81. Kết quả200/200 đăng nhập và xác minh phiên,0x429/0fail,342774ms,4luồng,no retry; chỉ4mục được chạy và cả4PASS,exit0. Xem `focusedDiagnosticReceipt` trong [M2_RUNTIME_RESULTS.json](M2_RUNTIME_RESULTS.json). FullC13vẫnFAILED199/200, lỗi đơn lẻ chưa rõ nguyên nhân; chưa coi là fullsuitePASS hay200kết nối đồng thời.
 
-Owner đã xác nhận luồng nhập email/đăng nhập sau sửa. Các bước còn chờ: Owner cấp/tảiCSV cho fixture chưaPIN, xem tài khoản giả và cấp lại riêng một em, xác nhận TEST chỉ dữ liệu giả. Reviewer chưa tick các mục chưa đủ bằng chứng.
+Owner đã xác nhận luồng nhập email/đăng nhập sau sửa. Owner tiếp tục xác nhận đã tải CSV cho đúng hai học sinh giả. Các bước còn chờ: xem tài khoản học sinh giả, cấp lại riêng một em mà không đổi PIN của em còn lại, và xác nhận TEST chỉ dữ liệu giả. Các mục chưa đủ bằng chứng vẫn để mở.
+
+
+### Owner xác nhận cấp PIN lần đầu — 15/10/2026
+
+Owner đã trả lời “Đã tải CSV cho 2 học sinh giả” sau hướng dẫn chọn lớp TEST giao diện, cấp PIN cho người chưa có PIN và tải CSV tại lần cấp. Không thu thập tệp CSV, mã học sinh, PIN hoặc ảnh nội dung CSV trong chat. Reviewer độc lập đối chiếu hai tiêu chí Owner đã có xác nhận: email/đăng nhập và cấp/tải CSV lần đầu; không xem đây là nghiệm thu toàn Mốc 2. Bước kế tiếp là Owner thử đăng nhập học sinh giả trong cửa sổ riêng, rồi cấp lại đúng một em và kiểm tra em còn lại vẫn dùng PIN cũ.
+
+
+### Kiểm tra tài khoản học sinh và cấp lại PIN theo ủy quyền Owner
+
+Owner yêu cầu “AI hãy tự làm hết, cấp quyền cho bạn” khi được mời thử đăng nhập học sinh. Đội triển khai tự kiểm tra bằng một lớp riêng và hai học sinh giả mới, giữ nguyên hai học sinh/CSV Owner vừa cấp. PIN/CSV chỉ tồn tại trong bộ nhớ; không đọc tệp CSV của Owner, không ghi PIN vào log hoặc bằng chứng.
+
+- Cấp lần đầu: HTTP200, no-store, đúng hai hàng CSV với hai PIN8chữ số khác nhau; cả hai đăng nhập và đọc lại phiên đúng danh tính/role thành công.
+- Cấp lại đúng một em: HTTP200, no-store, một hàng CSV; PIN mới khác và đăng nhập được, PIN cũ401, phiên cũ401. Em còn lại tiếp tục đăng nhập bằng PIN ban đầu và đọc lại phiên đúng danh tính.
+- Chrome: tự đăng nhập bằng PIN mới, mở được khu học sinh, có nhãn TEST/dữ liệu giả, không có đường quản lý/Admin; lớp chưa gán khóa học báo đúng phạm vi Mốc2. Ảnh QA chỉ chứa dữ liệu giả, không có PIN. Đã đăng xuất/đóng tab và giữ phiên Admin Owner ở trình duyệt khác.
+- Đối soát trực tiếp qua REST với Admin giả: truy vấn cờ is_fixture của học sinh/lớp ngoài fixture đều HTTP200, count0; phiên Admin được kiểm tra trên một hàng đọc hợp lệ trước đó. Chỉ lấy cờ và số tổng hợp. ConnectorSQL hiện từ chối quyền; dùng đường REST được cấp quyền hiện có, không nới bảo vệ. Một truy vấn liệt kê nhiều cờ trước đó chưa đạt, không dùng làm bằng chứng; truy vấn lọc chính xác đã xác minh.
+- Đây là AI kiểm tra theo ủy quyền, không ghi nhận Owner đã tự thực hiện các bước này. Kết quả riêng tại `delegatedVerification` trong [M2_RUNTIME_RESULTS.json](M2_RUNTIME_RESULTS.json). Mốc 2 vẫn còn kiểm tra Admin tạo/mời giáo viên và theo dõi lỗi tải cũ; không mở PROD. Việc dựng schema từ ba migration trên cloud TEST rỗng ban đầu đã có bằng chứng, không bắt buộc dựng lại một database thứ hai.
+
+
+### Giới hạn email giáo viên còn mở
+
+Đăng nhập Giáo viên QA bằng email qua BFF đã được kiểm chứng trong harness, không đồng nhất với luồng Admin tạo giáo viên mới và gửi thư mời. Luồng tạo/mời giáo viên thành công chưa có bằng chứng thực tế. Dịch vụ gửi thư mặc định của Supabase hiện chỉ gửi tới địa chỉ thành viên nhóm quản trị và có hạn mức thấp; gửi cho giáo viên khác cần cấu hình một dịch vụ gửi thư riêng. Nguồn chính thức kiểm tra ngày15/10/2026: [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp). Chưa có tài khoản gửi thư riêng được kết nối, không tự phát sinh phí hoặc mời người ngoài để làm bài kiểm tra. Giữ mục tạo/mời giáo viên chưa hoàn thành.

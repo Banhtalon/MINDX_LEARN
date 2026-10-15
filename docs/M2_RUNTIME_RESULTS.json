@@ -105,13 +105,16 @@
     }
   },
   "ownerAcceptance": {
-    "overall": "PENDING",
+    "overall": "M2_NOT_YET_ACCEPTED; independent technical gaps remain",
     "forgotPasswordEmailAndAdminLogin": "OWNER_CONFIRMED",
     "typingFocusFixed": "OWNER_CONFIRMED",
-    "firstIssueCsv": "PENDING",
-    "singleReissue": "PENDING",
-    "testDataOnly": "PENDING_OWNER_M2_CONFIRMATION",
-    "evidence": "Owner response: Nhập ổn và đăng nhập được; after instructions to hard-refresh, request recovery email, set password and log in. No credential or email link collected."
+    "firstIssueCsv": "OWNER_CONFIRMED",
+    "singleReissue": "AI_VERIFIED_UNDER_OWNER_DELEGATION",
+    "testDataOnly": "AI_VERIFIED_FIXTURE_FLAGS_AND_TEST_UI_UNDER_OWNER_DELEGATION",
+    "evidence": "Owner response: Nhập ổn và đăng nhập được; after instructions to hard-refresh, request recovery email, set password and log in. No credential or email link collected.",
+    "firstIssueStudentCount": 2,
+    "firstIssueEvidence": "Owner response: Đã tải CSV cho 2 học sinh giả; following Admin first-issue/download steps on the prepared TEST UI class. No CSV or PIN collected.",
+    "studentAccountView": "AI_VERIFIED_UNDER_OWNER_DELEGATION"
   },
   "productProductionAllowed": false,
   "hostedReceipt": {
@@ -563,5 +566,78 @@
     "noRetries": true,
     "cooldownEvidence": "Last threshold probe before 2026-10-15T10:05:00Z; launcher rejects elapsed <62s"
   },
-  "focusedProcessExitCode": 0
+  "focusedProcessExitCode": 0,
+  "delegatedVerification": {
+    "authorization": "Owner: AI hãy tự làm hết, cấp quyền cho bạn; in response to student/PIN manual check request",
+    "pin": {
+      "testedAt": "2026-10-15T10:48:44.942Z",
+      "sourceCommit": "8245a81616708b42f27421942b190bed2083cdd4",
+      "deploymentId": "dpl_B79eGzBgsmSUxWShTnVWECbwzgAn",
+      "authorization": "Owner explicitly delegated remaining TEST checks to AI",
+      "fixtureScope": "new isolated class and two synthetic pupils",
+      "firstIssue": {
+        "http": 200,
+        "noStore": true,
+        "csvRows": 2,
+        "distinctPins": true,
+        "loginAndSessionPass": 2
+      },
+      "credentialsPersisted": false,
+      "reissue": {
+        "http": 200,
+        "noStore": true,
+        "csvRows": 1,
+        "newPinDifferent": true,
+        "newPinLoginHttp": 200,
+        "newPinSessionPass": true,
+        "oldPinLoginHttp": 401,
+        "oldPinRejected": true,
+        "otherOriginalPinLoginHttp": 200,
+        "otherOriginalPinStillWorks": true,
+        "oldSessionHttp": 401,
+        "oldSessionRejected": true
+      },
+      "pass": true
+    },
+    "browser": {
+      "fixtureBannerVisible": true,
+      "manageLinks": 0,
+      "noCourseState": true,
+      "path": "/student",
+      "studentNameVisible": true,
+      "testedAt": "2026-10-15T10:51:01.411Z",
+      "sourceCommit": "8245a81616708b42f27421942b190bed2083cdd4",
+      "pass": true
+    },
+    "fixtureFlags": {
+      "checkedAt": "2026-10-15T10:52:13.087Z",
+      "scope": "TEST public.students and public.classes flags only; authenticated QA Admin",
+      "http": 200,
+      "nonfixtureRowsVisible": 0,
+      "contentRange": "*/0",
+      "nativeAdminSessionProved": true,
+      "pass": true,
+      "classes": {
+        "http": 200,
+        "nonfixtureRowsVisible": 0,
+        "contentRange": "*/0"
+      }
+    }
+  },
+  "remainingGates": {
+    "adminCreateTeacherInvitation": "OPEN; no successful hosted Admin create-teacher/invitation proof; default Supabase SMTP restricted to organization team addresses",
+    "historicalSingleLoginFailure": "UNRESOLVED_CAUSE; full C13 failed199/200; later focused C15 passed200/200 without retry",
+    "migrationIndependentReplay": "not performed; initial empty cloud construction by all3 versioned migrations proved and reviewed",
+    "production": "NOT_AUTHORIZED"
+  },
+  "independentChecklistReview": {
+    "reviewer": "gpt-6-luna max",
+    "technicalPassed": 8,
+    "technicalTotal": 9,
+    "ownerCriteriaPassed": 4,
+    "ownerCriteriaTotal": 4,
+    "delegatedOwnerCriteria": 2,
+    "openTechnicalCriterion": "Admin create-teacher/invitation happy path",
+    "overallMilestoneComplete": false
+  }
 }

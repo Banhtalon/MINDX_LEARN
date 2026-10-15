@@ -176,22 +176,22 @@ Tất cả ô bắt đầu để trống. Chỉ đánh dấu hoàn thành khi c�
 
 ### Mốc 2 — Supabase TEST, đăng nhập và phân quyền
 
-- [ ] Tạo/kết nối project Supabase TEST riêng sau khi xác nhận chi phí và tổ chức chứa project. **Kiểm tra:** không nhầm ref/key với PROD; TEST chỉ có fixture.
-- [ ] Thiết lập migration có phiên bản cho bảng, quyền, chỉ mục và chính sách. **Kiểm tra:** có thể dựng TEST từ các migration; thay đổi được rà soát trước khi đưa PROD.
-- [ ] Đội triển khai tạo Admin đầu tiên; Owner tự đặt mật khẩu qua liên kết email. Làm đăng nhập Admin/GV bằng email và HS bằng mã + PIN; có Quên mật khẩu cho Admin/GV. Dữ liệu thử chỉ dùng fixture; PIN mẫu 123456 chỉ có trong TEST. **Kiểm tra:** đặt lại qua email, đúng/sai, đăng xuất, hết phiên; không gửi mật khẩu qua chat, không có đăng ký tự do hoặc PIN chung trên tài khoản thật.
-- [ ] Thử ánh xạ mã học sinh ở máy chủ sang định danh Auth nội bộ khó đoán, không lộ trong trình duyệt. **Kiểm tra:** xác minh cách đăng nhập mã + PIN với Supabase Auth; gọi trực tiếp các đường đăng nhập không bỏ qua quyền hoặc giới hạn thử sai. Nếu cách này chưa an toàn/chưa hoạt động, chưa mở PROD.
-- [ ] Cấp PIN giả lần đầu chỉ cho học sinh chưa có PIN; thử cấp lại bằng cách chọn đúng một học sinh. Chỉ Admin tải CSV một lần rồi tự bàn giao riêng cho GV nếu cần. **Kiểm tra:** PIN giả 8 chữ số ngẫu nhiên; cấp lại không đổi PIN học sinh khác; PIN rõ chỉ xuất hiện tạm thời trong phản hồi tải no-store của Admin, không vào database ứng dụng, log, tệp tạm hoặc CSV tổng kết; mất CSV thì Admin cấp PIN mới cho đúng học sinh.
-- [ ] Kiểm tra quyền cấp/tải CSV đăng nhập: chỉ Admin được cấp PIN; cấp lần đầu chỉ cho người chưa có PIN, cấp lại chỉ đúng một học sinh. **Kiểm tra:** GV không tải/xem lại trong ứng dụng; học sinh và người không có quyền không lấy được PIN qua giao diện hay gọi trực tiếp.
-- [ ] Chống thử sai PIN tại máy chủ theo tài khoản và IP đáng tin cậy, báo lỗi chung, có chờ/tạm hạn chế nhưng không khóa vĩnh viễn chỉ vì người khác nhập sai. **Kiểm tra:** thử nhiều lần qua giao diện và gọi trực tiếp; không thể bỏ qua giới hạn, không lộ mã tồn tại; đo kịch bản 200 học sinh đăng nhập để phát hiện giới hạn Auth theo IP dùng chung trước PROD.
+- [x] Tạo/kết nối project Supabase TEST riêng sau khi xác nhận chi phí và tổ chức chứa project. **Kiểm tra:** không nhầm ref/key với PROD; TEST chỉ có fixture.
+- [x] Thiết lập migration có phiên bản cho bảng, quyền, chỉ mục và chính sách. **Kiểm tra:** có thể dựng TEST từ các migration; thay đổi được rà soát trước khi đưa PROD.
+- [x] Đội triển khai tạo Admin đầu tiên; Owner tự đặt mật khẩu qua liên kết email. Làm đăng nhập Admin/GV bằng email và HS bằng mã + PIN; có Quên mật khẩu cho Admin/GV. Dữ liệu thử chỉ dùng fixture; PIN mẫu 123456 chỉ có trong TEST. **Kiểm tra:** đặt lại qua email, đúng/sai, đăng xuất, hết phiên; không gửi mật khẩu qua chat, không có đăng ký tự do hoặc PIN chung trên tài khoản thật.
+- [x] Thử ánh xạ mã học sinh ở máy chủ sang định danh Auth nội bộ khó đoán, không lộ trong trình duyệt. **Kiểm tra:** xác minh cách đăng nhập mã + PIN với Supabase Auth; gọi trực tiếp các đường đăng nhập không bỏ qua quyền hoặc giới hạn thử sai. Nếu cách này chưa an toàn/chưa hoạt động, chưa mở PROD.
+- [x] Cấp PIN giả lần đầu chỉ cho học sinh chưa có PIN; thử cấp lại bằng cách chọn đúng một học sinh. Chỉ Admin tải CSV một lần rồi tự bàn giao riêng cho GV nếu cần. **Kiểm tra:** PIN giả 8 chữ số ngẫu nhiên; cấp lại không đổi PIN học sinh khác; PIN rõ chỉ xuất hiện tạm thời trong phản hồi tải no-store của Admin, không vào database ứng dụng, log, tệp tạm hoặc CSV tổng kết; mất CSV thì Admin cấp PIN mới cho đúng học sinh.
+- [x] Kiểm tra quyền cấp/tải CSV đăng nhập: chỉ Admin được cấp PIN; cấp lần đầu chỉ cho người chưa có PIN, cấp lại chỉ đúng một học sinh. **Kiểm tra:** GV không tải/xem lại trong ứng dụng; học sinh và người không có quyền không lấy được PIN qua giao diện hay gọi trực tiếp.
+- [x] Chống thử sai PIN tại máy chủ theo tài khoản và IP đáng tin cậy, báo lỗi chung, có chờ/tạm hạn chế nhưng không khóa vĩnh viễn chỉ vì người khác nhập sai. **Kiểm tra:** thử nhiều lần qua giao diện và gọi trực tiếp; không thể bỏ qua giới hạn, không lộ mã tồn tại; đo kịch bản 200 học sinh đăng nhập để phát hiện giới hạn Auth theo IP dùng chung trước PROD.
 - [ ] Làm hồ sơ vai trò, tạo giáo viên, phân công lớp, lưu trữ/khôi phục lớp và HS, và reset PIN HS bởi Admin. **Kiểm tra:** lưu trữ chặn login mới lẫn JWT cũ; chỉ Admin khôi phục/cấp lại; GV/HS không tự nâng quyền; PIN không bị ghi vào dữ liệu nghiệp vụ hoặc log.
-- [ ] Bật và kiểm tra RLS trên mọi bảng API và bucket riêng tư. **Kiểm tra:** HS A không đọc/sửa HS B; GV ngoài lớp không đọc; yêu cầu gọi trực tiếp cũng bị từ chối; Admin có quyền cần thiết.
+- [x] Bật và kiểm tra RLS trên mọi bảng API và bucket riêng tư. **Kiểm tra:** HS A không đọc/sửa HS B; GV ngoài lớp không đọc; yêu cầu gọi trực tiếp cũng bị từ chối; Admin có quyền cần thiết.
 
 **Nghiệm thu của Owner (Mốc 2)**
 
-- [ ] Đặt mật khẩu Admin qua email và đăng nhập được; thử liên kết Quên mật khẩu.
-- [ ] Cấp PIN lần đầu cho các học sinh giả chưa có PIN và tải CSV một lần.
-- [ ] Xem thử tài khoản học sinh giả và cấp lại PIN cho một em mà không đổi PIN của lớp.
-- [ ] Thấy rõ TEST chỉ có tài khoản/lớp giả.
+- [x] Đặt mật khẩu Admin qua email và đăng nhập được; thử liên kết Quên mật khẩu.
+- [x] Cấp PIN lần đầu cho các học sinh giả chưa có PIN và tải CSV một lần.
+- [x] Xem thử tài khoản học sinh giả và cấp lại PIN cho một em mà không đổi PIN của lớp.
+- [x] Thấy rõ TEST chỉ có tài khoản/lớp giả.
 
 ### Mốc 3 — Học, quiz và thực hành trên TEST
 
