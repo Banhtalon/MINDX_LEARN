@@ -625,10 +625,11 @@
     }
   },
   "remainingGates": {
-    "adminCreateTeacherInvitation": "OPEN; no successful hosted Admin create-teacher/invitation proof; default Supabase SMTP restricted to organization team addresses",
+    "adminCreateTeacherInvitation": "REMOVED_BY_OWNER_2026-10-15; historical missing invitation proof is no longer an acceptance requirement",
     "historicalSingleLoginFailure": "UNRESOLVED_CAUSE; full C13 failed199/200; later focused C15 passed200/200 without retry",
     "migrationIndependentReplay": "not performed; initial empty cloud construction by all3 versioned migrations proved and reviewed",
-    "production": "NOT_AUTHORIZED"
+    "production": "NOT_AUTHORIZED",
+    "adminConnectExistingTeacher": "IN_PROGRESS; Admin creates confirmed email/password Auth account in Supabase, app connects teacher profile without invitation"
   },
   "independentChecklistReview": {
     "reviewer": "gpt-6-luna max",
@@ -637,7 +638,7 @@
     "ownerCriteriaPassed": 4,
     "ownerCriteriaTotal": 4,
     "delegatedOwnerCriteria": 2,
-    "openTechnicalCriterion": "Admin create-teacher/invitation happy path",
+    "openTechnicalCriterion": "Admin connects existing manually created Supabase teacher account (replacement under implementation)",
     "overallMilestoneComplete": false
   }
 }

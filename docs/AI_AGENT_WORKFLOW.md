@@ -2,6 +2,25 @@
 
 Tệp này áp dụng cho các agent làm việc trong kho MINDX LEARN. Nó bổ sung cho yêu cầu Owner và an toàn dữ liệu hiện có, không thay thế chúng.
 
+## Phân vai bắt buộc và bàn giao chat
+
+Đây là quy tắc phân vai chuẩn cho mọi gói việc trong dự án. Yêu cầu của Owner, an toàn dữ liệu và hướng dẫn Next.js trong AGENTS.md vẫn được ưu tiên. Nếu một prompt cũ phân vai khác, dùng quy tắc này mà không tự thay đổi phạm vi sản phẩm đã duyệt.
+
+### Phân vai
+
+- **Điều phối — GPT-6.1 Sol:** chỉ phân rã yêu cầu, giao đúng vai trò, theo dõi, tổng hợp bằng chứng và báo Owner. Sol không trực tiếp sửa mã, tài liệu hay cấu hình; không tự chạy test/kiểm tra, thao tác Git, cloud hoặc nghiên cứu thay agent được giao.
+- **Worker mã — Gemini 3.8 Flash High qua AGY:** dùng đúng model gemini-3.8-flash-high và effort high cho công việc viết/sửa mã. Worker chỉ làm phạm vi được giao và có thể chạy kiểm tra trực tiếp cần thiết để xác nhận phần mã của mình.
+- **Reviewer độc lập — GPT-6 Luna Max:** giao một subagent riêng với đúng model gpt-6-luna và effort max để review. Reviewer phải đọc trạng thái hiện tại và bằng chứng mới nhất; không review mã do chính reviewer đó viết. Không lấy báo cáo của worker làm bằng chứng review.
+- **Các việc khác:** tài liệu, nghiên cứu, rà soát, kiểm chứng không thuộc phần mã, chuẩn bị Git/cloud và việc điều phối kỹ thuật đều giao cho subagent GPT-6 Luna Max phù hợp. Sol chỉ theo dõi và tổng hợp.
+- **Không tự đổi model hoặc vai trò:** khi model, AGY, quyền truy cập hoặc hạn mức không dùng được, ghi rõ vai trò đang thiếu và giữ nguyên công việc; không âm thầm thay bằng model khác hoặc để agent khác làm thay vai trò đó. Chỉ tiếp tục phần độc lập đã được giao và vẫn đúng ranh giới trên.
+
+### Bàn giao khi ngữ cảnh vượt 60%
+
+- Owner muốn chuyển phần việc còn lại sang chat mới khi mức dùng ngữ cảnh của **chat hiện tại** vượt 60%; chat mới dùng đúng model gpt-6.1-sol, effort high. Chỉ kích hoạt ngưỡng này từ số đo đáng tin cậy của riêng chat, không dùng phần trăm hạn mức tài khoản.
+- Kiểm tra capabilities của phiên ngày 16/10/2026 không thấy công cụ trả phần trăm ngữ cảnh của chat. get_usage_limits trả mức dùng hạn mức tài khoản; create_thread có thể tạo chat mới với model/effort được chỉ định; handoff_thread chỉ chuyển một chat khác giữa các checkout và không tạo chat mới hoặc chuyển chính chat đang gọi. Các chức năng đó không tạo ngưỡng kích hoạt tự động.
+- Vì chưa có số đo ngữ cảnh đáng tin cậy, hiện chưa thể tuyên bố đã cài hoặc chạy bàn giao tự động đúng ngưỡng 60%. Không tạo automation, hook, watcher, cấu hình toàn máy hay chat mới để giả lập ngưỡng. Giữ một tệp bàn giao trong dự án; chỉ chuyển tự động khi phiên sau có số đo riêng của chat đáng tin cậy và có thể tạo chat mới với đúng model/effort. Nếu không có số đo, báo rõ giới hạn và dùng cảnh báo/số đo thật mà giao diện cung cấp để Owner hoặc điều phối quyết định thời điểm chuyển.
+- OpenAI API có hướng dẫn thu gọn ngữ cảnh cho ứng dụng tự gọi Responses API, nhưng đó không phải phép đo ngữ cảnh hay cơ chế tự chuyển chat của Codex hiện tại: [Compaction](https://developers.openai.com/api/docs/guides/compaction).
+
 ## Mục tiêu
 
 - Chọn thay đổi nhỏ nhất nhưng giải quyết trọn vẹn yêu cầu.

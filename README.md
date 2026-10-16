@@ -6,11 +6,20 @@
 
 Bản TEST: https://mindx-learn-test.vercel.app . Đội triển khai cập nhật web sau kiểm tra; hồ sơ bằng chứng ghi rõ bản đang chạy.
 
-Ở Mốc 2, chọn **Giáo viên / Admin** để đăng nhập email/mật khẩu, hoặc **Học sinh** để dùng mã học sinh và PIN riêng gồm 8 chữ số. Không gửi mật khẩu/PIN trong chat. Admin tạo tài khoản nhân viên; không mở đăng ký tự do.
+Ở Mốc 2, chọn **Giáo viên / Admin** để đăng nhập email/mật khẩu, hoặc **Học sinh** để dùng mã học sinh và PIN riêng gồm 8 chữ số. Không gửi mật khẩu/PIN trong chat. Admin tạo email và mật khẩu giáo viên trực tiếp trong Supabase, sau đó kết nối tài khoản vào ứng dụng; không gửi thư mời và không mở đăng ký tự do.
 
 Admin dùng **Quản lý lớp** để tạo/sửa lớp, phân công giáo viên và lưu trữ/khôi phục lớp hoặc học sinh. Cấp PIN lần đầu chỉ cho học sinh chưa có PIN; cấp lại chỉ cho một học sinh được chọn. CSV tải tại lần cấp, không xem lại PIN cũ. Mất CSV thì cấp PIN mới cho đúng học sinh.
 
 TEST chỉ dùng lớp/học sinh giả; email Admin của Owner dùng để đăng nhập thật. Chưa nhập Teaching thật hoặc mở PROD.
+
+## Thêm giáo viên theo quyết định Owner ngày 15/10/2026
+
+1. Admin mở [Supabase TEST](https://supabase.com/dashboard/project/eythjapspkoyqdxlxtcd/auth/users), vào **Authentication → Users → Add user → Create new user**.
+2. Nhập email và mật khẩu tại Supabase, bật **Auto Confirm User** để xác nhận tài khoản, rồi tạo người dùng. Không chọn gửi thư mời.
+3. Trong ứng dụng, mở **Tài khoản Giáo viên → Kết nối giáo viên**, nhập đúng email vừa tạo và họ tên; nếu phân công ngay tại đây, chỉ chọn lớp đang hoạt động và chưa có giáo viên. Muốn đổi giáo viên của lớp đã được phân công, dùng **Quản lý lớp**.
+4. Giáo viên đăng nhập bằng email và mật khẩu Admin đã đặt trong Supabase. Kết nối không đổi mật khẩu hoặc tài khoản đăng nhập đã tạo. Bàn giao mật khẩu riêng, không gửi trong chat dự án.
+
+Tài khoản mới trong Supabase chưa tự có quyền Giáo viên cho đến khi Admin kết nối trong ứng dụng. Chức năng **Quên mật khẩu** vẫn được giữ.
 
 ## Phạm vi
 
