@@ -907,9 +907,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
-        const d = await res.json();
-        if (d.success) await fetchBootstrapData();
-        return { success: Boolean(d.success), message: d.message };
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success === true) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Kết nối tài khoản giáo viên thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể kết nối tài khoản giáo viên.' };
       } catch {
         return { success: false, message: 'Lỗi kết nối máy chủ.' };
       }
@@ -919,19 +922,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       return { success: false, message: 'Họ tên và email giáo viên không được để trống.' };
     }
 
+    const trimmedEmail = data.email.trim().toLowerCase();
+    const existing = users.find((u) => u.email?.toLowerCase() === trimmedEmail);
+    if (existing) {
+      return { success: false, message: `Email "${trimmedEmail}" đã tồn tại trong hệ thống.` };
+    }
+
     const newTeacher: User = {
       id: `usr_tea_${Date.now()}`,
       name: data.name.trim(),
-      email: data.email.trim().toLowerCase(),
+      email: trimmedEmail,
       role: 'teacher',
       status: 'active',
       assignedClassIds: data.assignedClassIds,
     };
 
     setUsers((prev) => [...prev, newTeacher]);
+    if (data.assignedClassIds && data.assignedClassIds.length > 0) {
+      setClasses((prev) =>
+        prev.map((c) =>
+          data.assignedClassIds.includes(c.id) ? { ...c, teacherId: newTeacher.id } : c
+        )
+      );
+    }
     return {
       success: true,
-      message: `Đã tạo giáo viên "${newTeacher.name}". [Mô phỏng]: Đã gửi liên kết đặt mật khẩu tới ${newTeacher.email}.`,
+      message: `Đã kết nối tài khoản giáo viên "${newTeacher.name}" (${newTeacher.email}) thành công (Mô phỏng).`,
     };
   };
 

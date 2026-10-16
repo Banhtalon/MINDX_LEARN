@@ -275,7 +275,7 @@ async function syncStudentBumpResult(
 // ----------------------------------------------------------------------------
 // Main HTTP Handler
 // ----------------------------------------------------------------------------
-Deno.serve(async (req: Request) => {
+export async function handleRequest(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -2181,10 +2181,16 @@ Deno.serve(async (req: Request) => {
         const { name, email, assignedClassIds } = payload as {
           name?: string;
           email?: string;
-          assignedClassIds?: string[];
+          assignedClassIds?: unknown;
         };
 
-        if (!name || typeof name !== 'string' || !name.trim() || !isValidEmail(email)) {
+        if (
+          !name ||
+          typeof name !== 'string' ||
+          !name.trim() ||
+          name.trim().length > 100 ||
+          !isValidEmail(email)
+        ) {
           return jsonResponse(
             { success: false, message: 'Họ tên và email giáo viên không hợp lệ.', code: 'INVALID_PAYLOAD' },
             400
@@ -2192,134 +2198,125 @@ Deno.serve(async (req: Request) => {
         }
 
         const normEmail = email.trim().toLowerCase();
-
-        // Reject @example.invalid in normal UI (QA bridge handles fake accounts)
-        if (normEmail.endsWith('@example.invalid')) {
+        if (normEmail.length > 255) {
           return jsonResponse(
-            { success: false, message: 'Không thể tạo giáo viên với địa chỉ email thử nghiệm.', code: 'INVALID_EMAIL' },
+            { success: false, message: 'Email giáo viên vượt quá độ dài tối đa.', code: 'INVALID_PAYLOAD' },
             400
           );
         }
 
-        const redirectUrl = 'https://mindx-learn-test.vercel.app/auth/callback';
-
-        const { data: inviteData, error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(normEmail, {
-          redirectTo: redirectUrl,
-          data: { role: 'teacher' },
-        });
-
-        if (inviteErr || !inviteData?.user || !inviteData.user.invited_at) {
-          return jsonResponse(
-            { success: false, message: 'Không thể gửi email kích hoạt cho giáo viên.', code: 'EMAIL_SEND_FAILED' },
-            500
-          );
-        }
-
-        const authUserId = inviteData.user.id;
-        const inviteIssuedAt = inviteData.user.invited_at;
-
-        const { error: metaErr } = await adminClient.auth.admin.updateUserById(authUserId, {
-          app_metadata: {
-            role: 'teacher',
-            m2_session_version: 1,
-          },
-        });
-
-        if (metaErr) {
-          await adminClient.auth.admin.deleteUser(authUserId);
-          return jsonResponse(
-            { success: false, message: 'Không thể thiết lập quyền giáo viên.', code: 'AUTH_UPDATE_FAILED' },
-            500
-          );
-        }
-
-        let newProfileId = crypto.randomUUID();
-        while (newProfileId.toLowerCase() === authUserId.toLowerCase()) {
-          newProfileId = crypto.randomUUID();
-        }
-
-        const { data: newProfile, error: profErr } = await adminClient
-          .from('profiles')
-          .insert({
-            id: newProfileId,
-            role: 'teacher',
-            full_name: name.trim(),
-            email: normEmail,
-            status: 'active',
-            session_version: 1,
-            is_fixture: false,
-          })
-          .select()
-          .single();
-
-        if (profErr || !newProfile) {
-          await adminClient.auth.admin.deleteUser(authUserId);
-          return jsonResponse(
-            { success: false, message: 'Không thể lưu hồ sơ giáo viên.', code: 'DB_ERROR' },
-            500
-          );
-        }
-
-        const { error: mapErr } = await adminClient.rpc('m2_create_actor_auth', {
-          p_auth_user_id: authUserId,
-          p_profile_id: newProfile.id,
-          p_role: 'teacher',
-          p_auth_email: normEmail,
-          p_session_version: 1,
-          p_invite_pending: true,
-          p_invite_issued_at: inviteIssuedAt,
-        });
-
-        if (mapErr) {
-          await adminClient.from('profiles').delete().eq('id', newProfile.id);
-          await adminClient.auth.admin.deleteUser(authUserId);
-          return jsonResponse(
-            { success: false, message: 'Không thể tạo bản đồ danh tính giáo viên.', code: 'DB_ERROR' },
-            500
-          );
-        }
-
-        const createdAssignments: string[] = [];
-        if (Array.isArray(assignedClassIds) && assignedClassIds.length > 0) {
+        // Validate assignedClassIds:
+        // undefined/null defaults to []
+        // bounded e.g. 100, UUIDs all; don't silently drop malformed values
+        const classIds: string[] = [];
+        if (assignedClassIds !== undefined && assignedClassIds !== null) {
+          if (!Array.isArray(assignedClassIds) || assignedClassIds.length > 100) {
+            return jsonResponse(
+              { success: false, message: 'Danh sách lớp phân công không hợp lệ hoặc vượt quá giới hạn 100 lớp.', code: 'INVALID_PAYLOAD' },
+              400
+            );
+          }
           for (const cid of assignedClassIds) {
-            if (!isValidUUID(cid)) {
-              await adminClient.from('class_teachers').delete().eq('teacher_profile_id', newProfile.id);
-              await adminClient.from('profiles').delete().eq('id', newProfile.id);
-              await adminClient.auth.admin.deleteUser(authUserId);
+            if (typeof cid !== 'string' || !isValidUUID(cid)) {
               return jsonResponse(
                 { success: false, message: 'Mã lớp phân công không hợp lệ.', code: 'INVALID_PAYLOAD' },
                 400
               );
             }
-
-            const { data: assignOk, error: assignErr } = await adminClient.rpc('m2_assign_class_teacher', {
-              p_admin_profile_id: actor.profileId,
-              p_class_id: cid,
-              p_teacher_id: newProfile.id,
-            });
-
-            if (assignErr || assignOk !== true) {
-              await adminClient.from('class_teachers').delete().eq('teacher_profile_id', newProfile.id);
-              await adminClient.from('profiles').delete().eq('id', newProfile.id);
-              await adminClient.auth.admin.deleteUser(authUserId);
-              return jsonResponse(
-                { success: false, message: 'Không thể phân công lớp cho giáo viên.', code: 'DB_ERROR' },
-                500
-              );
-            }
-            createdAssignments.push(cid);
+            classIds.push(cid);
           }
+        }
+
+        // Call atomic linking RPC
+        const { data: linkResult, error: linkErr } = await adminClient.rpc('m2_link_existing_teacher', {
+          p_admin_profile_id: actor.profileId,
+          p_email: normEmail,
+          p_name: name.trim(),
+          p_class_ids: classIds,
+        });
+
+        if (linkErr) {
+          const errMsg = linkErr.message || '';
+          if (errMsg.includes('AUTH_USER_NOT_FOUND') || errMsg.includes('AUTH_USER_DELETED')) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.TEACHER_ACCOUNT_NOT_FOUND, code: 'AUTH_USER_NOT_FOUND' },
+              404
+            );
+          }
+          if (
+            errMsg.includes('AUTH_USER_UNCONFIRMED') ||
+            errMsg.includes('AUTH_USER_NO_PASSWORD') ||
+            errMsg.includes('AUTH_USER_BANNED') ||
+            errMsg.includes('AUTH_USER_ANONYMOUS')
+          ) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.TEACHER_ACCOUNT_UNCONFIRMED, code: 'AUTH_USER_UNCONFIRMED' },
+              400
+            );
+          }
+          if (errMsg.includes('TEACHER_ALREADY_MAPPED') || errMsg.includes('PROFILE_EMAIL_EXISTS')) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.TEACHER_ALREADY_MAPPED, code: 'TEACHER_ALREADY_MAPPED' },
+              409
+            );
+          }
+          if (errMsg.includes('AUTH_USER_DUPLICATE_EMAIL')) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.TEACHER_ACCOUNT_DUPLICATE_EMAIL, code: 'AUTH_USER_DUPLICATE_EMAIL' },
+              409
+            );
+          }
+          if (errMsg.includes('AUTH_USER_CONFLICTING_ROLE')) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.TEACHER_ROLE_CONFLICT, code: 'AUTH_USER_CONFLICTING_ROLE' },
+              400
+            );
+          }
+          if (errMsg.includes('CLASS_ALREADY_ASSIGNED')) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.TEACHER_CLASS_ALREADY_ASSIGNED, code: 'CLASS_ALREADY_ASSIGNED' },
+              409
+            );
+          }
+          if (
+            errMsg.includes('Active class not found') ||
+            errMsg.includes('CLASS_NOT_FOUND') ||
+            errMsg.includes('INVALID_CLASS_ARRAY')
+          ) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.TEACHER_CLASS_INVALID, code: 'CLASS_NOT_FOUND' },
+              400
+            );
+          }
+          if (errMsg.includes('ADMIN_NOT_ACTIVE')) {
+            return jsonResponse(
+              { success: false, message: STATIC_MESSAGES.ADMIN_ONLY, code: 'FORBIDDEN' },
+              403
+            );
+          }
+          return jsonResponse(
+            { success: false, message: STATIC_MESSAGES.INTERNAL_ERROR, code: 'INTERNAL_ERROR' },
+            500
+          );
+        }
+
+        const linkedRow = Array.isArray(linkResult) ? linkResult[0] : linkResult;
+        if (!linkedRow || !linkedRow.id) {
+          return jsonResponse(
+            { success: false, message: STATIC_MESSAGES.INTERNAL_ERROR, code: 'INTERNAL_ERROR' },
+            500
+          );
         }
 
         return jsonResponse({
           success: true,
           data: {
-            id: newProfile.id,
-            name: newProfile.full_name,
-            email: newProfile.email,
+            id: linkedRow.id,
+            name: linkedRow.full_name,
+            email: linkedRow.email,
             role: 'teacher',
-            status: newProfile.status,
-            assignedClassIds: createdAssignments,
+            status: linkedRow.status,
+            assignedClassIds: linkedRow.assigned_class_ids || [],
           },
           message: STATIC_MESSAGES.TEACHER_CREATED,
         });
@@ -2925,6 +2922,8 @@ Deno.serve(async (req: Request) => {
         authPassword,
         testPassword,
         pinIssued = true,
+        emailConfirm,
+        confirmed,
       } = payload as {
         fixtureType?: string;
         fixtureRole?: Role;
@@ -2938,11 +2937,13 @@ Deno.serve(async (req: Request) => {
         authPassword?: string;
         testPassword?: string;
         pinIssued?: boolean;
+        emailConfirm?: boolean;
+        confirmed?: boolean;
       };
 
-      if (fixtureType !== 'qa-actor') {
+      if (fixtureType !== 'qa-actor' && fixtureType !== 'qa-unmapped-staff') {
         return jsonResponse(
-          { success: false, message: 'Loại fixture không được hỗ trợ. Chỉ hỗ trợ qa-actor.', code: 'INVALID_FIXTURE_TYPE' },
+          { success: false, message: 'Loại fixture không được hỗ trợ.', code: 'INVALID_FIXTURE_TYPE' },
           400
         );
       }
@@ -2952,6 +2953,104 @@ Deno.serve(async (req: Request) => {
           { success: false, message: 'Sử dụng authPassword thay cho testPassword.', code: 'INVALID_PAYLOAD' },
           400
         );
+      }
+
+      if (fixtureType === 'qa-unmapped-staff') {
+        if (
+          !isValidUUID(profileId) ||
+          !isValidUUID(authUserId) ||
+          profileId.toLowerCase() === authUserId.toLowerCase() ||
+          !authEmail ||
+          !isValidEmail(authEmail) ||
+          !authEmail.toLowerCase().endsWith('@example.invalid') ||
+          !authPassword ||
+          typeof authPassword !== 'string' ||
+          authPassword.trim().length === 0 ||
+          typeof fullName !== 'string' ||
+          !fullName.startsWith('TEST')
+        ) {
+          return jsonResponse(
+            { success: false, message: 'Dữ liệu qa-unmapped-staff không hợp lệ.', code: 'INVALID_PAYLOAD' },
+            400
+          );
+        }
+
+        if (fixtureRole !== 'teacher') {
+          return jsonResponse(
+            { success: false, message: 'Vai trò qa-unmapped-staff chỉ hỗ trợ teacher.', code: 'INVALID_PAYLOAD' },
+            400
+          );
+        }
+
+        const isConfirmed = emailConfirm !== false && confirmed !== false;
+
+        // Collision check: reject if auth user, profile, or mapping already exists
+        const { data: existingProf } = await adminClient
+          .from('profiles')
+          .select('id')
+          .eq('id', profileId)
+          .maybeSingle();
+
+        if (existingProf) {
+          return jsonResponse(
+            { success: false, message: 'Hồ sơ đã tồn tại: từ chối xung đột.', code: 'COLLISION_REJECTED' },
+            409
+          );
+        }
+
+        const { data: existingMap } = await adminClient.rpc('m2_get_actor_auth_by_auth_id', {
+          p_auth_user_id: authUserId,
+        });
+
+        if (existingMap && existingMap.length > 0) {
+          return jsonResponse(
+            { success: false, message: 'Tài khoản Auth đã tồn tại: từ chối xung đột.', code: 'COLLISION_REJECTED' },
+            409
+          );
+        }
+
+        const { data: existingUser } = await adminClient.auth.admin.getUserById(authUserId);
+        if (existingUser?.user) {
+          return jsonResponse(
+            { success: false, message: 'Tài khoản Auth đã tồn tại: từ chối xung đột.', code: 'COLLISION_REJECTED' },
+            409
+          );
+        }
+
+        // Create native Auth user ONLY, without app role grants, profile, or actor_auth mapping
+        const { data: newAuth, error: authErr } = await adminClient.auth.admin.createUser({
+          id: authUserId,
+          email: authEmail.toLowerCase().trim(),
+          password: authPassword,
+          email_confirm: isConfirmed,
+          user_metadata: { full_name: fullName.trim() },
+        });
+
+        if (authErr || !newAuth?.user) {
+          if (
+            authErr?.message?.toLowerCase().includes('already') ||
+            authErr?.status === 422 ||
+            (authErr as any)?.code === 'email_exists'
+          ) {
+            return jsonResponse(
+              { success: false, message: 'Tài khoản Auth đã tồn tại: từ chối xung đột.', code: 'COLLISION_REJECTED' },
+              409
+            );
+          }
+          return jsonResponse(
+            { success: false, message: 'Không thể khởi tạo tài khoản xác thực kiểm thử.', code: 'AUTH_CREATE_FAILED' },
+            500
+          );
+        }
+
+        return jsonResponse({
+          success: true,
+          data: {
+            profileId,
+            authUserId,
+          },
+          message: 'Khởi tạo tài khoản QA unmapped staff thành công.',
+        });
       }
 
       if (
@@ -3177,4 +3276,8 @@ Deno.serve(async (req: Request) => {
       500
     );
   }
-});
+}
+
+if (typeof Deno !== 'undefined' && typeof Deno.serve === 'function') {
+  Deno.serve(handleRequest);
+}
