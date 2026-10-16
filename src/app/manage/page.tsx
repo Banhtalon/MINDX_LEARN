@@ -25,14 +25,14 @@ export default function ManageDashboardPage() {
       <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-xl border border-slate-200">
         <IconAlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-slate-900 mb-2">Quyền truy cập hạn chế</h2>
-        <p className="text-xs text-slate-500 mb-4">
-          Trang quản trị và giảng dạy [UI-03] chỉ dành cho tài khoản Admin hoặc Giáo viên.
+        <p className="text-sm text-slate-600 mb-4">
+          Trang quản trị và giảng dạy chỉ dành cho tài khoản Admin hoặc Giáo viên.
         </p>
         <button
           onClick={() => router.push('/login')}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700"
+          className="min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
-          Đăng nhập vai trò Cán bộ
+          Đăng nhập vai trò Giáo viên / Admin
         </button>
       </div>
     );
@@ -67,12 +67,11 @@ export default function ManageDashboardPage() {
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
               {isAdmin ? 'Khu vực Admin Quản Trị' : 'Khu vực Giáo Viên Giảng Dạy'}
             </span>
-            <span className="text-xs text-slate-400 font-mono">[UI-03]</span>
           </div>
           <h1 className="text-xl font-extrabold text-slate-900">
             Xin chào, {currentUser.name}
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-sm text-slate-600 mt-1">
             {isAdmin
               ? 'Tổng quan toàn bộ hệ thống lớp học, khóa học 14 buổi và dữ liệu học sinh.'
               : 'Theo dõi tiến độ các lớp được giao phụ trách và hàng đợi bài tập thực hành cần chấm.'}
@@ -82,14 +81,14 @@ export default function ManageDashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/manage/classes"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+            className="min-h-[44px] px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <IconUsers className="w-4 h-4" />
             <span>Quản lý lớp & Học sinh</span>
           </Link>
           <Link
             href="/teacher/submissions"
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+            className="min-h-[44px] px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <IconFileText className="w-4 h-4" />
             <span>Hàng đợi chấm bài ({pendingSubmissions.length})</span>

@@ -90,7 +90,7 @@ export default function AdminCoursesPage() {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
-      const res = createCourse(trimmedTitle, createDescription.trim());
+      const res = await createCourse(trimmedTitle, createDescription.trim());
       if (!res.success) {
         // Dưới save_error: action trả lỗi, giữ modal/form, không thay dữ liệu, hiện lỗi và nút Thử lại
         setCreateError(res.message);
@@ -129,7 +129,7 @@ export default function AdminCoursesPage() {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
-      const res = updateCourse(selectedCourse.id, {
+      const res = await updateCourse(selectedCourse.id, {
         title: trimmedTitle,
         description: editDescription.trim(),
       });

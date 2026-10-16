@@ -1,0 +1,691 @@
+{
+  "schemaVersion": 1,
+  "environment": "TEST only",
+  "productSourceCommit": "b619da02eaa84b6c6b0d031ae9ac3c92257e609b",
+  "hostedUrl": "https://mindx-learn-test.vercel.app",
+  "deploymentId": "dpl_ArAVv6MmXaMVzeWvdZJmrgYjaqZk",
+  "backendVersion": "A11 Edge v2",
+  "frontendVersion": "B15",
+  "harnessSha256": "C67D5AB9435745D79E49326D7D2EC8E432988FBB0C2B3C2DCFE0944355B6F1EC",
+  "checks": {
+    "unit": {
+      "passed": 132,
+      "failed": 0,
+      "log": "unit-c13-20261015.log"
+    },
+    "hostedHttpGuards": {
+      "passed": 6,
+      "failed": 0
+    },
+    "measurementBranch": {
+      "passed": 4,
+      "failed": 0,
+      "scope": "actual source branch; healthy/inconclusive/error precedence"
+    },
+    "deployedManifest": {
+      "checkedAt": "2026-10-15T10:02:00.466Z",
+      "sourceCommit": "b619da02eaa84b6c6b0d031ae9ac3c92257e609b",
+      "files": 42,
+      "changed": [],
+      "pass": true
+    },
+    "raceA11": {
+      "testedAt": "2026-10-15T09:59:47.285Z",
+      "sourceCommit": "b619da02eaa84b6c6b0d031ae9ac3c92257e609b",
+      "cloud": "Edge v2 A11",
+      "seedHttp": 200,
+      "claims": [
+        {
+          "http": 200,
+          "success": true,
+          "targets": 1
+        },
+        {
+          "http": 409,
+          "success": false,
+          "code": "OPERATION_LOCKED",
+          "targets": 0
+        }
+      ],
+      "pass": true
+    },
+    "unissuedLifecycle": {
+      "testedAt": "2026-10-15T09:59:14.533Z",
+      "sourceCommit": "b619da02eaa84b6c6b0d031ae9ac3c92257e609b",
+      "target": "hosted TEST",
+      "archive": {
+        "http": 200,
+        "success": true
+      },
+      "restore": {
+        "http": 200,
+        "success": true
+      },
+      "restoredActive": true,
+      "stillUnissued": true,
+      "pass": true
+    },
+    "hosted-ip-proof-20261015": {
+      "testedAt": "2026-10-14T18:03:00.811Z",
+      "sourceCommit": "b619da02eaa84b6c6b0d031ae9ac3c92257e609b",
+      "concurrency": 24,
+      "first240Count": 240,
+      "first240All401": true,
+      "duration240Ms": 36153,
+      "totalDurationMs": 40949,
+      "after240": [
+        {
+          "http": 429,
+          "code": "RATE_LIMITED"
+        },
+        {
+          "http": 429,
+          "code": "RATE_LIMITED"
+        }
+      ],
+      "pass": true
+    },
+    "forged-logout-proof-20261015": {
+      "testedAt": "2026-10-14T17:51:43.910Z",
+      "edgeVersion": 2,
+      "before": {
+        "http": 200,
+        "success": true
+      },
+      "forgedLogout": {
+        "http": 401,
+        "success": false,
+        "code": "UNAUTHORIZED"
+      },
+      "after": {
+        "http": 200,
+        "success": true
+      },
+      "pass": true
+    }
+  },
+  "ownerAcceptance": {
+    "overall": "M2_NOT_YET_ACCEPTED; independent technical gaps remain",
+    "forgotPasswordEmailAndAdminLogin": "OWNER_CONFIRMED",
+    "typingFocusFixed": "OWNER_CONFIRMED",
+    "firstIssueCsv": "OWNER_CONFIRMED",
+    "singleReissue": "AI_VERIFIED_UNDER_OWNER_DELEGATION",
+    "testDataOnly": "AI_VERIFIED_FIXTURE_FLAGS_AND_TEST_UI_UNDER_OWNER_DELEGATION",
+    "evidence": "Owner response: Nhập ổn và đăng nhập được; after instructions to hard-refresh, request recovery email, set password and log in. No credential or email link collected.",
+    "firstIssueStudentCount": 2,
+    "firstIssueEvidence": "Owner response: Đã tải CSV cho 2 học sinh giả; following Admin first-issue/download steps on the prepared TEST UI class. No CSV or PIN collected.",
+    "studentAccountView": "AI_VERIFIED_UNDER_OWNER_DELEGATION"
+  },
+  "productProductionAllowed": false,
+  "hostedReceipt": {
+    "timestamp": "2026-10-15T09:58:00.064Z",
+    "targetSupabaseUrl": "https://eythjapspkoyqdxlxtcd.supabase.co",
+    "targetAppUrl": "https://mindx-learn-test.vercel.app",
+    "runId": "mv9d8akg64c3743d",
+    "flags": {
+      "runLoadTest": true,
+      "testCooldown": true,
+      "hasPublicKey": true
+    },
+    "checks": [
+      {
+        "id": "1.1",
+        "name": "Seed Admin QA-Actor via coordinator-seed-fixture bridge",
+        "httpStatus": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.2",
+        "name": "Admin staff-login on Next BFF returns encrypted cookie with valid attributes, verified roundtrip GET session, and sanitized DTO",
+        "httpStatus": 200,
+        "hasCookie": true,
+        "cookieAttrOk": true,
+        "sessionRoundtripOk": true,
+        "sanitized": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.3",
+        "name": "Admin creates controlled fixture classes (A, B, LOAD) via Next BFF",
+        "hasA": true,
+        "hasB": true,
+        "hasLoad": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.4",
+        "name": "Seed Teacher QA-Actor with assigned Class A and obtain native JWT",
+        "httpStatus": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "2.1",
+        "name": "Seed Student S1 (Student A in Class A) with distinct PIN and derived HMAC",
+        "httpStatus": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "2.2",
+        "name": "Seed Student B (Foreign Student in Class B) for strict cross-tenant RLS isolation",
+        "httpStatus": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "2.3",
+        "name": "Seed 2 Draft Students in Class B (pinIssued: false contract, data.success: true)",
+        "seedD1Status": 200,
+        "seedD2Status": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.5a",
+        "name": "Teacher role mutation escalation denied (403 on create-class & create-teacher)",
+        "createClassStatus": 403,
+        "createTeacherStatus": 403,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.5b",
+        "name": "Teacher native PostgREST RLS: exact 1 assigned class read, foreign class, students, profiles denied (0 rows)",
+        "hasClassA": true,
+        "deniesClassB": true,
+        "deniesStudentsB": true,
+        "deniesForeignProfile": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.5c",
+        "name": "Student cross-tenant PostgREST RLS: foreign student read 0 rows, foreign PATCH denied & verified unchanged, own row readable 1",
+        "foreignReadZero": true,
+        "patchDenied": true,
+        "studentBUnchanged": true,
+        "ownRowReadable": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.5d",
+        "name": "PostgREST RPC internal wrappers denied to anon and authenticated (401/403/404)",
+        "anonSecretStatus": 401,
+        "authSecretStatus": 403,
+        "anonSessionStatus": 401,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.5e",
+        "name": "Supabase Storage private bucket and object isolation: Admin 200, Teacher/Student/Anon denied (401/403/404 or 400 not_found)",
+        "adminStatus": 200,
+        "teacherStatus": 400,
+        "teacherProviderStatus": "404",
+        "teacherError": "not_found",
+        "studentStatus": 400,
+        "studentProviderStatus": "404",
+        "studentError": "not_found",
+        "anonStatus": 400,
+        "anonProviderStatus": "404",
+        "anonError": "not_found",
+        "storageIsolationPassed": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "3.1",
+        "name": "Native GoTrue rejects raw 8-digit PIN (400) and accepts derived HMAC password (200)",
+        "rawStatus": 400,
+        "derivedStatus": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "3.2",
+        "name": "Next BFF student login derives HMAC, returns encrypted cookie with valid attributes, verified roundtrip GET session, and sanitized DTO",
+        "httpStatus": 200,
+        "hasCookie": true,
+        "cookieAttrOk": true,
+        "sessionRoundtripOk": true,
+        "sanitized": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "3.3",
+        "name": "Student login challenge consumed successfully and replay atomically rejected (401)",
+        "firstConsumeStatus": 200,
+        "replayStatus": 401,
+        "status": "PASSED"
+      },
+      {
+        "id": "4.1",
+        "name": "Admin calls BFF pin-issue: returns no-store CSV with distinct 8-digit PINs",
+        "httpStatus": 200,
+        "isCsv": true,
+        "isNoStore": true,
+        "exactTwoRows": true,
+        "pupilsExactOnce": true,
+        "pinsDistinct": true,
+        "classColMatched": true,
+        "foundD1Pin": true,
+        "foundD2Pin": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "4.2",
+        "name": "Student D1 logs in via Next BFF using actual new CSV PIN",
+        "httpStatus": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "4.3",
+        "name": "Repeat pin-issue on same class honestly returns zero eligible students (no CSV re-read)",
+        "httpStatus": 200,
+        "code": "NO_UNISSUED_STUDENTS",
+        "status": "PASSED"
+      },
+      {
+        "id": "4.4",
+        "name": "Role authorization: Teacher/Student denied (403) and Anonymous denied (401) on valid pin-issue",
+        "teacherStatus": 403,
+        "studentStatus": 403,
+        "anonStatus": 401,
+        "status": "PASSED"
+      },
+      {
+        "id": "4.5",
+        "name": "Single student reissue resets exact one pupil PIN, revokes old credentials, other pupils unchanged",
+        "httpStatus": 200,
+        "isCsv": true,
+        "isNoStore": true,
+        "exactOneRow": true,
+        "reissuedClassMatched": true,
+        "hasReissuedPin": true,
+        "reissuedPinWorks": true,
+        "oldPinFails": true,
+        "d2Unchanged": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "4.6a",
+        "name": "Authenticated Admin negative pin-commit rejected by validator (HTTP 400/409, not 401/500)",
+        "httpStatus": 400,
+        "code": "DUPLICATE_STUDENT",
+        "rejectedByValidator": true,
+        "notExpiredOrInternal": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "4.6b",
+        "name": "Concurrent PIN claim race contention and atomic lock overlap",
+        "status": "NOT_TESTED",
+        "reason": "NOT_TESTED: Full concurrent contention requires external multi-actor timing synchronization; recorded explicit NOT_TESTED rather than synthetic PASS"
+      },
+      {
+        "id": "5.1",
+        "name": "Class archive blocks old JWT (native REST own row 0) and BFF cookie (401); restore requires new login and yields own row 1",
+        "ownBeforeOk": true,
+        "archOk": true,
+        "ownArchZero": true,
+        "bffCookieBlocked": true,
+        "bootArchStatus": 401,
+        "sessArchStatus": 200,
+        "loginArchBlocked": true,
+        "restOk": true,
+        "oldJwtStillDead": true,
+        "newLoginOk": true,
+        "ownNewOk": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "5.2",
+        "name": "Student archive blocks old JWT (native REST own row 0) and BFF cookie (401); restore requires new login and yields own row 1",
+        "ownBeforeOk": true,
+        "archOk": true,
+        "ownArchZero": true,
+        "bffCookieBlocked": true,
+        "bootArchStatus": 401,
+        "sessArchStatus": 200,
+        "loginArchBlocked": true,
+        "restOk": true,
+        "oldJwtStillDead": true,
+        "newLoginOk": true,
+        "ownNewOk": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "5.3",
+        "name": "Logout revokes session: old JWT yields native REST own row 0, old cookie yields 401, subsequent fresh login succeeds",
+        "ownBeforeOk": true,
+        "logoutBffStatus": 200,
+        "logoutEdgeStatus": 401,
+        "ownAfterZero": true,
+        "oldCookieDead": true,
+        "bootAfterStatus": 401,
+        "sessAfterStatus": 200,
+        "newLoginOk": true,
+        "ownNewOk": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "5.4",
+        "name": "Account limiter exact threshold: 6 allowed attempts (1 correct + 5 incorrect 401) -> 7th triggers HTTP 429",
+        "initialLoginSuccess": true,
+        "attempts2to6Failed401": true,
+        "attempt7Status": 429,
+        "status": "PASSED"
+      },
+      {
+        "id": "5.5",
+        "name": "Separate IP gate: bounded up to 241 distinct unknown codes on same IP with forged XFF triggers HTTP 429 and remains limited",
+        "totalProbesSent": 241,
+        "probesCompleted": 241,
+        "count401": 240,
+        "count429": 1,
+        "first429At": 239,
+        "first429ElapsedMs": 24940,
+        "followUpStill429": true,
+        "followUpValid": true,
+        "ipProbe500": false,
+        "durationMs": 25250,
+        "status": "PASSED"
+      },
+      {
+        "id": "5.6",
+        "name": "Rate limit cooldown expires after 62s and allows correct PIN login (HTTP 200, success true)",
+        "recoveryStatus": 200,
+        "clearedAccountAndIpPoison": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "6.1",
+        "name": "Bounded 200 distinct student logins via Next BFF with roundtrip GET session verification (count 200)",
+        "totalProbes": 200,
+        "seedSuccessCount": 200,
+        "loginSuccessCount": 199,
+        "sessionVerifiedCount": 199,
+        "login429Count": 0,
+        "loginFailCount": 1,
+        "durationMs": 338112,
+        "avgMsPerLogin": 1690.56,
+        "status": "FAILED"
+      },
+      {
+        "id": "7.1",
+        "name": "Real Email Owner direct password setup & forgot password acceptance",
+        "status": "MANUAL_PENDING",
+        "reason": "Manual acceptance required by Owner; automated test rejects fake SMTP"
+      },
+      {
+        "id": "7.2",
+        "name": "Negative recovery callback with invalid code rejected fail-closed (400/401)",
+        "httpStatus": 400,
+        "status": "PASSED"
+      }
+    ],
+    "summary": {
+      "total": 31,
+      "passed": 28,
+      "failed": 1,
+      "skipped": 1,
+      "manualPending": 1
+    },
+    "verdict": "FAILED"
+  },
+  "hostedProcessExitCode": 1,
+  "receiptExtractionNote": "Merged stdout/stderr raw log preserved privately; one exact [FATAL] footer interleaved in JSON was removed before parsing. No counts/statuses altered.",
+  "subsequentChecks": {
+    "checkedAt": "2026-10-15T10:30:05.558Z",
+    "uiFix": "B17",
+    "modalSourceSha256": "7CB938923795F87EDB2FBA78FAB7F476D55402A17C4E61377A7293054BAE01E0",
+    "modalTestsSha256": "DA250DCCB159647E143C25337FA43D48E59EF2E78C3F4D4A35F4051270E1AACE",
+    "unit": {
+      "passed": 136,
+      "failed": 0
+    },
+    "focusRegression": {
+      "passed": 4,
+      "failed": 0
+    },
+    "baselineNegativeControl": {
+      "passed": 3,
+      "failed": 1,
+      "expectedFailure": true,
+      "scope": "original modal source, same regression suite; only failing typing/focus test"
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "telemetryC15": {
+      "harnessSha256": "2F23C549619E17C6110B5A3984B8338F8C706329DE50C107DA903FA3C64B2096",
+      "sourceAssertionsPassed": 9,
+      "sourceAssertionsFailed": 0,
+      "liveReplay": "FOCUSED_LOAD_PASSED, original full-suite failure retained"
+    },
+    "hostedUiFix": {
+      "testedAt": "2026-10-15T10:35:26.543Z",
+      "deploymentId": "dpl_B79eGzBgsmSUxWShTnVWECbwzgAn",
+      "sourceCommit": "8245a81616708b42f27421942b190bed2083cdd4",
+      "typedSequentially": true,
+      "syntheticEmailOnly": true,
+      "noEmailSubmitted": true,
+      "viewports": [
+        {
+          "activeId": "forgot-password-email",
+          "dialogOpen": true,
+          "documentWidth": 1274,
+          "viewport": 1280
+        },
+        {
+          "activeId": "forgot-password-email",
+          "dialogOpen": true,
+          "documentWidth": 1440,
+          "viewport": 1440
+        },
+        {
+          "activeId": "forgot-password-email",
+          "dialogOpen": true,
+          "documentWidth": 1920,
+          "viewport": 1920
+        }
+      ],
+      "tabWrapToCloseButton": true,
+      "escapeClosesAndRestoresOpener": true,
+      "pass": true
+    }
+  },
+  "currentDeployment": {
+    "id": "dpl_CPipjdZPvZusTGngJvnW76TzLP5v",
+    "productSourceCommit": "7d17cbd0d99e02dbfa3355c532e4e1ffa752e331",
+    "state": "READY",
+    "url": "https://mindx-learn-test.vercel.app",
+    "checkedAt": "2026-10-16T10:43:55Z",
+    "uploadedFiles": 42,
+    "uploadedBytes": 692352
+  },
+  "focusedDiagnosticReceipt": {
+    "timestamp": "2026-10-15T10:34:05.646Z",
+    "targetSupabaseUrl": "https://eythjapspkoyqdxlxtcd.supabase.co",
+    "targetAppUrl": "https://mindx-learn-test.vercel.app",
+    "runId": "mv9eipji640e9d7d",
+    "flags": {
+      "runLoadTest": true,
+      "testCooldown": false,
+      "hasPublicKey": true
+    },
+    "checks": [
+      {
+        "id": "1.1",
+        "name": "Seed Admin QA-Actor via coordinator-seed-fixture bridge",
+        "httpStatus": 200,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.2",
+        "name": "Admin staff-login on Next BFF returns encrypted cookie with valid attributes, verified roundtrip GET session, and sanitized DTO",
+        "httpStatus": 200,
+        "hasCookie": true,
+        "cookieAttrOk": true,
+        "sessionRoundtripOk": true,
+        "sanitized": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "1.3",
+        "name": "Admin creates controlled fixture classes (A, B, LOAD) via Next BFF",
+        "hasA": true,
+        "hasB": true,
+        "hasLoad": true,
+        "status": "PASSED"
+      },
+      {
+        "id": "6.1",
+        "name": "Bounded 200 distinct student logins via Next BFF with roundtrip GET session verification (count 200)",
+        "totalProbes": 200,
+        "seedSuccessCount": 200,
+        "loginSuccessCount": 200,
+        "sessionVerifiedCount": 200,
+        "login429Count": 0,
+        "loginFailCount": 0,
+        "sessionFailCount": 0,
+        "sessionNon200Count": 0,
+        "sessionMissingCount": 0,
+        "sessionWrongProfileCount": 0,
+        "totalFailed": 0,
+        "totalMismatch": 0,
+        "stage_login": 0,
+        "stage_session": 0,
+        "durationMs": 342774,
+        "avgMsPerLogin": 1713.87,
+        "status": "PASSED"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "manualPending": 0
+    },
+    "verdict": "FOCUSED_LOAD_PASSED",
+    "scope": "FOCUSED_LOAD_ONLY: setup 1.1-1.3 and load 6.1; all other full-suite checks omitted",
+    "sourceCommit": "8245a81616708b42f27421942b190bed2083cdd4",
+    "harnessSha256": "2F23C549619E17C6110B5A3984B8338F8C706329DE50C107DA903FA3C64B2096",
+    "noRetries": true,
+    "cooldownEvidence": "Last threshold probe before 2026-10-15T10:05:00Z; launcher rejects elapsed <62s"
+  },
+  "focusedProcessExitCode": 0,
+  "delegatedVerification": {
+    "authorization": "Owner: AI hãy tự làm hết, cấp quyền cho bạn; in response to student/PIN manual check request",
+    "pin": {
+      "testedAt": "2026-10-15T10:48:44.942Z",
+      "sourceCommit": "8245a81616708b42f27421942b190bed2083cdd4",
+      "deploymentId": "dpl_B79eGzBgsmSUxWShTnVWECbwzgAn",
+      "authorization": "Owner explicitly delegated remaining TEST checks to AI",
+      "fixtureScope": "new isolated class and two synthetic pupils",
+      "firstIssue": {
+        "http": 200,
+        "noStore": true,
+        "csvRows": 2,
+        "distinctPins": true,
+        "loginAndSessionPass": 2
+      },
+      "credentialsPersisted": false,
+      "reissue": {
+        "http": 200,
+        "noStore": true,
+        "csvRows": 1,
+        "newPinDifferent": true,
+        "newPinLoginHttp": 200,
+        "newPinSessionPass": true,
+        "oldPinLoginHttp": 401,
+        "oldPinRejected": true,
+        "otherOriginalPinLoginHttp": 200,
+        "otherOriginalPinStillWorks": true,
+        "oldSessionHttp": 401,
+        "oldSessionRejected": true
+      },
+      "pass": true
+    },
+    "browser": {
+      "fixtureBannerVisible": true,
+      "manageLinks": 0,
+      "noCourseState": true,
+      "path": "/student",
+      "studentNameVisible": true,
+      "testedAt": "2026-10-15T10:51:01.411Z",
+      "sourceCommit": "8245a81616708b42f27421942b190bed2083cdd4",
+      "pass": true
+    },
+    "fixtureFlags": {
+      "checkedAt": "2026-10-15T10:52:13.087Z",
+      "scope": "TEST public.students and public.classes flags only; authenticated QA Admin",
+      "http": 200,
+      "nonfixtureRowsVisible": 0,
+      "contentRange": "*/0",
+      "nativeAdminSessionProved": true,
+      "pass": true,
+      "classes": {
+        "http": 200,
+        "nonfixtureRowsVisible": 0,
+        "contentRange": "*/0"
+      }
+    }
+  },
+  "remainingGates": {
+    "adminCreateTeacherInvitation": "REMOVED_BY_OWNER_2026-10-15; historical missing invitation proof is no longer an acceptance requirement",
+    "historicalSingleLoginFailure": "UNRESOLVED_CAUSE; full C13 failed199/200; later focused C15 passed200/200 without retry",
+    "migrationIndependentReplay": "not performed; initial empty cloud construction by all3 versioned migrations proved and reviewed",
+    "production": "NOT_AUTHORIZED",
+    "adminConnectExistingTeacher": "API_PASS_OWNER_UI_CONNECT_RELOAD_CONFIRMED; Owner directly confirmed the synthetic teacher and class remain visible after reload; mandatory 1280x720, 1440x900, 1920x1080 viewport checks are still pending"
+  },
+  "independentChecklistReview": {
+    "reviewer": "gpt-6-luna max",
+    "technicalPassed": 8,
+    "technicalTotal": 9,
+    "ownerCriteriaPassed": 4,
+    "ownerCriteriaTotal": 4,
+    "delegatedOwnerCriteria": 2,
+    "openTechnicalCriterion": "Mandatory Admin UI viewport checks 1280x720, 1440x900, 1920x1080 remain pending after Owner-confirmed synthetic teacher connect and reload",
+    "overallMilestoneComplete": false
+  },
+  "latestE6Evidence": {
+    "recordedAt": "2026-10-16T10:43:55Z",
+    "environment": "TEST only",
+    "productCommit": "7d17cbd0d99e02dbfa3355c532e4e1ffa752e331",
+    "sourceTreeCommit": "1fa3eca5913792c92207394dcca4505b3f3788bf",
+    "edge": {
+      "function": "m2-backend",
+      "version": 3,
+      "verifyJwt": false,
+      "bundleDigest": "42b6289d6b8bec41af4c4fb6d1d63c9951781e2cb1a3fae974ed28549902a2ef",
+      "receipt": ".workflow-local/m2/m2-edge-deploy-receipt-20261016.json"
+    },
+    "teacherConnectionApi": {
+      "passed": 19,
+      "total": 19,
+      "syntheticFixturesOnly": true,
+      "receipt": ".workflow-local/m2/m2-teacher-connection-api-qa-20261016-focused.json"
+    },
+    "vercel": {
+      "teamId": "team_KjA2bxebH8S1hMts27rFbxn3",
+      "projectId": "prj_T9SLafrAyOywnv8PGm821eYBVBT7",
+      "deploymentId": "dpl_CPipjdZPvZusTGngJvnW76TzLP5v",
+      "state": "READY",
+      "alias": "https://mindx-learn-test.vercel.app",
+      "target": "production in the dedicated TEST project",
+      "manifestFiles": 42,
+      "manifestBytes": 692352,
+      "manifestSha256": "86dd23d3f7f976b50acbc022c84aa2f71058bff9de5d3f1405071934708ee774",
+      "receipt": ".workflow-local/m2/vercel-deployment-receipt-e6-20261016.json"
+    },
+    "adminUi": {
+      "status": "OWNER_VERIFIED_CONNECT_AND_RELOAD; VIEWPORTS_PENDING",
+      "ownerConfirmation": "Kết nối được, tải lại vẫn thấy giáo viên và lớp",
+      "ownerConfirmationReceipt": ".workflow-local/m2/m2-owner-admin-ui-confirmation-20261016.json",
+      "browserActions": 0,
+      "screenshots": [],
+      "agentBrowserBlockReceipt": ".workflow-local/m2/m2-ui-admin-qa-blocked-20261016.json",
+      "mandatoryViewportsUnverified": [
+        "1280x720",
+        "1440x900",
+        "1920x1080"
+      ],
+      "blockReceipt": ".workflow-local/m2/m2-ui-admin-qa-blocked-20261016.json",
+      "syntheticFixtureReceipt": ".workflow-local/m2/m2-teacher-ui-fixture-20261016.json",
+      "ownerCheck": "OWNER_CONFIRMED_CONNECT_AND_RELOAD"
+    }
+  }
+}

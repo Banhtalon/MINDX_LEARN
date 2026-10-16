@@ -83,6 +83,7 @@ export interface StudentProfile {
   currentClassId: string;
   originalClassId: string;
   pinHash: string | null; // null if not yet issued
+  hasPin?: boolean; // Safe boolean representation for UI (never exposing raw hash)
   pinIssuedAt: string | null;
   status: StudentStatus;
   notes?: string;

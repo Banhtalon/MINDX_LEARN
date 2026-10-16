@@ -2,6 +2,25 @@
 
 Tệp này áp dụng cho các agent làm việc trong kho MINDX LEARN. Nó bổ sung cho yêu cầu Owner và an toàn dữ liệu hiện có, không thay thế chúng.
 
+## Phân vai bắt buộc và bàn giao chat
+
+Đây là quy tắc phân vai chuẩn cho mọi gói việc trong dự án. Yêu cầu của Owner, an toàn dữ liệu và hướng dẫn Next.js trong AGENTS.md vẫn được ưu tiên. Nếu một prompt cũ phân vai khác, dùng quy tắc này mà không tự thay đổi phạm vi sản phẩm đã duyệt.
+
+### Phân vai
+
+- **Điều phối — GPT-6.1 Sol:** chỉ phân rã yêu cầu, giao đúng vai trò, theo dõi, tổng hợp bằng chứng và báo Owner. Sol không trực tiếp sửa mã, tài liệu hay cấu hình; không tự chạy test/kiểm tra, thao tác Git, cloud hoặc nghiên cứu thay agent được giao.
+- **Worker mã — Gemini 3.8 Flash High qua AGY:** dùng đúng model gemini-3.8-flash-high và effort high cho công việc viết/sửa mã. Worker chỉ làm phạm vi được giao và có thể chạy kiểm tra trực tiếp cần thiết để xác nhận phần mã của mình.
+- **Reviewer độc lập — GPT-6 Luna Max:** giao một subagent riêng với đúng model gpt-6-luna và effort max để review. Reviewer phải đọc trạng thái hiện tại và bằng chứng mới nhất; không review mã do chính reviewer đó viết. Không lấy báo cáo của worker làm bằng chứng review.
+- **Các việc khác:** tài liệu, nghiên cứu, rà soát, kiểm chứng không thuộc phần mã, chuẩn bị Git/cloud và việc điều phối kỹ thuật đều giao cho subagent GPT-6 Luna Max phù hợp. Sol chỉ theo dõi và tổng hợp.
+- **Không tự đổi model hoặc vai trò:** khi model, AGY, quyền truy cập hoặc hạn mức không dùng được, ghi rõ vai trò đang thiếu và giữ nguyên công việc; không âm thầm thay bằng model khác hoặc để agent khác làm thay vai trò đó. Chỉ tiếp tục phần độc lập đã được giao và vẫn đúng ranh giới trên.
+
+### Bàn giao khi ngữ cảnh vượt 60%
+
+- Owner muốn chuyển phần việc còn lại sang chat mới khi mức dùng ngữ cảnh của **chat hiện tại** vượt 60%; chat mới dùng đúng model gpt-6.1-sol, effort high. Chỉ kích hoạt ngưỡng này từ số đo đáng tin cậy của riêng chat, không dùng phần trăm hạn mức tài khoản.
+- Kiểm tra capabilities của phiên ngày 16/10/2026 không thấy công cụ trả phần trăm ngữ cảnh của chat. get_usage_limits trả mức dùng hạn mức tài khoản; create_thread có thể tạo chat mới với model/effort được chỉ định; handoff_thread chỉ chuyển một chat khác giữa các checkout và không tạo chat mới hoặc chuyển chính chat đang gọi. Các chức năng đó không tạo ngưỡng kích hoạt tự động.
+- Vì chưa có số đo ngữ cảnh đáng tin cậy, hiện chưa thể tuyên bố đã cài hoặc chạy bàn giao tự động đúng ngưỡng 60%. Không tạo automation, hook, watcher, cấu hình toàn máy hay chat mới để giả lập ngưỡng. Giữ một tệp bàn giao trong dự án; chỉ chuyển tự động khi phiên sau có số đo riêng của chat đáng tin cậy và có thể tạo chat mới với đúng model/effort. Nếu không có số đo, báo rõ giới hạn và dùng cảnh báo/số đo thật mà giao diện cung cấp để Owner hoặc điều phối quyết định thời điểm chuyển.
+- OpenAI API có hướng dẫn thu gọn ngữ cảnh cho ứng dụng tự gọi Responses API, nhưng đó không phải phép đo ngữ cảnh hay cơ chế tự chuyển chat của Codex hiện tại: [Compaction](https://developers.openai.com/api/docs/guides/compaction).
+
 ## Mục tiêu
 
 - Chọn thay đổi nhỏ nhất nhưng giải quyết trọn vẹn yêu cầu.
@@ -19,6 +38,21 @@ Không tạo lớp bọc, tùy chọn hoặc cấu hình chỉ để dùng về 
 Chỉ dùng tinh thần viết gọn cho gói việc nội bộ, ghi chú kỹ thuật và phần tóm tắt kiểm tra. Không dùng lối viết rút gọn khi trao đổi với Owner, hướng dẫn thao tác, cảnh báo an toàn, tài liệu tồn tại lâu dài hoặc khi câu chữ có thể gây hiểu nhầm.
 
 Không cài hoặc chạy proxy, hook vòng đời, phần mềm nền, tiện ích trình duyệt, MCP hay trình cài đặt của Caveman trong dự án này. Không để dữ liệu dự án, mã nguồn, nhật ký hoặc thông tin Teaching đi qua dịch vụ bên ngoài chỉ để giảm token.
+
+## Thiết kế giao diện: UI UX Pro Max và Taste Skill
+
+Theo yêu cầu Owner, các lần thiết kế hoặc chỉnh giao diện tiếp theo phải áp dụng **UI UX Pro Max** và **Taste Skill** từ các kho nguồn tương ứng. UI UX Pro Max hỗ trợ bố cục và trải nghiệm thao tác; Taste Skill hỗ trợ phong cách thị giác và tính nhất quán. Đọc hướng dẫn thực tế của cả hai skill trước khi làm, giữ các thành phần phù hợp đang có và tránh viết lại toàn bộ giao diện chỉ để đổi phong cách.
+
+Chốt phong cách chung với Owner trước khi triển khai giao diện ở Mốc 2; tiếp tục hoàn thiện từng luồng tại Mốc 2–5 và kiểm tra tổng thể tại Mốc 6. Giữ tiếng Việt dễ hiểu, nền sáng, xanh dương chủ đạo, bốn khu theo vai trò, trợ năng và kiểm tra desktop 1280×720, 1440×900, 1920×1080. Mọi thay đổi vẫn phải tuân thủ phạm vi mốc, phân vai và quy tắc nghiệm thu của dự án.
+
+Owner đã cung cấp và đội triển khai đã xác minh/cài hai nguồn ngày 14/10/2026:
+
+- UI UX Pro Max: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill , commit `7246805992a42b7bba37d4cac83b01416f0c6c44`, skill `.claude/skills/ui-ux-pro-max`.
+- Taste Skill: https://github.com/leonxlnx/taste-skill , commit `a60a36dc2bb3bb77ccf17f2f62041f5ca8a458b9`, skill `skills/taste-skill`.
+
+Hai skill đã được cài trong môi trường Codex của Owner. Phong cách ứng dụng tiếp tục theo quyết định trong kế hoạch: nền sáng, xanh dương chủ đạo, chữ dễ đọc, điều hướng rõ và chuyển động nhẹ. Taste v2 thiên về trang giới thiệu, nên chỉ áp dụng nguyên tắc phù hợp cho các màn hình ứng dụng: chữ/màu nhất quán, bề mặt đơn giản, ít trang trí, kiểm tra ảnh thật; không ép dashboard có ảnh tiếp thị hoặc chuyển động liên tục. Không tuyên bố đã chạy bộ kiểm tra riêng của Taste khi chưa chạy; giao diện được reviewer kiểm tra bằng trình duyệt theo kích thước dự án.
+
+Việc cài hai skill không có nghĩa giao diện Mốc 1 đã dùng chúng hoặc đã chốt thiết kế cuối. Không đưa mã nguồn, dữ liệu học sinh, cookie hay mật khẩu vào dịch vụ ngoài chỉ để thiết kế giao diện.
 
 ## Nguồn và phạm vi đã duyệt
 

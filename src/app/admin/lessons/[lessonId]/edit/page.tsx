@@ -106,8 +106,8 @@ export default function EditLessonPage() {
     }
 
     setIsSaving(true);
-    setTimeout(() => {
-      const res = updateLesson(lesson.id, {
+    setTimeout(async () => {
+      const res = await updateLesson(lesson.id, {
         title,
         description,
         materials,

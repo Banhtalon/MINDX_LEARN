@@ -18,7 +18,7 @@ import {
 } from '@/components/icons';
 
 export default function HomePage() {
-  const { currentUser, switchDemoUser } = useStore();
+  const { currentUser, switchDemoUser, isLiveMode } = useStore();
 
   const routes = [
     { code: 'UI-01', path: '/login', name: 'Đăng nhập chung', area: 'Xác thực', desc: 'HS dùng mã + PIN 8 số; Admin/GV dùng email + mật khẩu. Có Quên mật khẩu.' },
@@ -42,55 +42,75 @@ export default function HomePage() {
       <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/40 border border-blue-400/40 text-xs font-semibold uppercase tracking-wider mb-3">
-            Mốc 1 — Khung Web & Các luồng giao diện giả lập
+            {isLiveMode ? 'Mốc 2 — Hệ thống Xác thực Bảo mật & Quản lý Lớp' : 'Mốc 1 — Khung Web & Các luồng giao diện giả lập'}
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
             MINDX LEARN — Nền tảng Học tập & Quản lý Lớp
           </h1>
           <p className="text-blue-100 text-sm leading-relaxed mb-6">
-            Bản thử nghiệm giao diện dành cho Owner và Reviewer kiểm duyệt theo Kế hoạch v3. Toàn bộ dữ liệu
-            hiện đang chạy trong bộ nhớ máy (RAM), không kết nối cơ sở dữ liệu thật, không email thật, không
-            phát sinh chi phí.
+            {isLiveMode
+              ? 'Hệ thống học tập và quản lý lớp phân quyền với xác thực phiên bảo mật (AES-256-GCM), kiểm soát truy cập RLS và quản lý cấp mã PIN an toàn.'
+              : 'Bản thử nghiệm giao diện dành cho Owner và Reviewer kiểm duyệt theo Kế hoạch v3. Toàn bộ dữ liệu hiện đang chạy trong bộ nhớ máy (RAM).'}
           </p>
 
-          {/* Quick Demo Switcher */}
-          <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
-            <div className="text-xs font-bold uppercase tracking-wider text-blue-200 mb-2">
-              Chọn nhanh vai trò để bắt đầu trải nghiệm:
+          {/* Quick Demo Switcher - EXCLUSIVELY in demo mode */}
+          {!isLiveMode ? (
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
+              <div className="text-xs font-bold uppercase tracking-wider text-blue-200 mb-2">
+                Chọn nhanh vai trò để bắt đầu trải nghiệm:
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  onClick={() => switchDemoUser('admin')}
+                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                    currentUser?.role === 'admin'
+                      ? 'bg-white text-blue-700 ring-2 ring-white'
+                      : 'bg-blue-800/80 text-white hover:bg-blue-800'
+                  }`}
+                >
+                  1. Đóng vai ADMIN Quản Trị
+                </button>
+                <button
+                  onClick={() => switchDemoUser('teacher')}
+                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                    currentUser?.role === 'teacher'
+                      ? 'bg-white text-emerald-700 ring-2 ring-white'
+                      : 'bg-emerald-800/80 text-white hover:bg-emerald-800'
+                  }`}
+                >
+                  2. Đóng vai GIÁO VIÊN
+                </button>
+                <button
+                  onClick={() => switchDemoUser('student')}
+                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                    currentUser?.role === 'student'
+                      ? 'bg-white text-amber-700 ring-2 ring-white'
+                      : 'bg-amber-800/80 text-white hover:bg-amber-800'
+                  }`}
+                >
+                  3. Đóng vai HỌC SINH
+                </button>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <button
-                onClick={() => switchDemoUser('admin')}
-                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
-                  currentUser?.role === 'admin'
-                    ? 'bg-white text-blue-700 ring-2 ring-white'
-                    : 'bg-blue-800/80 text-white hover:bg-blue-800'
-                }`}
-              >
-                1. Đóng vai ADMIN Quản Trị
-              </button>
-              <button
-                onClick={() => switchDemoUser('teacher')}
-                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
-                  currentUser?.role === 'teacher'
-                    ? 'bg-white text-emerald-700 ring-2 ring-white'
-                    : 'bg-emerald-800/80 text-white hover:bg-emerald-800'
-                }`}
-              >
-                2. Đóng vai GIÁO VIÊN
-              </button>
-              <button
-                onClick={() => switchDemoUser('student')}
-                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
-                  currentUser?.role === 'student'
-                    ? 'bg-white text-amber-700 ring-2 ring-white'
-                    : 'bg-amber-800/80 text-white hover:bg-amber-800'
-                }`}
-              >
-                3. Đóng vai HỌC SINH
-              </button>
+          ) : (
+            <div className="flex items-center gap-3">
+              {currentUser ? (
+                <Link
+                  href={currentUser.role === 'student' ? '/student' : '/manage'}
+                  className="px-5 py-2.5 bg-white text-blue-700 font-bold rounded-lg text-sm shadow hover:bg-blue-50 transition-colors"
+                >
+                  Vào khu vực làm việc ({currentUser.role === 'student' ? 'Học sinh' : currentUser.role === 'teacher' ? 'Giáo viên' : 'Admin'}) →
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="px-5 py-2.5 bg-white text-blue-700 font-bold rounded-lg text-sm shadow hover:bg-blue-50 transition-colors"
+                >
+                  Đăng nhập hệ thống →
+                </Link>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
 

@@ -1,0 +1,7 @@
+project_id = "eythjapspkoyqdxlxtcd"
+
+[api]
+port = 54321
+
+[functions.m2-backend]
+verify_jwt = false

@@ -19,6 +19,9 @@
 # Local workflow and task packets
 .workflow-local
 
+# Supabase CLI local cache
+/supabase/.temp/
+
 # Debug logs
 npm-debug.log*
 yarn-debug.log*

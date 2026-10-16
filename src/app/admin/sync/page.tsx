@@ -17,7 +17,7 @@ import {
 
 export default function AdminSyncPage() {
   const router = useRouter();
-  const { currentUser, previewTeachingSync, applyTeachingSync } = useStore();
+  const { currentUser, isLiveMode, previewTeachingSync, applyTeachingSync } = useStore();
 
   const [activeTab, setActiveTab] = useState<'mock_fixture' | 'real_source'>('mock_fixture');
   const [isLoading, setIsLoading] = useState(false);
@@ -54,9 +54,9 @@ export default function AdminSyncPage() {
       const res = await fetch('/fixtures/teaching_mock.json');
       const data = await res.json();
 
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsLoading(false);
-        const result = previewTeachingSync(data);
+        const result = await previewTeachingSync(data);
         if (result.success && result.report) {
           setDiffReport(result.report);
           setStatusMessage({
@@ -95,7 +95,7 @@ export default function AdminSyncPage() {
     if (!diffReport || isApplyingSync) return;
     setIsApplyingSync(true);
     await new Promise((r) => setTimeout(r, 400));
-    const res = applyTeachingSync(diffReport);
+    const res = await applyTeachingSync(diffReport);
     setIsApplyingSync(false);
     if (res.success) {
       setStatusMessage({ text: res.message, isError: false });

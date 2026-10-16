@@ -91,8 +91,8 @@ export default function TeacherSubmissionsPage() {
     setGradingAction(status);
     setActionAlert(null);
 
-    setTimeout(() => {
-      const res = gradeSubmission(activeSub.id, {
+    setTimeout(async () => {
+      const res = await gradeSubmission(activeSub.id, {
         status,
         feedback,
       });
@@ -106,7 +106,7 @@ export default function TeacherSubmissionsPage() {
     if (!activeSub || isReopening) return;
     setIsReopening(true);
     await new Promise((r) => setTimeout(r, 400));
-    const res = reopenSubmission(activeSub.id);
+    const res = await reopenSubmission(activeSub.id);
     setIsReopening(false);
     setActionAlert({ text: res.message, isError: !res.success });
   };

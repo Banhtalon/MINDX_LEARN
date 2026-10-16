@@ -10,6 +10,7 @@ import {
   IconUser,
   IconLogOut,
   IconAlertTriangle,
+  IconAlertCircle,
   IconFileText,
   IconUsers,
   IconDatabase,
@@ -18,10 +19,10 @@ import {
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, logout, qaState } = useStore();
+  const { currentUser, logout, qaState, isLiveMode, bootstrapError, retryBootstrap } = useStore();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push('/login');
   };
 
@@ -39,21 +40,43 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
-      {/* Top Warning Banner: ALWAYS VISIBLE MOCK DATA NOTICE */}
+      {/* Top Warning Banner */}
       <div className="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs font-medium flex items-center justify-between border-b border-amber-600">
         <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
           <IconAlertTriangle className="w-4 h-4 text-slate-950 shrink-0" />
-          <span className="font-bold tracking-wide">DỮ LIỆU GIẢ — MÔI TRƯỜNG THỬ NGHIỆM TEST</span>
-          <span className="text-slate-900 hidden md:inline">
-            | Mọi thao tác lưu/cấp mã/đồng bộ đều đang chạy mô phỏng trong bộ nhớ tạm (không kết nối cơ sở dữ liệu thật).
-          </span>
-          {qaState.scenario !== 'normal' && (
-            <span className="ml-auto bg-slate-900 text-white px-2 py-0.5 rounded text-[11px] font-semibold">
-              Kịch bản QA: {qaState.scenario.toUpperCase()}
-            </span>
+          {isLiveMode ? (
+            <span className="font-bold tracking-wide">TEST MỐC 2 — dữ liệu học sinh giả, đăng nhập thật</span>
+          ) : (
+            <>
+              <span className="font-bold tracking-wide">DỮ LIỆU GIẢ — MÔI TRƯỜNG THỬ NGHIỆM MỐC 1 (MÔ PHỎNG)</span>
+              <span className="text-slate-900 hidden md:inline">
+                | Mọi thao tác lưu/cấp mã/đồng bộ đều đang chạy mô phỏng trong bộ nhớ tạm (không kết nối cơ sở dữ liệu thật).
+              </span>
+              {qaState.scenario !== 'normal' && (
+                <span className="ml-auto bg-slate-900 text-white px-2 py-0.5 rounded text-[11px] font-semibold">
+                  Kịch bản QA: {qaState.scenario.toUpperCase()}
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>
+
+      {/* Bootstrap Error Alert in Live Mode */}
+      {isLiveMode && bootstrapError && (
+        <div className="bg-rose-50 border-b border-rose-200 px-4 py-2 text-xs text-rose-800">
+          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
+            <IconAlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span className="font-semibold flex-1">{bootstrapError}</span>
+            <button
+              onClick={() => retryBootstrap()}
+              className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold transition-colors"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,7 +89,9 @@ export function Navbar() {
               </div>
               <div>
                 <span className="font-extrabold text-slate-900 text-base tracking-tight">MINDX LEARN</span>
-                <span className="block text-[10px] text-blue-600 font-bold uppercase tracking-wider">Bản thử nghiệm Mốc 1</span>
+                <span className="block text-[10px] text-blue-600 font-bold uppercase tracking-wider">
+                  {isLiveMode ? 'Bản thử nghiệm Mốc 2' : 'Bản thử nghiệm Mốc 1 (Mô phỏng)'}
+                </span>
               </div>
             </Link>
 

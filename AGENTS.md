@@ -11,3 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Quy tắc làm việc AI của dự án
 
 Đọc [docs/AI_AGENT_WORKFLOW.md](docs/AI_AGENT_WORKFLOW.md) trước khi thay đổi mã, cấu hình hoặc tài liệu kỹ thuật. Quy tắc Owner, an toàn dữ liệu, tiếng Việt dễ hiểu, nghiệm thu và hướng dẫn Next.js trong tệp này luôn được ưu tiên.
+
+Khi thiết kế hoặc chỉnh giao diện tiếp theo, áp dụng **UI UX Pro Max** và **Taste Skill** theo yêu cầu và trạng thái xác minh nguồn trong tài liệu trên.
+
+Quy tắc phân vai, dùng đúng model và giới hạn bàn giao chat nằm tại [docs/AI_AGENT_WORKFLOW.md](docs/AI_AGENT_WORKFLOW.md). Nếu prompt cũ mâu thuẫn, áp dụng quy tắc này cùng yêu cầu Owner/an toàn dữ liệu; vẫn phải làm theo hướng dẫn Next.js ở đầu tệp.

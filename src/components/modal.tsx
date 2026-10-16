@@ -13,9 +13,9 @@ interface ModalProps {
 
 /**
  * Hook hỗ trợ Accessibility:
- * 1. Phím Escape để đóng an toàn
+ * 1. Phím Escape để đóng an toàn (luôn gọi callback onClose mới nhất)
  * 2. Giữ tiêu điểm (Focus Trap) bằng phím Tab / Shift+Tab
- * 3. Tự động focus vào phần tử đầu tiên khi mở
+ * 3. Tự động focus vào phần tử đầu tiên khi mở (chỉ theo dõi vòng đời isOpen, không bị kích hoạt lại khi caller re-render)
  * 4. Khôi phục tiêu điểm về phần tử trước đó khi đóng
  */
 function useDialogA11y({
@@ -27,6 +27,11 @@ function useDialogA11y({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -54,7 +59,7 @@ function useDialogA11y({
       // Phím Escape đóng dialog
       if (e.key === 'Escape') {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -97,7 +102,7 @@ function useDialogA11y({
         previousFocusRef.current.focus();
       }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   return containerRef;
 }

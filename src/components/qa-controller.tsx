@@ -12,8 +12,13 @@ import {
 } from './icons';
 
 export function QAController() {
-  const { qaState, setQAScenario, currentUser, switchDemoUser } = useStore();
+  const { qaState, setQAScenario, currentUser, switchDemoUser, isLiveMode } = useStore();
   const [isOpen, setIsOpen] = useState(false);
+
+  // In live mode, never expose QA controller or role switching
+  if (isLiveMode) {
+    return null;
+  }
 
   const scenarios: { key: QAScenario; label: string; desc: string; badgeColor: string }[] = [
     {

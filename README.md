@@ -1,91 +1,65 @@
-# MINDX LEARN — Nền tảng Học tập & Quản lý Lớp (Mốc 1)
+# MINDX LEARN — bản TEST Mốc 2
 
-Ứng dụng web dùng chung để quản lý học sinh, giáo viên và Admin theo Kế hoạch v3 (`PROJECT_PLAN.md`).
-Gói triển khai **M1-A**: Dựng khung Next.js, Node.js, TypeScript và toàn bộ 13 màn hình giao diện giả lập (UI-01 đến UI-13).
+Ứng dụng học tập và quản lý lớp theo [PROJECT_PLAN.md](PROJECT_PLAN.md). Mốc 1 đã nghiệm thu; Mốc 2 đang triển khai và kiểm tra. Bằng chứng hiện tại: [docs/M2_EVIDENCE.md](docs/M2_EVIDENCE.md).
 
-> **Cảnh báo môi trường TEST:** Toàn bộ dữ liệu hiện tại chạy hoàn toàn trong bộ nhớ máy (RAM). Không kết nối cơ sở dữ liệu Supabase, không gửi email thật, không lưu mật khẩu hay mã PIN thô.
+## Mở ứng dụng
 
----
+Bản TEST: https://mindx-learn-test.vercel.app . Đội triển khai cập nhật web sau kiểm tra; hồ sơ bằng chứng ghi rõ bản đang chạy.
 
-## 1. Bốn khu vực giao diện chính
+Ở Mốc 2, chọn **Giáo viên / Admin** để đăng nhập email/mật khẩu, hoặc **Học sinh** để dùng mã học sinh và PIN riêng gồm 8 chữ số. Không gửi mật khẩu/PIN trong chat. Admin tạo email và mật khẩu giáo viên trực tiếp trong Supabase, sau đó kết nối tài khoản vào ứng dụng; không gửi thư mời và không mở đăng ký tự do.
 
-1. **Khu Xác thực & Tài khoản chung:**
-   - `/login` [UI-01]: Đăng nhập học sinh (Mã HS + PIN 8 số) hoặc cán bộ (Email + Mật khẩu). Có "Quên mật khẩu" gửi email mô phỏng. Nút đăng nhập nhanh 1-click cho kiểm thử.
-   - `/account` [UI-02]: Xem hồ sơ; học sinh đổi PIN 8 chữ số; Admin/GV đổi mật khẩu; đăng xuất.
+Admin dùng **Quản lý lớp** để tạo/sửa lớp, phân công giáo viên và lưu trữ/khôi phục lớp hoặc học sinh. Cấp PIN lần đầu chỉ cho học sinh chưa có PIN; cấp lại chỉ cho một học sinh được chọn. CSV tải tại lần cấp, không xem lại PIN cũ. Mất CSV thì cấp PIN mới cho đúng học sinh.
 
-2. **Khu Học sinh:**
-   - `/student` [UI-10]: Tổng quan lớp học và tiến độ cố định **"Đã hoàn thành X/14 buổi"** ((X/14)*100%).
-   - `/student/course` [UI-11]: Danh sách 14 buổi học (chỉ hiển thị các bài Đã xuất bản). Học sinh được mở học bài tùy ý mà không bắt buộc theo thứ tự tuần tự.
-   - `/student/lessons/[lessonId]` [UI-12]: Chi tiết bài học, xem video, tài liệu, nộp bài thực hành (liên kết hoặc tệp <= 2MB). Khóa nộp lại khi bài đã được duyệt Đạt.
-   - `/student/lessons/[lessonId]/quiz` [UI-13]: Làm trắc nghiệm Quiz, ngưỡng đạt >= 70%, làm lại không giới hạn và lưu điểm cao nhất.
+TEST chỉ dùng lớp/học sinh giả; email Admin của Owner dùng để đăng nhập thật. Chưa nhập Teaching thật hoặc mở PROD.
 
-3. **Khu Giáo viên:**
-   - `/manage` [UI-03]: Bảng điều khiển theo dõi lớp phụ trách và số lượng bài nộp cần chấm ("Việc cần chấm").
-   - `/manage/classes` [UI-04]: Theo dõi danh sách học sinh và tiến độ lớp được giao (Giáo viên không có nút cấp PIN).
-   - `/teacher/submissions` [UI-09]: Hàng đợi bài nộp, chấm bài Đạt / Cần làm lại, nhận xét và mở lại quyền nộp bài cho học sinh.
+## Thêm giáo viên theo quyết định Owner ngày 15/10/2026
 
-4. **Khu Quản trị Admin:**
-   - `/manage/classes` [UI-04]: Quản lý lớp, gán khóa/giáo viên; cấp PIN lần đầu (cho HS chưa có PIN) hoặc cấp lại 1 HS với CSV một lần; kết thúc khóa học 14 buổi, xuất đối chiếu CSV và xóa vĩnh viễn dữ liệu cũ.
-   - `/admin/courses` [UI-05]: Quản lý khóa học đúng 14 vị trí Buổi 1–14 cố định; xem trạng thái Nháp / Đã xuất bản.
-   - `/admin/lessons/[lessonId]/edit` [UI-06]: Soạn thảo video, tài liệu, quiz, chế độ thực hành; **Chặn xuất bản bài học chỉ có lý thuyết**.
-   - `/admin/teachers` [UI-07]: Tạo tài khoản giáo viên bằng email công vụ, gửi liên kết thiết lập mật khẩu, phân công lớp.
-   - `/admin/sync` [UI-08]: Thử nghiệm đồng bộ fixture Teaching MindX, đối chiếu mã lớp ROB, cam kết an toàn không chuyển mật khẩu/cookie.
+1. Admin mở [Supabase TEST](https://supabase.com/dashboard/project/eythjapspkoyqdxlxtcd/auth/users), vào **Authentication → Users → Add user → Create new user**.
+2. Nhập email và mật khẩu tại Supabase, bật **Auto Confirm User** để xác nhận tài khoản, rồi tạo người dùng. Không chọn gửi thư mời.
+3. Trong ứng dụng, mở **Tài khoản Giáo viên → Kết nối giáo viên**, nhập đúng email vừa tạo và họ tên; nếu phân công ngay tại đây, chỉ chọn lớp đang hoạt động và chưa có giáo viên. Muốn đổi giáo viên của lớp đã được phân công, dùng **Quản lý lớp**.
+4. Giáo viên đăng nhập bằng email và mật khẩu Admin đã đặt trong Supabase. Kết nối không đổi mật khẩu hoặc tài khoản đăng nhập đã tạo. Bàn giao mật khẩu riêng, không gửi trong chat dự án.
 
----
+Tài khoản mới trong Supabase chưa tự có quyền Giáo viên cho đến khi Admin kết nối trong ứng dụng. Chức năng **Quên mật khẩu** vẫn được giữ.
 
-## 2. Quy tắc nghiệp vụ trọng tâm đã cài đặt
+## Phạm vi
 
-- **Khóa 14 buổi cố định:** Mỗi khóa học có đúng 14 vị trí Buổi 1–14. Không thêm/xóa/đảo vị trí làm lệch số buổi và cấu trúc báo cáo.
-- **Tiến độ X/14:** Luôn tính trên mẫu số 14 buổi: `(X / 14) * 100%`. Kể cả khi một số buổi đang là Bản nháp, chỉ khi hoàn thành 14/14 mới đạt 100%.
-- **Chặn xuất bản chỉ lý thuyết:** Hệ thống từ chối xuất bản bài học nếu thiếu cả Quiz và Thực hành.
-- **Bảo mật PIN 8 chữ số:**
-  - PIN gồm đúng 8 chữ số ngẫu nhiên, từ chối các dãy số dễ đoán.
-  - Cấp PIN lần đầu chỉ tạo mã cho học sinh chưa có PIN.
-  - Cấp lại PIN chỉ tác động đúng 1 học sinh được chọn.
-  - Tải CSV một lần (no-store), không lưu PIN thô trong cơ sở dữ liệu.
-  - Giáo viên không có nút cấp PIN và không tải/xem lại CSV mã PIN.
-- **Kết thúc khóa & CSV tổng kết 14 buổi:**
-  - Yêu cầu Admin xác nhận lớp đã học đủ 14 buổi theo lịch.
-  - Cảnh báo đỏ về bài chưa nộp/chờ chấm là thông tin để Admin cân nhắc, không tự chặn kỹ thuật.
-  - CSV tổng kết bao gồm toàn bộ học sinh từng tham gia đợt (kể cả em đã chuyển lớp hoặc bị lưu trữ).
-  - Đúng 14 dòng cho mỗi học sinh (`Tổng số HS x 14 dòng`). Tuyệt đối không chứa mã PIN.
-  - Xóa vĩnh viễn điểm quiz, bài nộp, nhận xét của lớp; giữ nguyên tài khoản người dùng và nội dung bài học.
+- Mốc 2: đăng nhập, PIN, tài khoản, lớp, phân công giáo viên, quyền dữ liệu và khóa phiên cũ.
+- Mốc 3: khóa 14 buổi, quiz, thực hành, chấm bài và tiến độ lưu thật.
+- Mốc 4: đồng bộ Teaching có xem trước/xác nhận.
+- Mốc 5: CSV tổng kết và kết thúc/xóa kết quả đợt cũ.
+- Mốc 6: kiểm tra tổng thể và quyết định mở PROD.
 
----
+Các tính năng ngoài Mốc 2 bị khóa trong chế độ kết nối thật. Mô phỏng Mốc 1 được giữ để tham khảo, chỉ bật khi đội triển khai cấu hình `NEXT_PUBLIC_MINDX_DEMO=1`; dữ liệu mô phỏng chỉ nằm trong bộ nhớ trang.
 
-## 3. Bộ điều khiển kiểm thử QA (QA Controller)
+## Chạy trên máy đã cấu hình
 
-Giao diện tích hợp sẵn thanh công cụ nổi **"Mô phỏng QA"** ở góc dưới bên phải màn hình để QA và Reviewer chủ động chọn các tình huống:
-1. `Normal`: Hoạt động bình thường.
-2. `Loading Delay`: Mô phỏng độ trễ mạng 2 giây để kiểm tra skeleton/spinner.
-3. `Save Error`: Mô phỏng lỗi lưu máy chủ — **thao tác lưu báo lỗi và dữ liệu trong kho hoàn toàn không bị thay đổi (Rollback)**.
-4. `Network Error`: Mô phỏng mất kết nối, hiển thị nút thử lại.
-5. `Session Expired`: Mô phỏng hết phiên làm việc (401).
-6. `Forbidden`: Mô phỏng lỗi không đủ quyền (403).
-7. `Empty Data`: Mô phỏng trạng thái không có dữ liệu (Empty State).
+Cần Node.js 24.x và các gói dự án. Đội triển khai giữ cấu hình riêng trong `.env.local`, không đưa lên GitHub/chat. Thiếu cấu hình thì ứng dụng báo chưa sẵn sàng, không tự mở Admin mô phỏng.
 
----
+Mở PowerShell và chạy:
 
-## 4. Hướng dẫn chạy và kiểm thử
-
-Môi trường yêu cầu: Node 24.x, npm 11.x, Next.js 16.4.0, React 19.3.0.
-
-```bash
-# 1. Cài đặt các gói phụ thuộc
-npm install
-
-# 2. Kiểm tra kiểu TypeScript toàn bộ dự án
-npm run typecheck
-
-# 3. Chạy bộ kiểm thử tự động (Unit Test kiểm chứng quy tắc nghiệp vụ trong src/lib/simulation-rules.ts)
-npm test
-
-# 4. Khởi chạy máy chủ phát triển cục bộ (cổng mặc định 3000)
-npm run dev
-
-# 5. Kiểm tra biên dịch ứng dụng production
-npm run build
-
-# 6. Khởi chạy bản production build
-npm run start
+```powershell
+Set-Location -LiteralPath 'F:\MINDX_project test\PROJECT-8-LEARN-DASHBOARD'
+npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
+
+Thấy `Ready` thì mở http://127.0.0.1:3000 . Giữ cửa sổ chạy mở; Ctrl+C để dừng. Đăng nhập dùng Supabase TEST nên thay đổi lớp/PIN được lưu trên TEST. Máy mới cần đội triển khai cấu hình trước; Owner không tự tìm hoặc chép khóa dịch vụ.
+
+## Kiểm tra dành cho đội triển khai
+
+```powershell
+npm run typecheck
+npm test
+npm run build
+```
+
+Build chỉ xác nhận mã biên dịch. Phép thử kết nối dùng `scripts/m2-app-check.mjs` và `scripts/m2-live-check.mjs`; công cụ sau tạo tài khoản giả, chỉ chạy đúng TEST. Tải 200 tài khoản/chờ giới hạn dùng cờ rõ ràng. Biên bản phân biệt PASS, FAIL, NOT_TESTED và MANUAL_PENDING.
+
+`npm run start` chạy bản đóng gói; xác minh địa chỉ mạng tin cậy được cấu hình cho Vercel. Thử đăng nhập trên máy cá nhân dùng `npm run dev` như trên.
+
+SQL có phiên bản tại `supabase/migrations/`; dịch vụ quyền tại `supabase/functions/m2-backend/`. Khóa quản trị chỉ ở dịch vụ, không ở trình duyệt. Cookie phiên mã hóa, không cho mã trang đọc. PIN rõ chỉ xuất hiện tạm trong CSV cấp PIN của Admin.
+
+## Bàn giao
+
+Gemini qua AGY CLI triển khai, Sol điều phối/kiểm tra/kết nối, Luna review độc lập. Chỉ reviewer tick checklist sau đủ bằng chứng/nghiệm thu Owner. Kiểm tra trên máy hoặc một lượt đăng nhập không đồng nghĩa hoàn thành Mốc 2.
+
+Giao diện dùng UI UX Pro Max và nguyên tắc Taste phù hợp ứng dụng, nền sáng/xanh dương/tiếng Việt dễ đọc. Nguồn skill và quy tắc: [docs/AI_AGENT_WORKFLOW.md](docs/AI_AGENT_WORKFLOW.md).
