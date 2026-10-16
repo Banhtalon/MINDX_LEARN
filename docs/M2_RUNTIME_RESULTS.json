@@ -629,7 +629,7 @@
     "historicalSingleLoginFailure": "UNRESOLVED_CAUSE; full C13 failed199/200; later focused C15 passed200/200 without retry",
     "migrationIndependentReplay": "not performed; initial empty cloud construction by all3 versioned migrations proved and reviewed",
     "production": "NOT_AUTHORIZED",
-    "adminConnectExistingTeacher": "API_PASS_UI_UNVERIFIED; TEST focused API 19/19 passed on synthetic fixtures, including original teacher password and rollback; Admin UI connection/reload and mandatory 1280x720, 1440x900, 1920x1080 viewports are still pending"
+    "adminConnectExistingTeacher": "API_PASS_OWNER_UI_CONNECT_RELOAD_CONFIRMED; Owner directly confirmed the synthetic teacher and class remain visible after reload; mandatory 1280x720, 1440x900, 1920x1080 viewport checks are still pending"
   },
   "independentChecklistReview": {
     "reviewer": "gpt-6-luna max",
@@ -638,7 +638,7 @@
     "ownerCriteriaPassed": 4,
     "ownerCriteriaTotal": 4,
     "delegatedOwnerCriteria": 2,
-    "openTechnicalCriterion": "Admin connects an existing confirmed teacher Auth account in the TEST UI and reloads; mandatory viewport checks 1280x720, 1440x900, 1920x1080 remain pending",
+    "openTechnicalCriterion": "Mandatory Admin UI viewport checks 1280x720, 1440x900, 1920x1080 remain pending after Owner-confirmed synthetic teacher connect and reload",
     "overallMilestoneComplete": false
   },
   "latestE6Evidence": {
@@ -672,9 +672,12 @@
       "receipt": ".workflow-local/m2/vercel-deployment-receipt-e6-20261016.json"
     },
     "adminUi": {
-      "status": "BLOCKED_BEFORE_BROWSER_OPEN",
+      "status": "OWNER_VERIFIED_CONNECT_AND_RELOAD; VIEWPORTS_PENDING",
+      "ownerConfirmation": "Kết nối được, tải lại vẫn thấy giáo viên và lớp",
+      "ownerConfirmationReceipt": ".workflow-local/m2/m2-owner-admin-ui-confirmation-20261016.json",
       "browserActions": 0,
       "screenshots": [],
+      "agentBrowserBlockReceipt": ".workflow-local/m2/m2-ui-admin-qa-blocked-20261016.json",
       "mandatoryViewportsUnverified": [
         "1280x720",
         "1440x900",
@@ -682,7 +685,7 @@
       ],
       "blockReceipt": ".workflow-local/m2/m2-ui-admin-qa-blocked-20261016.json",
       "syntheticFixtureReceipt": ".workflow-local/m2/m2-teacher-ui-fixture-20261016.json",
-      "ownerCheck": "pending"
+      "ownerCheck": "OWNER_CONFIRMED_CONNECT_AND_RELOAD"
     }
   }
 }
