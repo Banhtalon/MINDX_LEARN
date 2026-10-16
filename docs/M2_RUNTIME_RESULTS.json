@@ -487,13 +487,13 @@
     }
   },
   "currentDeployment": {
-    "id": "dpl_B79eGzBgsmSUxWShTnVWECbwzgAn",
-    "productSourceCommit": "8245a81616708b42f27421942b190bed2083cdd4",
+    "id": "dpl_CPipjdZPvZusTGngJvnW76TzLP5v",
+    "productSourceCommit": "7d17cbd0d99e02dbfa3355c532e4e1ffa752e331",
     "state": "READY",
     "url": "https://mindx-learn-test.vercel.app",
-    "checkedAt": "2026-10-15T10:37:20.231Z",
+    "checkedAt": "2026-10-16T10:43:55Z",
     "uploadedFiles": 42,
-    "uploadedBytes": 687874
+    "uploadedBytes": 692352
   },
   "focusedDiagnosticReceipt": {
     "timestamp": "2026-10-15T10:34:05.646Z",
@@ -629,7 +629,7 @@
     "historicalSingleLoginFailure": "UNRESOLVED_CAUSE; full C13 failed199/200; later focused C15 passed200/200 without retry",
     "migrationIndependentReplay": "not performed; initial empty cloud construction by all3 versioned migrations proved and reviewed",
     "production": "NOT_AUTHORIZED",
-    "adminConnectExistingTeacher": "IN_PROGRESS; Admin creates confirmed email/password Auth account in Supabase, app connects teacher profile without invitation"
+    "adminConnectExistingTeacher": "API_PASS_UI_UNVERIFIED; TEST focused API 19/19 passed on synthetic fixtures, including original teacher password and rollback; Admin UI connection/reload and mandatory 1280x720, 1440x900, 1920x1080 viewports are still pending"
   },
   "independentChecklistReview": {
     "reviewer": "gpt-6-luna max",
@@ -638,7 +638,51 @@
     "ownerCriteriaPassed": 4,
     "ownerCriteriaTotal": 4,
     "delegatedOwnerCriteria": 2,
-    "openTechnicalCriterion": "Admin connects existing manually created Supabase teacher account (replacement under implementation)",
+    "openTechnicalCriterion": "Admin connects an existing confirmed teacher Auth account in the TEST UI and reloads; mandatory viewport checks 1280x720, 1440x900, 1920x1080 remain pending",
     "overallMilestoneComplete": false
+  },
+  "latestE6Evidence": {
+    "recordedAt": "2026-10-16T10:43:55Z",
+    "environment": "TEST only",
+    "productCommit": "7d17cbd0d99e02dbfa3355c532e4e1ffa752e331",
+    "sourceTreeCommit": "1fa3eca5913792c92207394dcca4505b3f3788bf",
+    "edge": {
+      "function": "m2-backend",
+      "version": 3,
+      "verifyJwt": false,
+      "bundleDigest": "42b6289d6b8bec41af4c4fb6d1d63c9951781e2cb1a3fae974ed28549902a2ef",
+      "receipt": ".workflow-local/m2/m2-edge-deploy-receipt-20261016.json"
+    },
+    "teacherConnectionApi": {
+      "passed": 19,
+      "total": 19,
+      "syntheticFixturesOnly": true,
+      "receipt": ".workflow-local/m2/m2-teacher-connection-api-qa-20261016-focused.json"
+    },
+    "vercel": {
+      "teamId": "team_KjA2bxebH8S1hMts27rFbxn3",
+      "projectId": "prj_T9SLafrAyOywnv8PGm821eYBVBT7",
+      "deploymentId": "dpl_CPipjdZPvZusTGngJvnW76TzLP5v",
+      "state": "READY",
+      "alias": "https://mindx-learn-test.vercel.app",
+      "target": "production in the dedicated TEST project",
+      "manifestFiles": 42,
+      "manifestBytes": 692352,
+      "manifestSha256": "86dd23d3f7f976b50acbc022c84aa2f71058bff9de5d3f1405071934708ee774",
+      "receipt": ".workflow-local/m2/vercel-deployment-receipt-e6-20261016.json"
+    },
+    "adminUi": {
+      "status": "BLOCKED_BEFORE_BROWSER_OPEN",
+      "browserActions": 0,
+      "screenshots": [],
+      "mandatoryViewportsUnverified": [
+        "1280x720",
+        "1440x900",
+        "1920x1080"
+      ],
+      "blockReceipt": ".workflow-local/m2/m2-ui-admin-qa-blocked-20261016.json",
+      "syntheticFixtureReceipt": ".workflow-local/m2/m2-teacher-ui-fixture-20261016.json",
+      "ownerCheck": "pending"
+    }
   }
 }
