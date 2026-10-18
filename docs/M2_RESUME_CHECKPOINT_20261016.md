@@ -1,6 +1,16 @@
-# M2 checkpoint — 16/10/2026
+# M2 checkpoint — cập nhật 18/10/2026
 
-Đây là cập nhật trạng thái để tiếp tục Mốc 2, không phải nghiệm thu Mốc 2 và không thay thế các biên nhận lịch sử trong `M2_RUNTIME_RESULTS.json`. Không đánh dấu hoàn tất mục checklist nào trong bản cập nhật này.
+Đây là checkpoint tiếp tục Mốc 2. Kết quả tại thời điểm 16/10 được giữ bên dưới làm lịch sử; trạng thái mới nhất ngày 18/10 nằm ở mục đầu và không thay thế các biên nhận lịch sử trong `M2_RUNTIME_RESULTS.json`.
+
+## Trạng thái mới nhất — 18/10/2026
+
+- Reviewer độc lập PASS cổng UI Admin TEST tại `1280×720`, `1440×900`, `1920×1080`; checklist kỹ thuật M2 là 9/9 và tiêu chí Owner 4/4. Chỉ TEST, không mở PROD và không bắt đầu Mốc 3.
+- Lượt UI chỉ kiểm tra fixture giả `c4678` và hộp thoại kết nối để trống. Cả ba kích thước không có cuộn ngang; mỗi danh sách khớp đúng một dòng fixture; 2 ô nhập để trống, 25 checkbox đều không chọn. Ở `1280×720`, nút Hủy ban đầu dưới mép nhưng nhấn Tab đưa nút vào vùng nhìn; Hủy đóng hộp thoại và giữ nguyên route/fixture. Các kích thước 1440 và 1920 cũng được reviewer xác nhận.
+- Ảnh bằng chứng được hiển thị trực tiếp trong phiên công cụ, không lưu thành tệp ảnh. Biên nhận phép đo và các giới hạn ảnh: `scratch/m2-ui-viewport-20261018/viewport-receipt.json`. Biên nhận Vercel/source chỉ đọc: `scratch/m2-ui-viewport-20261018/hosted-source-receipt.json`.
+- Vercel xác nhận alias TEST vẫn trỏ vào deployment production của project TEST `dpl_CPipjdZPvZusTGngJvnW76TzLP5v` (`READY`, source commit `7d17cbd0d99e02dbfa3355c532e4e1ffa752e331`). 42/42 tệp trong allowlist E6 khớp SHA-256; không có thay đổi mã sản phẩm hoặc triển khai mới. HEAD local khi đối chiếu là `8a6b6edd0dcaaf125581e880e4b1eeb7961c5a41`; thay đổi sau product commit là tài liệu.
+- Giữ riêng full C13 **FAILED 199/200**, nguyên nhân một lần lỗi chưa rõ, và C15 **focused PASS 200/200**; không retry C13. Việc PASS UI không làm thay đổi các kết quả lịch sử này.
+
+## Nội dung đã xác minh tại checkpoint 16/10 (giữ lịch sử)
 
 ## Thay đổi và kiểm tra mã
 
@@ -31,8 +41,13 @@
 - Fixture giao diện TEST giả ban đầu gồm tài khoản Auth Giáo viên đã xác nhận nhưng chưa có hồ sơ/ánh xạ trong ứng dụng và một lớp trống. Owner đã kết nối fixture này; không dọn hoặc xóa dữ liệu đã liên kết. Receipt khởi tạo: `.workflow-local/m2/m2-teacher-ui-fixture-20261016.json`; không lưu mật khẩu, token hoặc ID Auth, không gửi thư.
 - Giữ riêng lịch sử: full C13 **FAILED 199/200**, nguyên nhân một lượt lỗi chưa rõ; C15 **focused 200/200 PASS**, không retry. C15 không đổi kết quả C13.
 
-## Việc còn lại
+## Việc còn lại tại thời điểm 16/10 (đã cập nhật 18/10)
 
 - Reviewer độc lập đã đối chiếu receipt E6 và xác nhận phần còn mở là các kích thước Admin bắt buộc.
 - Owner đã xác nhận thao tác kết nối/tải lại trên TEST; cần hoàn tất kiểm tra `1280×720`, `1440×900` và `1920×1080`. Hiện chưa có ảnh do Computer Use bị chặn trước khi trình duyệt mở.
 - Giữ Mốc 2 chưa nghiệm thu cho tới khi có kết quả giao diện ba kích thước và quyết định reviewer/Owner. Không tự tick checklist.
+
+## Tiếp tục từ checkpoint 18/10
+
+- Các gạch đầu dòng trong mục 16/10 phía trên là ảnh chụp lịch sử trước lượt UI và review độc lập; trạng thái hiện tại là PASS 9/9 kỹ thuật và 4/4 Owner như ghi ở đầu tệp.
+- Giữ PR #1 mở ở trạng thái nháp; không merge. Chỉ TEST, không mở PROD hoặc bắt đầu Mốc 3.

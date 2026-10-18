@@ -629,17 +629,82 @@
     "historicalSingleLoginFailure": "UNRESOLVED_CAUSE; full C13 failed199/200; later focused C15 passed200/200 without retry",
     "migrationIndependentReplay": "not performed; initial empty cloud construction by all3 versioned migrations proved and reviewed",
     "production": "NOT_AUTHORIZED",
-    "adminConnectExistingTeacher": "API_PASS_OWNER_UI_CONNECT_RELOAD_CONFIRMED; Owner directly confirmed the synthetic teacher and class remain visible after reload; mandatory 1280x720, 1440x900, 1920x1080 viewport checks are still pending"
+    "adminConnectExistingTeacher": "API_PASS_OWNER_UI_CONNECT_RELOAD_CONFIRMED; 1280x720, 1440x900, 1920x1080 viewport checks PASS by Ops and independent reviewer on synthetic fixture c4678; TEST only"
   },
   "independentChecklistReview": {
     "reviewer": "gpt-6-luna max",
-    "technicalPassed": 8,
+    "technicalPassed": 9,
     "technicalTotal": 9,
     "ownerCriteriaPassed": 4,
     "ownerCriteriaTotal": 4,
     "delegatedOwnerCriteria": 2,
-    "openTechnicalCriterion": "Mandatory Admin UI viewport checks 1280x720, 1440x900, 1920x1080 remain pending after Owner-confirmed synthetic teacher connect and reload",
-    "overallMilestoneComplete": false
+    "openTechnicalCriterion": null,
+    "reviewVerdict": "PASS",
+    "reviewedAt": "2026-10-18",
+    "overallMilestoneComplete": true
+  },
+  "latestAdminUiViewportEvidence": {
+    "recordedAt": "2026-10-18",
+    "environment": "TEST only",
+    "route": "https://mindx-learn-test.vercel.app/admin/teachers",
+    "syntheticFixture": "c4678",
+    "operationsStatus": "PASS",
+    "independentReviewer": "gpt-6-luna max",
+    "independentReviewVerdict": "PASS",
+    "sourceHeadAtCheck": "8a6b6edd0dcaaf125581e880e4b1eeb7961c5a41",
+    "productCommit": "7d17cbd0d99e02dbfa3355c532e4e1ffa752e331",
+    "productionDeployment": "dpl_CPipjdZPvZusTGngJvnW76TzLP5v",
+    "sourceAllowlist": {
+      "manifestFiles": 42,
+      "matchingFiles": 42,
+      "hashMismatches": 0,
+      "manifestSha256": "86dd23d3f7f976b50acbc022c84aa2f71058bff9de5d3f1405071934708ee774"
+    },
+    "sharedModalAssertions": {
+      "blankTextAndEmailFields": 2,
+      "checkboxes": 25,
+      "checkedCheckboxes": 0,
+      "emailLikeTextCount": 0,
+      "cancelPreservedRouteAndFixture": true,
+      "horizontalOverflow": false
+    },
+    "viewports": [
+      {
+        "width": 1280,
+        "height": 720,
+        "fixtureRowsMatched": 1,
+        "horizontalOverflow": false,
+        "cancelInitiallyBelowViewport": true,
+        "keyboardTabBroughtCancelIntoView": true,
+        "cancelClosedModalWithoutMutation": true
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "fixtureRowsMatched": 1,
+        "horizontalOverflow": false,
+        "cancelVisibleAndKeyboardReachable": true,
+        "reviewedCrop": "Modal title and action controls were clearly visible"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "fixtureRowsMatched": 1,
+        "horizontalOverflow": false,
+        "cancelVisibleAndKeyboardReachable": true,
+        "reviewedEvidence": "UI metadata passed; reviewer had viewed the valid crop earlier in the review session"
+      }
+    ],
+    "screenshots": {
+      "savedFiles": [],
+      "delivery": "Valid crops were emitted inline by the documented CUA screenshot API; no local image file or image hash exists.",
+      "excludedAttempts": "Screenshot timeouts and crops with incorrect scroll coordinates were discarded; they are not evidence and did not represent a policy block."
+    },
+    "receiptPaths": [
+      "scratch/m2-ui-viewport-20261018/viewport-receipt.json",
+      "scratch/m2-ui-viewport-20261018/hosted-source-receipt.json"
+    ],
+    "scope": "Read-only visual inspection of synthetic fixture and blank connect modal. No checkbox, mapping, account, authentication, or application data changed."
   },
   "latestE6Evidence": {
     "recordedAt": "2026-10-16T10:43:55Z",

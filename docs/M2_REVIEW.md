@@ -1,8 +1,12 @@
-# Rà soát độc lập Mốc 2 — checkpoint ngày 15/10/2026
+# Rà soát độc lập Mốc 2 — cập nhật 18/10/2026
 
-**Kết luận:** Mốc 2 chưa nghiệm thu; không mở PROD. Bằng chứng cho phép đánh dấu 8 mục kỹ thuật và đủ 4 mục nghiệm thu Owner, trong đó hai mục cuối do AI thực hiện theo ủy quyền rõ ràng của Owner. Mục kỹ thuật còn mở là luồng Admin tạo/mời giáo viên.
+**Kết luận hiện tại:** Các tiêu chí kỹ thuật Mốc 2 trên TEST đạt 9/9 và nghiệm thu Owner đạt 4/4 theo hồ sơ hiện hành. Không mở PROD và không chuyển kết quả này thành xác nhận tải Mốc 6. Lượt hosted C13 vẫn `FAILED`: 199/200 đăng nhập và 199/200 xác minh phiên; nguyên nhân của một lỗi đăng nhập chưa rõ. C15 là lượt tập trung riêng, `PASS` 200/200, không retry. Không coi C15 là sửa hoặc thay kết quả C13.
 
-Bản TEST hiện tại là deployment `dpl_B79eGzBgsmSUxWShTnVWECbwzgAn`, source `8245a81616708b42f27421942b190bed2083cdd4`. Tài liệu chi tiết và receipt tổng hợp nằm tại [docs/M2_EVIDENCE.md](M2_EVIDENCE.md) và [docs/M2_RUNTIME_RESULTS.json](M2_RUNTIME_RESULTS.json).
+Điều kiện UI Admin còn chờ ở lần rà trước đã được kiểm tra trực tiếp trên Chrome TEST tại 1280×720, 1440×900 và 1920×1080. Danh sách không tràn ngang và hiển thị đúng một lớp fixture tổng hợp. Modal trống có hai ô nhập rỗng, 25 lựa chọn chưa đánh dấu; Hủy đóng modal và không đổi route/lớp. Ở 1280×720, modal cao hơn vùng nhìn ban đầu và Hủy cần thao tác Tab/cuộn để vào màn hình; receipt xác nhận nút dùng được và Hủy không làm thay đổi dữ liệu. Đây là giới hạn trình bày cần giữ rõ, không che bằng ảnh crop.
+
+Nguồn hiện tại được đối chiếu từ `scratch/m2-ui-viewport-20261018/hosted-source-receipt.json` và `scratch/m2-ui-viewport-20261018/viewport-receipt.json`: HEAD `8a6b6edd0dcaaf125581e880e4b1eeb7961c5a41`, bản sản phẩm trên alias TEST `https://mindx-learn-test.vercel.app` ở commit `7d17cbd0d99e02dbfa3355c532e4e1ffa752e331`, deployment `READY`, 42/42 tệp allowlist khớp và 0 hash mismatch. Bốn thay đổi từ commit sản phẩm là tài liệu. CUA chỉ xuất ảnh crop inline; không có tệp ảnh local được lưu hoặc tạo lại.
+
+Các phần dưới đây ghi lại bằng chứng lịch sử và giữ phân biệt giữa thao tác Owner, kiểm tra theo ủy quyền và các lượt đo riêng. Tài liệu tổng hợp và kết quả runtime: [M2_EVIDENCE.md](M2_EVIDENCE.md), [M2_RUNTIME_RESULTS.json](M2_RUNTIME_RESULTS.json).
 
 ## Bằng chứng mới theo ủy quyền của Owner
 
@@ -24,7 +28,7 @@ Các receipt được lưu tại `.workflow-local/m2/delegated-pin-proof-2026101
 5. **Đạt — cấp PIN lần đầu và cấp lại một người.** Receipt xác nhận CSV no-store, số hàng đúng, PIN chỉ giữ trong RAM; PIN mới hoạt động, PIN/phiên cũ bị thu hồi, người còn lại không đổi. Không lưu CSV/PIN trong bằng chứng.
 6. **Đạt — quyền cấp và tải CSV.** Admin được phép; giáo viên, học sinh và người chưa đăng nhập bị từ chối khi gọi trực tiếp. Ảnh QA giáo viên trước đó cũng không có nút cấp PIN.
 7. **Đạt — giới hạn thử sai và phép đo 200 học sinh của Mốc 2.** Kiểm tra tài khoản chặn từ lượt thứ 7; thử IP có 240 phản hồi từ chối rồi chặn lượt tiếp theo, header IP giả không vượt giới hạn; sau thời gian chờ đăng nhập hợp lệ lại được. Receipt C15 đo riêng 200 đăng nhập và 200 phiên thành công, không retry, đồng thời 4; đây là phép đo chẩn đoán yêu cầu ở Mốc 2, không phải 200 kết nối đồng thời hay cổng tải Mốc 6.
-8. **Còn mở — Admin tạo và mời giáo viên.** Phân vai, phân công lớp, chặn giáo viên tự tạo lớp/giáo viên, lưu trữ/khôi phục lớp và học sinh, cũng như thu hồi phiên/PIN đã có bằng chứng. Chưa thử luồng thành công để Admin tạo giáo viên và gửi thư mời/đặt mật khẩu cho nhân viên; chưa có người nhận được Owner ủy quyền hoặc cấu hình gửi thư tùy chỉnh để chạy phép thử này.
+8. **Đạt — Admin kết nối giáo viên đã có và giữ phân công sau tải lại.** Owner đã bỏ yêu cầu thư mời; Admin tạo email/mật khẩu trực tiếp trong Supabase rồi kết nối hồ sơ giáo viên. API focused teacher-connection đạt 19/19 trên fixture giả; Owner xác nhận “Kết nối được, tải lại vẫn thấy giáo viên và lớp.” Lượt ngày 18/10 kiểm tra trang Admin ở ba kích thước desktop, modal để trống, bàn phím tới Hủy và không có thay đổi fixture khi hủy. Các luồng phân quyền, phân công, lưu trữ/khôi phục và reset PIN đã có bằng chứng riêng ở các mục trước; không tuyên bố SMTP hoặc thư mời đã chạy.
 9. **Đạt — RLS và Storage trong ma trận đã thử.** Receipt kiểm tra trực tiếp các bảng API Mốc 2 và bucket riêng tư: học sinh không đọc/sửa hồ sơ học sinh khác, giáo viên ngoài lớp bị chặn, người không có quyền bị từ chối và Admin truy cập được. Supabase Advisor vẫn có cảnh báo helper `SECURITY DEFINER` và bảo vệ mật khẩu bị lộ chưa bật; kết quả không phải chứng nhận bảo mật toàn diện.
 
 ## Nghiệm thu Owner và các giới hạn còn lại
@@ -36,4 +40,4 @@ Các receipt được lưu tại `.workflow-local/m2/delegated-pin-proof-2026101
 
 B17 đã qua kiểm tra focus bàn phím ở 1280/1440/1920px; Owner xác nhận luồng email/đăng nhập sau sửa. C15 focused đạt 200/200; tuy nhiên receipt full C13 vẫn `FAILED`: 199/200 login và phiên, 0 phản hồi 429, 1 lần login lỗi. Có một HTTP 500 trong log Edge nhưng chưa có dấu nối để xác định đó có phải lỗi đăng nhập hay không. C15 không tái hiện hoặc giải thích lỗi cũ; không được gọi lỗi đó là đã sửa. Thử tranh chấp trong receipt C13 vẫn `NOT_TESTED` dù có bằng chứng tranh chấp riêng A11.
 
-Vì luồng Admin tạo/mời giáo viên chưa được xác minh, đồng thời lỗi đơn lẻ của C13 vẫn chưa rõ nguyên nhân, Mốc 2 chưa nghiệm thu. Không tuyên bố SMTP hoạt động hoặc thư mời nhân viên đã được gửi; không mở PROD, không chuyển sang Mốc 3–6.
+Sau cập nhật này, checklist Mốc 2 được đánh dấu hoàn tất cho môi trường TEST. Kết luận không xóa lịch sử C13: lỗi đơn lẻ vẫn chưa rõ nguyên nhân, và C15 chỉ là lượt tập trung riêng đạt 200/200. Không tuyên bố SMTP hoạt động, không nói C13 đã sửa, không gọi đây là 200 kết nối đồng thời hoặc cổng tải Mốc 6; PROD vẫn chưa được cho phép.
