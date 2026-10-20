@@ -1384,11 +1384,32 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
     'archive-student',
     'restore-student',
     'update-student',
+    'create-course',
+    'update-course',
+    'update-lesson',
+    'transfer-student',
+    'reset-student-progress',
   ];
 
   if (ADMIN_ACTIONS.includes(action) && session?.user?.role !== 'admin') {
     return apiResponse(
       { success: false, message: 'Thao tác chỉ dành cho Quản trị viên.', code: 'FORBIDDEN' },
+      403
+    );
+  }
+
+  const STUDENT_ACTIONS = ['submit-quiz', 'submit-practice'];
+  if (STUDENT_ACTIONS.includes(action) && session?.user?.role !== 'student') {
+    return apiResponse(
+      { success: false, message: 'Thao tác chỉ dành cho Học sinh.', code: 'FORBIDDEN' },
+      403
+    );
+  }
+
+  const TEACHER_ACTIONS = ['grade-submission', 'reopen-submission'];
+  if (TEACHER_ACTIONS.includes(action) && session?.user?.role !== 'teacher' && session?.user?.role !== 'admin') {
+    return apiResponse(
+      { success: false, message: 'Thao tác chỉ dành cho Giáo viên hoặc Quản trị viên.', code: 'FORBIDDEN' },
       403
     );
   }
@@ -1412,6 +1433,9 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
       data: {
         name: rawData.name !== undefined ? String(rawData.name).trim().slice(0, 100) : undefined,
         code: rawData.code !== undefined ? String(rawData.code).trim().slice(0, 50) : undefined,
+        courseId: rawData.courseId !== undefined
+          ? (rawData.courseId === null || rawData.courseId === '' ? null : String(rawData.courseId).trim())
+          : undefined,
         teacherId: rawData.teacherId !== undefined
           ? (rawData.teacherId === null || rawData.teacherId === '' ? null : String(rawData.teacherId).trim())
           : undefined,
@@ -1442,6 +1466,65 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
           ? (rawData.notes === null ? '' : String(rawData.notes).trim().slice(0, 255))
           : undefined,
       },
+    };
+  } else if (action === 'create-course') {
+    cleanPayload = {
+      title: String(body.title || '').trim().slice(0, 200),
+      description: String(body.description || '').trim().slice(0, 1000),
+    };
+  } else if (action === 'update-course') {
+    cleanPayload = {
+      id: body.id,
+      title: String(body.title || '').trim().slice(0, 200),
+      description: String(body.description || '').trim().slice(0, 1000),
+    };
+  } else if (action === 'update-lesson') {
+    const rawLessonData = (body.data && typeof body.data === 'object') ? body.data : body;
+    cleanPayload = {
+      id: body.id,
+      data: {
+        title: rawLessonData.title !== undefined ? String(rawLessonData.title).trim().slice(0, 200) : undefined,
+        description: rawLessonData.description !== undefined ? String(rawLessonData.description).trim().slice(0, 2000) : undefined,
+        materials: rawLessonData.materials !== undefined ? String(rawLessonData.materials).trim().slice(0, 2000) : undefined,
+        videoUrl: rawLessonData.videoUrl !== undefined ? String(rawLessonData.videoUrl).trim().slice(0, 500) : undefined,
+        status: rawLessonData.status !== undefined ? (rawLessonData.status === 'published' ? 'published' : 'draft') : undefined,
+        hasQuiz: rawLessonData.hasQuiz !== undefined ? Boolean(rawLessonData.hasQuiz) : undefined,
+        hasPractice: rawLessonData.hasPractice !== undefined ? Boolean(rawLessonData.hasPractice) : undefined,
+        practiceMode: rawLessonData.practiceMode !== undefined ? (rawLessonData.practiceMode === 'file_allowed' ? 'file_allowed' : 'link_only') : undefined,
+        questions: Array.isArray(rawLessonData.questions) ? rawLessonData.questions : undefined,
+      },
+    };
+  } else if (action === 'submit-quiz') {
+    cleanPayload = {
+      lessonId: body.lessonId,
+      answers: Array.isArray(body.answers) ? body.answers.map((a: any) => Number(a)) : [],
+    };
+  } else if (action === 'submit-practice') {
+    cleanPayload = {
+      lessonId: body.lessonId,
+      type: body.type === 'file' ? 'file' : (body.type === 'text' ? 'text' : 'link'),
+      content: String(body.content || '').trim().slice(0, 1000),
+      notes: body.notes !== undefined ? String(body.notes).trim().slice(0, 1000) : '',
+      fileSizeBytes: typeof body.fileSizeBytes === 'number' ? body.fileSizeBytes : undefined,
+    };
+  } else if (action === 'grade-submission') {
+    cleanPayload = {
+      submissionId: body.submissionId,
+      status: body.status === 'approved' ? 'approved' : 'needs_revision',
+      feedback: body.feedback !== undefined ? String(body.feedback).trim().slice(0, 2000) : '',
+    };
+  } else if (action === 'reopen-submission') {
+    cleanPayload = {
+      submissionId: body.submissionId,
+    };
+  } else if (action === 'transfer-student') {
+    cleanPayload = {
+      studentId: body.studentId,
+      targetClassId: body.targetClassId,
+    };
+  } else if (action === 'reset-student-progress') {
+    cleanPayload = {
+      studentId: body.studentId,
     };
   } else {
     cleanPayload = {};

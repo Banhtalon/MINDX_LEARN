@@ -13,6 +13,7 @@ import {
   IconLock,
   IconFileText,
   IconUpload,
+  IconDownload,
   IconExternalLink,
   IconRefreshCw,
   IconBookOpen,
@@ -23,7 +24,7 @@ export default function StudentLessonDetailPage() {
   const router = useRouter();
   const lessonId = params.lessonId as string;
 
-  const { currentUser, lessons, submissions, quizResults, submitPractice, qaState } = useStore();
+  const { currentUser, lessons, submissions, quizResults, submitPractice, qaState, isLiveMode } = useStore();
 
   const lesson = lessons.find((l) => l.id === lessonId);
 
@@ -33,6 +34,7 @@ export default function StudentLessonDetailPage() {
   const [notes, setNotes] = useState('');
   const [fileName, setFileName] = useState('');
   const [fileSize, setFileSize] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [alertNotice, setAlertNotice] = useState<{ text: string; isError: boolean } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,31 +86,63 @@ export default function StudentLessonDetailPage() {
   const sessionCompleted = quizPassed && practicePassed;
 
   // Handle practice form submission
-  const handleSubmitPractice = (e: React.FormEvent) => {
+  const handleSubmitPractice = async (e: React.FormEvent) => {
     e.preventDefault();
     setAlertNotice(null);
 
-    let submitContent = content.trim();
+    let submitContent = '';
+    let finalFileSize: number | undefined = undefined;
+
     if (submissionType === 'file') {
-      if (!fileName) {
-        setAlertNotice({ text: 'Vui lòng chọn một tệp hợp lệ (dung lượng tối đa 2 MB).', isError: true });
+      if (!selectedFile) {
+        setAlertNotice({ text: 'Vui lòng chọn một tệp bài làm thực tế từ thiết bị của bạn (tối đa 2 MB).', isError: true });
         return;
       }
-      submitContent = fileName;
+      if (selectedFile.size > 2 * 1024 * 1024) {
+        setAlertNotice({ text: 'Kích thước tệp vượt quá giới hạn 2 MB.', isError: true });
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const form = new FormData();
+        form.append('file', selectedFile);
+        form.append('lessonId', lesson.id);
+
+        const uploadRes = await fetch('/api/m3/file', {
+          method: 'POST',
+          body: form,
+        });
+        const uploadJson = await uploadRes.json().catch(() => null);
+
+        if (!uploadRes.ok || !uploadJson?.success || !uploadJson?.filePath) {
+          setIsSubmitting(false);
+          setAlertNotice({ text: uploadJson?.message || 'Không thể tải tệp lên máy chủ.', isError: true });
+          return;
+        }
+
+        submitContent = uploadJson.filePath;
+        finalFileSize = typeof uploadJson.fileSize === 'number' ? uploadJson.fileSize : selectedFile.size;
+      } catch {
+        setIsSubmitting(false);
+        setAlertNotice({ text: 'Lỗi kết nối khi tải tệp lên máy chủ.', isError: true });
+        return;
+      }
     } else {
+      submitContent = content.trim();
       if (!submitContent) {
         setAlertNotice({ text: 'Vui lòng nhập đường dẫn liên kết bài làm.', isError: true });
         return;
       }
+      setIsSubmitting(true);
     }
 
-    setIsSubmitting(true);
     setTimeout(async () => {
       const res = await submitPractice(currentUser.id, lesson.id, {
         type: submissionType,
         content: submitContent,
         notes,
-        fileSizeBytes: submissionType === 'file' ? fileSize : undefined,
+        fileSizeBytes: finalFileSize,
       });
 
       setIsSubmitting(false);
@@ -116,16 +150,11 @@ export default function StudentLessonDetailPage() {
       if (res.success) {
         setContent('');
         setFileName('');
+        setFileSize(0);
+        setSelectedFile(null);
         setNotes('');
       }
     }, qaState.delayMs || 300);
-  };
-
-  // Mock file chooser simulation
-  const handleSimulateFileSelect = (simulatedName: string, simulatedSizeKB: number) => {
-    const sizeBytes = simulatedSizeKB * 1024;
-    setFileName(simulatedName);
-    setFileSize(sizeBytes);
   };
 
   return (
@@ -315,8 +344,19 @@ export default function StudentLessonDetailPage() {
                     <span>Mở link</span>
                     <IconExternalLink className="w-3 h-3" />
                   </a>
+                ) : currentSub.type === 'text' ? (
+                  <span className="text-slate-500 font-semibold shrink-0">
+                    Bài nộp văn bản
+                  </span>
                 ) : (
-                  <span className="text-slate-400 font-mono shrink-0">Tệp đính kèm</span>
+                  <a
+                    href={`/api/m3/file?path=${encodeURIComponent(currentSub.content)}`}
+                    download
+                    className="text-blue-600 hover:underline font-bold shrink-0 flex items-center gap-1"
+                  >
+                    <span>Tải tệp</span>
+                    <IconDownload className="w-3.5 h-3.5" />
+                  </a>
                 )}
               </div>
 
@@ -390,51 +430,38 @@ export default function StudentLessonDetailPage() {
                   />
                 </div>
               ) : (
-                /* File Input Simulation (Max 2MB, allowed formats: zip, pdf, png, jpg, webp, txt, py, js, html, css, json, md, sb3) */
+                /* Real File Input (Max 2MB, allowed formats: zip, pdf, png, jpg, webp, txt, py, js, html, css, json, md, sb3) */
                 <div className="space-y-2">
                   <label className="block font-semibold text-slate-700">
-                    Chọn tệp bài làm (Định dạng cho phép: ZIP, PDF, PNG, PY, JS, SB3... | Tối đa 2MB):
+                    Chọn tệp bài làm (Định dạng cho phép: ZIP, PDF, PNG, JPG/JPEG, WEBP, TXT, PY, JS, HTML, CSS, JSON, MD, SB3 | Tối đa 2MB):
                   </label>
 
-                  <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50">
-                    <IconUpload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <span className="text-slate-600 block mb-2">
-                      {fileName
-                        ? `Đã chọn: ${fileName} (${Math.round(fileSize / 1024)} KB)`
-                        : 'Bấm chọn tệp mẫu để kiểm thử'}
-                    </span>
-
-                    {/* Simulation buttons */}
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleSimulateFileSelect('bai_lam_robot_scratch.sb3', 450)}
-                        className="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-100 font-mono text-[11px]"
-                      >
-                        Mẫu 1: robot.sb3 (450KB)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSimulateFileSelect('ma_nguon_python.py', 25)}
-                        className="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-100 font-mono text-[11px]"
-                      >
-                        Mẫu 2: code.py (25KB)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSimulateFileSelect('bao_cao_du_an.pdf', 1200)}
-                        className="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-100 font-mono text-[11px]"
-                      >
-                        Mẫu 3: baocao.pdf (1.2MB)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSimulateFileSelect('tep_qua_co_3mb.zip', 3100)}
-                        className="px-2.5 py-1 rounded bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-100 font-mono text-[11px]"
-                      >
-                        Thử tệp lỗi &gt; 2MB (3.1MB)
-                      </button>
+                  <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50 space-y-3">
+                    <IconUpload className="w-8 h-8 text-slate-400 mx-auto mb-1" />
+                    <div>
+                      <input
+                        type="file"
+                        accept=".zip,.pdf,.png,.jpg,.jpeg,.webp,.txt,.py,.js,.html,.css,.json,.md,.sb3"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setSelectedFile(file);
+                            setFileName(file.name);
+                            setFileSize(file.size);
+                          } else {
+                            setSelectedFile(null);
+                            setFileName('');
+                            setFileSize(0);
+                          }
+                        }}
+                        className="block w-full max-w-sm mx-auto text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                      />
                     </div>
+                    <span className="text-slate-600 block text-xs">
+                      {selectedFile
+                        ? `Đã chọn: ${selectedFile.name} (${Math.round(selectedFile.size / 1024)} KB)`
+                        : 'Vui lòng chọn tệp từ máy tính để tải lên máy chủ bảo mật.'}
+                    </span>
                   </div>
                 </div>
               )}

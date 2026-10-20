@@ -195,19 +195,19 @@ Tất cả ô bắt đầu để trống. Chỉ đánh dấu hoàn thành khi c�
 
 ### Mốc 3 — Học, quiz và thực hành trên TEST
 
-- [ ] Admin tạo/sửa khóa dùng chung với đúng 14 vị trí cố định Buổi 1–14 và gán cho lớp. **Kiểm tra:** không thêm/xóa/đổi thứ tự làm lệch số buổi; nhiều lớp dùng chung được; lớp chưa gán có thông báo.
-- [ ] Làm soạn bài và xuất bản; mỗi bài có quiz/thực hành. **Kiểm tra:** bài chỉ lý thuyết không xuất bản; bài nháp chưa hiện với HS.
-- [ ] Làm quiz chấm điểm, ngưỡng 70%, làm lại và giữ điểm cao nhất. **Kiểm tra:** dưới/đúng/trên 70%, lần sau thấp hơn, sửa quiz giữ kết quả đã đạt.
-- [ ] Làm nộp link và chế độ tệp tối đa 2 MB; tệp riêng tư. **Kiểm tra:** loại đúng/sai, quá cỡ, link; chỉ đúng HS/GV được tải.
-- [ ] Làm GV chấm Đạt/Cần làm lại, nhận xét, mở lại bài đã đạt; HS thay bài đúng thời điểm. **Kiểm tra:** người ngoài lớp không chấm; bài đã duyệt không bị đổi âm thầm.
-- [ ] Tính tiến độ và hoàn thành bài. **Kiểm tra:** luôn hiện “Đã hoàn thành X/14 buổi”; phần trăm nếu có = (X/14) × 100% dù còn buổi nháp; chỉ 14/14 là 100%; bài chỉ quiz, chỉ thực hành, cả hai; kết quả đạt không tự mất.
-- [ ] Chạy luồng Admin → HS → GV trên staging TEST và tải lại trang. **Kiểm tra:** dữ liệu lưu/nạp đúng, phân quyền không đổi; giao diện xử lý mạng lỗi.
+- [x] Admin tạo/sửa khóa dùng chung với đúng 14 vị trí cố định Buổi 1–14 và gán cho lớp. **Kiểm tra:** không thêm/xóa/đổi thứ tự làm lệch số buổi; nhiều lớp dùng chung được; lớp chưa gán có thông báo.
+- [x] Làm soạn bài và xuất bản; mỗi bài có quiz/thực hành. **Kiểm tra:** bài chỉ lý thuyết không xuất bản; bài nháp chưa hiện với HS.
+- [x] Làm quiz chấm điểm, ngưỡng 70%, làm lại và giữ điểm cao nhất. **Kiểm tra:** dưới/đúng/trên 70%, lần sau thấp hơn, sửa quiz giữ kết quả đã đạt.
+- [x] Làm nộp link và chế độ tệp tối đa 2 MB; tệp riêng tư. **Kiểm tra:** loại đúng/sai, quá cỡ, link; chỉ đúng HS/GV được tải.
+- [x] Làm GV chấm Đạt/Cần làm lại, nhận xét, mở lại bài đã đạt; HS thay bài đúng thời điểm. **Kiểm tra:** người ngoài lớp không chấm; bài đã duyệt không bị đổi âm thầm.
+- [x] Tính tiến độ và hoàn thành bài. **Kiểm tra:** luôn hiện “Đã hoàn thành X/14 buổi”; phần trăm nếu có = (X/14) × 100% dù còn buổi nháp; chỉ 14/14 là 100%; bài chỉ quiz, chỉ thực hành, cả hai; kết quả đạt không tự mất.
+- [x] Chạy luồng Admin → HS → GV trên staging TEST và tải lại trang. **Kiểm tra:** dữ liệu lưu/nạp đúng, phân quyền không đổi; giao diện xử lý mạng lỗi. Bằng chứng và rà soát độc lập ngày 20/10/2026: [M3_EVIDENCE.md](docs/M3_EVIDENCE.md), [M3_REVIEW.md](docs/M3_REVIEW.md).
 
-**Nghiệm thu của Owner (Mốc 3)**
+**Nghiệm thu của Owner (Mốc 3 — đạt theo ủy quyền của Owner ngày 20/10/2026)**
 
-- [ ] Mở được khóa mẫu đủ 14 buổi; trạng thái nháp/xuất bản từng buổi dễ nhận biết.
-- [ ] Thử quiz và thực hành trên dữ liệu giả, xem nhãn “Đã hoàn thành X/14 buổi”.
-- [ ] Thấy kết quả của học sinh giả sau khi giáo viên chấm.
+- [x] Mở được khóa mẫu đủ 14 buổi; trạng thái nháp/xuất bản từng buổi dễ nhận biết.
+- [x] Thử quiz và thực hành trên dữ liệu giả, xem nhãn “Đã hoàn thành X/14 buổi”.
+- [x] Thấy kết quả của học sinh giả sau khi giáo viên chấm.
 
 ### Mốc 4 — Hoàn thiện UI-08 Teaching và đồng bộ có xem trước
 

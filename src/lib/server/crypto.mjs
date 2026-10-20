@@ -46,6 +46,15 @@ export const ALLOWED_BFF_ACTIONS = Object.freeze([
   'update-student',
   'pin-issue',
   'pin-reissue',
+  'create-course',
+  'update-course',
+  'update-lesson',
+  'submit-quiz',
+  'submit-practice',
+  'grade-submission',
+  'reopen-submission',
+  'transfer-student',
+  'reset-student-progress',
 ]);
 
 // Explicitly blocked/coordination actions that must never be exposed publicly
@@ -768,6 +777,33 @@ export function sanitizeBootstrapDto(dto) {
       delete clean.pin;
       return clean;
     });
+  }
+
+  // M3: Sanitize lessons for student role - NEVER expose correctOptionIndex to students
+  const isStudent = result.currentUser?.role === 'student';
+  if (Array.isArray(result.lessons)) {
+    result.lessons = result.lessons
+      .filter((l) => {
+        if (!l || typeof l !== 'object') return false;
+        // Draft lessons must NEVER appear in student view
+        if (isStudent && l.status !== 'published') return false;
+        return true;
+      })
+      .map((l) => {
+        const cleanLesson = { ...l };
+        if (Array.isArray(cleanLesson.questions)) {
+          cleanLesson.questions = cleanLesson.questions.map((q) => {
+            if (!q || typeof q !== 'object') return q;
+            const cleanQ = { ...q };
+            if (isStudent) {
+              delete cleanQ.correctOptionIndex;
+              delete cleanQ.correct_option_index;
+            }
+            return cleanQ;
+          });
+        }
+        return cleanLesson;
+      });
   }
 
   // Remove top-level tokens or sensitive fields if any were attached

@@ -288,3 +288,4 @@ export function IconSave({ className = 'w-5 h-5', size = 20, ...props }: IconPro
     </svg>
   );
 }
+

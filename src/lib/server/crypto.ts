@@ -16,6 +16,8 @@ export interface ValidatedSessionUser {
   email?: string;
   studentCode?: string;
   classId?: string;
+  currentClassId?: string;
+  assignedClassIds?: string[];
 }
 
 export interface ValidatedSessionPayload {
@@ -75,6 +77,8 @@ export interface SessionEnvelopeParams {
     email?: string;
     studentCode?: string;
     classId?: string;
+    currentClassId?: string;
+    assignedClassIds?: string[];
   };
   expiresAtEpochSec?: number;
   nowMs?: number;

@@ -28,6 +28,7 @@ export default function TeacherSubmissionsPage() {
     gradeSubmission,
     reopenSubmission,
     qaState,
+    isLiveMode,
   } = useStore();
 
   const [selectedSubId, setSelectedSubId] = useState<string>('');
@@ -301,7 +302,11 @@ export default function TeacherSubmissionsPage() {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-700">Hình thức nộp:</span>
                   <span className="font-mono uppercase font-bold text-slate-900">
-                    {activeSub.type === 'link' ? 'Liên kết ngoài (URL)' : 'Tệp tải lên (Dưới 2MB)'}
+                    {activeSub.type === 'link'
+                      ? 'Liên kết ngoài (URL)'
+                      : activeSub.type === 'text'
+                      ? 'Văn bản trực tiếp'
+                      : 'Tệp tải lên (Dưới 2MB)'}
                   </span>
                 </div>
 
@@ -321,15 +326,19 @@ export default function TeacherSubmissionsPage() {
                       <span>Mở link</span>
                       <IconExternalLink className="w-3.5 h-3.5" />
                     </a>
+                  ) : activeSub.type === 'text' ? (
+                    <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-semibold shrink-0">
+                      Bài nộp dạng văn bản
+                    </span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => alert(`[Mô phỏng]: Đang tải tệp an toàn ${activeSub.content}`)}
+                    <a
+                      href={`/api/m3/file?path=${encodeURIComponent(activeSub.content)}`}
+                      download
                       className="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 shrink-0 flex items-center gap-1"
                     >
                       <IconDownload className="w-3.5 h-3.5" />
                       <span>Tải tệp</span>
-                    </button>
+                    </a>
                   )}
                 </div>
 

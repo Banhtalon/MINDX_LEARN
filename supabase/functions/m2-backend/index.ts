@@ -14,6 +14,11 @@ import {
   UserDTO,
   ClassDTO,
   StudentDTO,
+  CourseDTO,
+  LessonDTO,
+  QuestionDTO,
+  QuizResultDTO,
+  PracticeSubmissionDTO,
   isValidUUID,
   isValidEmail,
   normalizeStudentCode,
@@ -1760,14 +1765,22 @@ export async function handleRequest(req: Request): Promise<Response> {
       let students: StudentDTO[] = [];
 
       if (actor.role === 'admin') {
-        const { data: allProfiles } = await actorClient
+        const { data: allProfiles, error: profsErr } = await actorClient
           .from('profiles')
           .select('id, full_name, email, role, status')
           .in('role', ['admin', 'teacher']);
 
-        const { data: ctAll } = await actorClient
+        if (profsErr) {
+          return jsonResponse({ success: false, message: 'Không thể tải danh sách tài khoản quản trị và giáo viên.', code: 'DB_ERROR' }, 500);
+        }
+
+        const { data: ctAll, error: ctErr } = await actorClient
           .from('class_teachers')
           .select('class_id, teacher_profile_id');
+
+        if (ctErr) {
+          return jsonResponse({ success: false, message: 'Không thể tải thông tin phân công giáo viên.', code: 'DB_ERROR' }, 500);
+        }
 
         users = (allProfiles || []).map((p: any) => ({
           id: p.id,
@@ -1780,9 +1793,13 @@ export async function handleRequest(req: Request): Promise<Response> {
             .map((ct: any) => ct.class_id),
         }));
 
-        const { data: allClasses } = await actorClient
+        const { data: allClasses, error: classesErr } = await actorClient
           .from('classes')
           .select('id, code, name, course_id, status, is_14_sessions_confirmed');
+
+        if (classesErr) {
+          return jsonResponse({ success: false, message: 'Không thể tải danh sách lớp học.', code: 'DB_ERROR' }, 500);
+        }
 
         classes = (allClasses || []).map((c: any) => {
           const assigned = (ctAll || []).find((ct: any) => ct.class_id === c.id);
@@ -1797,9 +1814,13 @@ export async function handleRequest(req: Request): Promise<Response> {
           };
         });
 
-        const { data: allStudents } = await actorClient
+        const { data: allStudents, error: studentsErr } = await actorClient
           .from('students')
           .select('id, participant_id, student_code, full_name, current_class_id, original_class_id, pin_issued_at, status, notes');
+
+        if (studentsErr) {
+          return jsonResponse({ success: false, message: 'Không thể tải danh sách học sinh.', code: 'DB_ERROR' }, 500);
+        }
 
         students = (allStudents || []).map((s: any) => ({
           id: s.id,
@@ -1814,18 +1835,26 @@ export async function handleRequest(req: Request): Promise<Response> {
           notes: s.notes,
         }));
       } else if (actor.role === 'teacher') {
-        const { data: myCt } = await actorClient
+        const { data: myCt, error: myCtErr } = await actorClient
           .from('class_teachers')
           .select('class_id')
           .eq('teacher_profile_id', actor.profileId);
+
+        if (myCtErr) {
+          return jsonResponse({ success: false, message: 'Không thể tải thông tin phân công lớp học của giáo viên.', code: 'DB_ERROR' }, 500);
+        }
 
         const assignedClassIds = (myCt || []).map((ct: any) => ct.class_id);
         currentUser.assignedClassIds = assignedClassIds;
         users = [currentUser];
 
-        const { data: myClasses } = await actorClient
+        const { data: myClasses, error: myClassesErr } = await actorClient
           .from('classes')
           .select('id, code, name, course_id, status, is_14_sessions_confirmed');
+
+        if (myClassesErr) {
+          return jsonResponse({ success: false, message: 'Không thể tải danh sách lớp học phụ trách.', code: 'DB_ERROR' }, 500);
+        }
 
         classes = (myClasses || []).map((c: any) => ({
           id: c.id,
@@ -1837,27 +1866,38 @@ export async function handleRequest(req: Request): Promise<Response> {
           is14SessionsConfirmed: c.is_14_sessions_confirmed,
         }));
 
-        const { data: myStudents } = await actorClient
-          .from('students')
-          .select('id, participant_id, student_code, full_name, current_class_id, original_class_id, pin_issued_at, status, notes');
+        if (assignedClassIds.length > 0) {
+          const { data: myStudents, error: myStudentsErr } = await actorClient
+            .from('students')
+            .select('id, participant_id, student_code, full_name, current_class_id, original_class_id, pin_issued_at, status, notes')
+            .in('current_class_id', assignedClassIds);
 
-        students = (myStudents || []).map((s: any) => ({
-          id: s.id,
-          participantId: s.participant_id,
-          studentCode: s.student_code,
-          fullName: s.full_name,
-          currentClassId: s.current_class_id,
-          originalClassId: s.original_class_id,
-          pinIssuedAt: s.pin_issued_at,
-          hasPin: Boolean(s.pin_issued_at),
-          status: s.status,
-          notes: s.notes,
-        }));
+          if (myStudentsErr) {
+            return jsonResponse({ success: false, message: 'Không thể tải danh sách học sinh của các lớp phụ trách.', code: 'DB_ERROR' }, 500);
+          }
+
+          students = (myStudents || []).map((s: any) => ({
+            id: s.id,
+            participantId: s.participant_id,
+            studentCode: s.student_code,
+            fullName: s.full_name,
+            currentClassId: s.current_class_id,
+            originalClassId: s.original_class_id,
+            pinIssuedAt: s.pin_issued_at,
+            hasPin: Boolean(s.pin_issued_at),
+            status: s.status,
+            notes: s.notes,
+          }));
+        }
       } else if (actor.role === 'student') {
-        const { data: myStudent } = await actorClient
+        const { data: myStudent, error: myStudentErr } = await actorClient
           .from('students')
           .select('id, participant_id, student_code, full_name, current_class_id, original_class_id, pin_issued_at, status, notes')
           .maybeSingle();
+
+        if (myStudentErr) {
+          return jsonResponse({ success: false, message: 'Không thể tải hồ sơ học sinh.', code: 'DB_ERROR' }, 500);
+        }
 
         if (myStudent) {
           currentUser.currentClassId = myStudent.current_class_id;
@@ -1876,10 +1916,14 @@ export async function handleRequest(req: Request): Promise<Response> {
             },
           ];
 
-          const { data: myClass } = await actorClient
+          const { data: myClass, error: myClassErr } = await actorClient
             .from('classes')
             .select('id, code, name, course_id, status, is_14_sessions_confirmed')
             .maybeSingle();
+
+          if (myClassErr) {
+            return jsonResponse({ success: false, message: 'Không thể tải thông tin lớp học của học sinh.', code: 'DB_ERROR' }, 500);
+          }
 
           if (myClass) {
             classes = [
@@ -1898,6 +1942,216 @@ export async function handleRequest(req: Request): Promise<Response> {
         users = [currentUser];
       }
 
+      // ----------------------------------------------------------------------
+      // M3: Load courses, lessons, quiz_results, submissions with strict security
+      // ----------------------------------------------------------------------
+      let courses: CourseDTO[] = [];
+      let lessons: LessonDTO[] = [];
+      let quizResults: QuizResultDTO[] = [];
+      let submissions: PracticeSubmissionDTO[] = [];
+
+      // 1. Courses (Students only see course assigned to their active class)
+      let dbCourses: any[] = [];
+      if (actor.role === 'student') {
+        const studentClassCourseId = classes[0]?.courseId;
+        if (studentClassCourseId) {
+          const { data: cData, error: coursesErr } = await actorClient
+            .from('courses')
+            .select('id, title, description, total_sessions, created_at')
+            .eq('id', studentClassCourseId)
+            .order('created_at', { ascending: true });
+
+          if (coursesErr) {
+            return jsonResponse({ success: false, message: 'Không thể truy vấn thông tin khóa học.', code: 'DB_ERROR' }, 500);
+          }
+          dbCourses = cData || [];
+        } else {
+          dbCourses = [];
+        }
+      } else {
+        const { data: cData, error: coursesErr } = await actorClient
+          .from('courses')
+          .select('id, title, description, total_sessions, created_at')
+          .order('created_at', { ascending: true });
+
+        if (coursesErr) {
+          return jsonResponse({ success: false, message: 'Không thể truy vấn danh sách khóa học.', code: 'DB_ERROR' }, 500);
+        }
+        dbCourses = cData || [];
+      }
+
+      courses = dbCourses.map((c: any) => ({
+        id: c.id,
+        title: c.title,
+        description: c.description,
+        totalSessions: 14,
+        createdAt: c.created_at,
+      }));
+
+      // 2. Lessons & Questions (Staff read full questions with answers via server service-role; student gets questions without correctOptionIndex)
+      if (actor.role === 'admin' || actor.role === 'teacher') {
+        // Staff: select all authorized lessons (draft and published) under RLS
+        const { data: dbLessons, error: lessonsErr } = await actorClient
+          .from('lessons')
+          .select('id, course_id, session_number, title, description, materials, video_url, status, has_quiz, has_practice, practice_mode')
+          .order('session_number', { ascending: true });
+
+        if (lessonsErr) {
+          return jsonResponse({ success: false, message: 'Không thể truy vấn danh sách bài học.', code: 'DB_ERROR' }, 500);
+        }
+
+        const lessonIds = (dbLessons || []).map((l: any) => l.id);
+        let dbQuestions: any[] = [];
+        if (lessonIds.length > 0) {
+          const { data: qData, error: questionsErr } = await adminClient
+            .from('quiz_questions')
+            .select('id, lesson_id, prompt, options, correct_option_index, order_index')
+            .in('lesson_id', lessonIds)
+            .order('order_index', { ascending: true });
+
+          if (questionsErr) {
+            return jsonResponse({ success: false, message: 'Không thể truy vấn câu hỏi trắc nghiệm.', code: 'DB_ERROR' }, 500);
+          }
+          dbQuestions = qData || [];
+        }
+
+        const questionsByLesson = new Map<string, QuestionDTO[]>();
+        for (const q of dbQuestions) {
+          const list = questionsByLesson.get(q.lesson_id) || [];
+          list.push({
+            id: q.id,
+            prompt: q.prompt,
+            options: q.options,
+            correctOptionIndex: q.correct_option_index,
+          });
+          questionsByLesson.set(q.lesson_id, list);
+        }
+
+        lessons = (dbLessons || []).map((l: any) => ({
+          id: l.id,
+          courseId: l.course_id,
+          sessionNumber: l.session_number,
+          title: l.title,
+          description: l.description,
+          materials: l.materials,
+          videoUrl: l.video_url,
+          status: l.status,
+          hasQuiz: l.has_quiz,
+          hasPractice: l.has_practice,
+          practiceMode: l.practice_mode,
+          questions: questionsByLesson.get(l.id) || [],
+        }));
+      } else if (actor.role === 'student') {
+        // Student: select ONLY published lessons belonging to student's class course
+        const { data: dbLessons, error: lessonsErr } = await actorClient
+          .from('lessons')
+          .select('id, course_id, session_number, title, description, materials, video_url, status, has_quiz, has_practice, practice_mode')
+          .eq('status', 'published')
+          .order('session_number', { ascending: true });
+
+        if (lessonsErr) {
+          return jsonResponse({ success: false, message: 'Không thể truy vấn danh sách bài học.', code: 'DB_ERROR' }, 500);
+        }
+
+        const lessonIds = (dbLessons || []).map((l: any) => l.id);
+        let dbQuestions: any[] = [];
+        if (lessonIds.length > 0) {
+          // Student query for questions: strictly WITHOUT correct_option_index
+          const { data: qData, error: questionsErr } = await adminClient
+            .from('quiz_questions')
+            .select('id, lesson_id, prompt, options, order_index')
+            .in('lesson_id', lessonIds)
+            .order('order_index', { ascending: true });
+
+          if (questionsErr) {
+            return jsonResponse({ success: false, message: 'Không thể truy vấn câu hỏi trắc nghiệm.', code: 'DB_ERROR' }, 500);
+          }
+          dbQuestions = qData || [];
+        }
+
+        const questionsByLesson = new Map<string, QuestionDTO[]>();
+        for (const q of dbQuestions) {
+          const list = questionsByLesson.get(q.lesson_id) || [];
+          list.push({
+            id: q.id,
+            prompt: q.prompt,
+            options: q.options,
+            // Strictly NO correctOptionIndex field
+          });
+          questionsByLesson.set(q.lesson_id, list);
+        }
+
+        lessons = (dbLessons || []).map((l: any) => ({
+          id: l.id,
+          courseId: l.course_id,
+          sessionNumber: l.session_number,
+          title: l.title,
+          description: l.description,
+          materials: l.materials,
+          videoUrl: l.video_url,
+          status: l.status,
+          hasQuiz: l.has_quiz,
+          hasPractice: l.has_practice,
+          practiceMode: l.practice_mode,
+          questions: questionsByLesson.get(l.id) || [],
+        }));
+      }
+
+      // 3. Quiz Results (Select and map class_id, surface database errors)
+      const { data: dbQuizResults, error: quizErr } = actor.role === 'student'
+        ? await actorClient
+            .from('quiz_results')
+            .select('student_id, lesson_id, class_id, highest_score, attempts_count, passed, last_attempt_at')
+            .eq('student_id', actor.profileId)
+        : await actorClient
+            .from('quiz_results')
+            .select('student_id, lesson_id, class_id, highest_score, attempts_count, passed, last_attempt_at');
+
+      if (quizErr) {
+        return jsonResponse({ success: false, message: 'Không thể truy vấn kết quả trắc nghiệm.', code: 'DB_ERROR' }, 500);
+      }
+
+      quizResults = (dbQuizResults || []).map((q: any) => ({
+        studentId: q.student_id,
+        lessonId: q.lesson_id,
+        classId: q.class_id,
+        highestScore: q.highest_score,
+        attemptsCount: q.attempts_count,
+        passed: q.passed,
+        lastAttemptAt: q.last_attempt_at,
+      }));
+
+      // 4. Submissions (Select and map class_id, surface database errors)
+      const { data: dbSubmissions, error: subErr } = actor.role === 'student'
+        ? await actorClient
+            .from('practice_submissions')
+            .select('id, student_id, lesson_id, class_id, type, content, file_size_bytes, notes, status, teacher_feedback, submitted_at, graded_at, graded_by, can_resubmit')
+            .eq('student_id', actor.profileId)
+        : await actorClient
+            .from('practice_submissions')
+            .select('id, student_id, lesson_id, class_id, type, content, file_size_bytes, notes, status, teacher_feedback, submitted_at, graded_at, graded_by, can_resubmit');
+
+      if (subErr) {
+        return jsonResponse({ success: false, message: 'Không thể truy vấn bài nộp thực hành.', code: 'DB_ERROR' }, 500);
+      }
+
+      submissions = (dbSubmissions || []).map((s: any) => ({
+        id: s.id,
+        studentId: s.student_id,
+        lessonId: s.lesson_id,
+        classId: s.class_id,
+        type: s.type,
+        content: s.content,
+        fileSizeBytes: s.file_size_bytes,
+        notes: s.notes,
+        status: s.status,
+        teacherFeedback: s.teacher_feedback,
+        submittedAt: s.submitted_at,
+        gradedAt: s.graded_at,
+        gradedBy: s.graded_by,
+        canResubmit: s.can_resubmit,
+      }));
+
       return jsonResponse({
         success: true,
         data: {
@@ -1905,10 +2159,10 @@ export async function handleRequest(req: Request): Promise<Response> {
           users,
           classes,
           students,
-          courses: [],
-          lessons: [],
-          quizResults: [],
-          submissions: [],
+          courses,
+          lessons,
+          quizResults,
+          submissions,
         },
       });
     }
@@ -1940,13 +2194,6 @@ export async function handleRequest(req: Request): Promise<Response> {
           teacherId?: string | null;
         };
 
-        if (courseId !== undefined && courseId !== null) {
-          return jsonResponse(
-            { success: false, message: 'Khóa học chưa được hỗ trợ trong M2.', code: 'INVALID_PAYLOAD' },
-            400
-          );
-        }
-
         if (!code || typeof code !== 'string' || !code.trim() || !name || typeof name !== 'string' || !name.trim()) {
           return jsonResponse(
             { success: false, message: STATIC_MESSAGES.INVALID_PAYLOAD, code: 'INVALID_PAYLOAD' },
@@ -1955,19 +2202,23 @@ export async function handleRequest(req: Request): Promise<Response> {
         }
 
         const targetTeacherId = teacherId && isValidUUID(teacherId) ? teacherId : null;
+        const targetCourseId = courseId && isValidUUID(courseId) ? courseId : null;
 
-        const { data: savedClassData, error: saveErr } = await adminClient.rpc('m2_save_class', {
+        const { data: savedClassData, error: saveErr } = await adminClient.rpc('m3_save_class', {
           p_admin_profile_id: actor.profileId,
           p_class_id: null,
           p_code: code.trim(),
           p_name: name.trim(),
           p_teacher_id: targetTeacherId,
+          p_course_id: targetCourseId,
+          p_update_teacher: true,
+          p_update_course: true,
         });
 
         const savedClass = savedClassData?.[0];
         if (saveErr || !savedClass) {
           return jsonResponse(
-            { success: false, message: 'Không thể tạo lớp học. Mã lớp có thể đã tồn tại.', code: 'DB_ERROR' },
+            { success: false, message: saveErr?.message || 'Không thể tạo lớp học. Mã lớp có thể đã tồn tại.', code: 'DB_ERROR' },
             400
           );
         }
@@ -1976,7 +2227,7 @@ export async function handleRequest(req: Request): Promise<Response> {
           id: savedClass.id,
           code: savedClass.code,
           name: savedClass.name,
-          courseId: null,
+          courseId: savedClass.course_id,
           teacherId: savedClass.teacher_id,
           status: savedClass.status,
           is14SessionsConfirmed: savedClass.is_14_sessions_confirmed,
@@ -1998,55 +2249,33 @@ export async function handleRequest(req: Request): Promise<Response> {
           );
         }
 
-        if (data.courseId !== undefined && data.courseId !== null) {
-          return jsonResponse(
-            { success: false, message: 'Khóa học chưa được hỗ trợ trong M2.', code: 'INVALID_PAYLOAD' },
-            400
-          );
-        }
+        // Atomic partial update with presence flags: resolve omitted fields inside transaction under lock
+        const updateTeacherFlag = data.teacherId !== undefined;
+        const updateCourseFlag = data.courseId !== undefined;
+        const targetTeacherId = data.teacherId && isValidUUID(data.teacherId) ? data.teacherId : null;
+        const targetCourseId = data.courseId && isValidUUID(data.courseId) ? data.courseId : null;
+        const codeParam = data.code && typeof data.code === 'string' && data.code.trim() ? data.code.trim() : null;
+        const nameParam = data.name && typeof data.name === 'string' && data.name.trim() ? data.name.trim() : null;
 
-        // Fetch current class to preserve unsupplied fields
-        const { data: curClass, error: curErr } = await adminClient
-          .from('classes')
-          .select('code, name')
-          .eq('id', id)
-          .single();
-
-        if (curErr || !curClass) {
-          return jsonResponse(
-            { success: false, message: 'Lớp học không tồn tại.', code: 'NOT_FOUND' },
-            404
-          );
-        }
-
-        const finalCode = data.code ? data.code.trim() : curClass.code;
-        const finalName = data.name ? data.name.trim() : curClass.name;
-
-        let finalTeacherId: string | null = null;
-        if (data.teacherId !== undefined) {
-          finalTeacherId = data.teacherId && isValidUUID(data.teacherId) ? data.teacherId : null;
-        } else {
-          const { data: ctRow } = await adminClient
-            .from('class_teachers')
-            .select('teacher_profile_id')
-            .eq('class_id', id)
-            .maybeSingle();
-          finalTeacherId = ctRow ? ctRow.teacher_profile_id : null;
-        }
-
-        const { data: savedClassData, error: saveErr } = await adminClient.rpc('m2_save_class', {
+        const { data: savedClassData, error: saveErr } = await adminClient.rpc('m3_save_class', {
           p_admin_profile_id: actor.profileId,
           p_class_id: id,
-          p_code: finalCode,
-          p_name: finalName,
-          p_teacher_id: finalTeacherId,
+          p_code: codeParam,
+          p_name: nameParam,
+          p_teacher_id: targetTeacherId,
+          p_course_id: targetCourseId,
+          p_update_teacher: updateTeacherFlag,
+          p_update_course: updateCourseFlag,
         });
 
         const savedClass = savedClassData?.[0];
         if (saveErr || !savedClass) {
+          const errMsg = saveErr?.message || '';
+          const status = errMsg.includes('NOT_FOUND') ? 404 : 400;
+          const code = errMsg.includes('DUPLICATE_CODE') ? 'DUPLICATE_CODE' : (errMsg.includes('NOT_FOUND') ? 'NOT_FOUND' : 'DB_ERROR');
           return jsonResponse(
-            { success: false, message: 'Không thể cập nhật lớp học.', code: 'DB_ERROR' },
-            400
+            { success: false, message: errMsg || 'Không thể cập nhật lớp học.', code },
+            status
           );
         }
 
@@ -2054,7 +2283,7 @@ export async function handleRequest(req: Request): Promise<Response> {
           id: savedClass.id,
           code: savedClass.code,
           name: savedClass.name,
-          courseId: null,
+          courseId: savedClass.course_id,
           teacherId: savedClass.teacher_id,
           status: savedClass.status,
           is14SessionsConfirmed: savedClass.is_14_sessions_confirmed,
@@ -3262,6 +3491,517 @@ export async function handleRequest(req: Request): Promise<Response> {
           sha256,
         },
         message: 'Khởi tạo đối tượng lưu trữ kiểm thử thành công.',
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // M3 ACTIONS: create-course, update-course, update-lesson (Admin only)
+    // --------------------------------------------------------------------------
+    if (action === 'create-course') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'admin') {
+        return jsonResponse(
+          { success: false, message: STATIC_MESSAGES.ADMIN_ONLY, code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { title, description } = payload as { title?: string; description?: string };
+      if (!title || typeof title !== 'string' || !title.trim()) {
+        return jsonResponse(
+          { success: false, message: 'Tiêu đề khóa học không được để trống.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const { data: newCourseData, error: courseErr } = await adminClient.rpc('m3_create_course', {
+        p_admin_profile_id: actor.profileId,
+        p_title: title.trim(),
+        p_description: description ? String(description).trim() : '',
+      });
+
+      if (courseErr || !newCourseData || newCourseData.length === 0) {
+        return jsonResponse(
+          { success: false, message: courseErr?.message || 'Không thể tạo khóa học.', code: 'DB_ERROR' },
+          400
+        );
+      }
+
+      const created = newCourseData[0];
+      return jsonResponse({
+        success: true,
+        data: {
+          id: created.id,
+          title: created.title,
+          description: created.description,
+          totalSessions: created.total_sessions || 14,
+          createdAt: created.created_at,
+        },
+        message: STATIC_MESSAGES.COURSE_CREATED,
+      });
+    }
+
+    if (action === 'update-course') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'admin') {
+        return jsonResponse(
+          { success: false, message: STATIC_MESSAGES.ADMIN_ONLY, code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { id, title, description } = payload as { id?: string; title?: string; description?: string };
+      if (!isValidUUID(id) || !title || typeof title !== 'string' || !title.trim()) {
+        return jsonResponse(
+          { success: false, message: 'Dữ liệu khóa học không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const { error: updErr } = await adminClient.rpc('m3_update_course', {
+        p_admin_profile_id: actor.profileId,
+        p_course_id: id,
+        p_title: title.trim(),
+        p_description: description ? String(description).trim() : '',
+      });
+
+      if (updErr) {
+        return jsonResponse(
+          { success: false, message: updErr.message || 'Không thể cập nhật khóa học.', code: 'DB_ERROR' },
+          400
+        );
+      }
+
+      return jsonResponse({
+        success: true,
+        message: STATIC_MESSAGES.COURSE_UPDATED,
+      });
+    }
+
+    if (action === 'update-lesson') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'admin') {
+        return jsonResponse(
+          { success: false, message: STATIC_MESSAGES.ADMIN_ONLY, code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { id, data: lessonData } = payload as { id?: string; data?: any };
+      if (!isValidUUID(id) || !lessonData || typeof lessonData !== 'object') {
+        return jsonResponse(
+          { success: false, message: 'Dữ liệu bài học không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const title = lessonData.title ? String(lessonData.title).trim() : '';
+      if (!title) {
+        return jsonResponse(
+          { success: false, message: 'Tiêu đề bài học không được để trống.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const status = lessonData.status === 'published' ? 'published' : 'draft';
+      const hasQuiz = Boolean(lessonData.hasQuiz);
+      const hasPractice = Boolean(lessonData.hasPractice);
+
+      // Enforce publish rule: cannot publish theory-only lesson
+      if (status === 'published' && !hasQuiz && !hasPractice) {
+        return jsonResponse(
+          {
+            success: false,
+            message: STATIC_MESSAGES.CANNOT_PUBLISH_THEORY_ONLY,
+            code: 'CANNOT_PUBLISH_THEORY_ONLY',
+          },
+          400
+        );
+      }
+
+      const practiceMode = lessonData.practiceMode === 'file_allowed' ? 'file_allowed' : 'link_only';
+
+      const { error: updErr } = await adminClient.rpc('m3_update_lesson', {
+        p_admin_profile_id: actor.profileId,
+        p_lesson_id: id,
+        p_title: title,
+        p_description: lessonData.description ? String(lessonData.description) : '',
+        p_materials: lessonData.materials ? String(lessonData.materials) : '',
+        p_video_url: lessonData.videoUrl ? String(lessonData.videoUrl) : '',
+        p_status: status,
+        p_has_quiz: hasQuiz,
+        p_has_practice: hasPractice,
+        p_practice_mode: practiceMode,
+        p_questions: Array.isArray(lessonData.questions) ? lessonData.questions : [],
+      });
+
+      if (updErr) {
+        return jsonResponse(
+          { success: false, message: updErr.message || 'Không thể cập nhật bài học.', code: 'DB_ERROR' },
+          400
+        );
+      }
+
+      return jsonResponse({
+        success: true,
+        message: STATIC_MESSAGES.LESSON_UPDATED,
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // M3 ACTION: submit-quiz (Student only, server-side grading)
+    // --------------------------------------------------------------------------
+    if (action === 'submit-quiz') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'student') {
+        return jsonResponse(
+          { success: false, message: 'Thao tác chỉ dành cho Học sinh.', code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { lessonId, answers } = payload as { lessonId?: string; answers?: number[] };
+      if (!isValidUUID(lessonId) || !Array.isArray(answers)) {
+        return jsonResponse(
+          { success: false, message: 'Dữ liệu nộp bài trắc nghiệm không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const { data: quizRes, error: quizErr } = await adminClient.rpc('m3_submit_quiz_attempt', {
+        p_student_profile_id: actor.profileId,
+        p_lesson_id: lessonId,
+        p_answers: answers,
+      });
+
+      if (quizErr || !quizRes || quizRes.length === 0) {
+        return jsonResponse(
+          { success: false, message: quizErr?.message || 'Không thể nộp bài trắc nghiệm.', code: 'QUIZ_SUBMIT_FAILED' },
+          400
+        );
+      }
+
+      const res = quizRes[0];
+      return jsonResponse({
+        success: true,
+        score: res.score,
+        passed: res.passed,
+        highestScore: res.highest_score,
+        attemptsCount: res.attempts_count,
+        message: res.passed
+          ? 'Chúc mừng! Bạn đã đạt bài trắc nghiệm.'
+          : 'Bạn chưa đạt ngưỡng 70%. Bạn có thể làm lại bài không giới hạn số lần.',
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // M3 ACTION: submit-practice (Student only)
+    // --------------------------------------------------------------------------
+    if (action === 'submit-practice') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'student') {
+        return jsonResponse(
+          { success: false, message: 'Thao tác chỉ dành cho Học sinh.', code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { lessonId, type, content, notes, fileSizeBytes } = payload as {
+        lessonId?: string;
+        type?: string;
+        content?: string;
+        notes?: string;
+        fileSizeBytes?: number;
+      };
+
+      if (!isValidUUID(lessonId) || !content || typeof content !== 'string' || !content.trim()) {
+        return jsonResponse(
+          { success: false, message: 'Dữ liệu bài nộp thực hành không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const cleanType = type === 'file' ? 'file' : type === 'text' ? 'text' : 'link';
+
+      if (cleanType === 'link') {
+        const trimmed = content.trim();
+        if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+          return jsonResponse(
+            { success: false, message: 'Đường dẫn bài nộp phải có scheme http:// hoặc https://.', code: 'INVALID_LINK_SCHEME' },
+            400
+          );
+        }
+      }
+
+      if (cleanType === 'file' && typeof fileSizeBytes === 'number' && fileSizeBytes > 2097152) {
+        return jsonResponse(
+          { success: false, message: STATIC_MESSAGES.FILE_TOO_LARGE, code: 'FILE_TOO_LARGE' },
+          400
+        );
+      }
+
+      const { data: subData, error: subErr } = await adminClient.rpc('m3_submit_practice', {
+        p_student_profile_id: actor.profileId,
+        p_lesson_id: lessonId,
+        p_type: cleanType,
+        p_content: content.trim(),
+        p_file_size_bytes: typeof fileSizeBytes === 'number' ? fileSizeBytes : null,
+        p_notes: notes ? String(notes).trim() : '',
+      });
+
+      if (subErr || !subData || subData.length === 0) {
+        const msg = subErr?.message || 'Không thể nộp bài thực hành.';
+        let code = 'DB_ERROR';
+        if (msg.includes('CANNOT_RESUBMIT_APPROVED')) code = 'CANNOT_RESUBMIT_APPROVED';
+        else if (msg.includes('INVALID_RESERVATION')) code = 'INVALID_RESERVATION';
+        else if (msg.includes('PENDING_UPLOAD_CAP_EXCEEDED')) code = 'PENDING_UPLOAD_CAP_EXCEEDED';
+        else if (msg.includes('FILE_NOT_FOUND')) code = 'FILE_NOT_FOUND';
+        else if (msg.includes('FILE_TOO_LARGE')) code = 'FILE_TOO_LARGE';
+        else if (msg.includes('INVALID_FILE_PATH')) code = 'INVALID_FILE_PATH';
+        else if (msg.includes('INVALID_FILE_TYPE')) code = 'INVALID_FILE_TYPE';
+        else if (msg.includes('INVALID_LINK_SCHEME')) code = 'INVALID_LINK_SCHEME';
+        else if (msg.includes('DUPLICATE_FILE')) code = 'DUPLICATE_FILE';
+        else if (msg.includes('FORBIDDEN')) code = 'FORBIDDEN';
+        return jsonResponse({ success: false, message: msg, code }, 400);
+      }
+
+      // If resubmitting with a replacement file, clean up old file via Storage API only if unreferenced
+      const oldFilePath = (subData[0] as any)?.old_file_path;
+      if (oldFilePath && typeof oldFilePath === 'string') {
+        try {
+          const { data: refRows } = await adminClient
+            .from('practice_submissions')
+            .select('id')
+            .eq('content', oldFilePath)
+            .limit(1);
+          if (!refRows || refRows.length === 0) {
+            await adminClient.storage.from('m3-practice-files').remove([oldFilePath]);
+          }
+        } catch {
+          // Non-fatal background storage cleanup catch
+        }
+      }
+
+      return jsonResponse({
+        success: true,
+        data: subData[0],
+        message: STATIC_MESSAGES.PRACTICE_SUBMITTED,
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // M3 ACTION: grade-submission (Teacher or Admin)
+    // --------------------------------------------------------------------------
+    if (action === 'grade-submission') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'teacher' && actor.role !== 'admin') {
+        return jsonResponse(
+          { success: false, message: 'Chỉ Giáo viên hoặc Quản trị viên mới có quyền chấm bài.', code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { submissionId, status, feedback } = payload as {
+        submissionId?: string;
+        status?: string;
+        feedback?: string;
+      };
+
+      if (!isValidUUID(submissionId) || !status || !['approved', 'needs_revision'].includes(status)) {
+        return jsonResponse(
+          { success: false, message: 'Dữ liệu chấm bài không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const { data: gradeData, error: gradeErr } = await adminClient.rpc('m3_grade_submission', {
+        p_actor_profile_id: actor.profileId,
+        p_submission_id: submissionId,
+        p_status: status,
+        p_feedback: feedback ? String(feedback).trim() : '',
+      });
+
+      if (gradeErr || !gradeData || gradeData.length === 0) {
+        return jsonResponse(
+          { success: false, message: gradeErr?.message || 'Không thể lưu kết quả chấm bài.', code: 'GRADE_FAILED' },
+          400
+        );
+      }
+
+      return jsonResponse({
+        success: true,
+        data: gradeData[0],
+        message: STATIC_MESSAGES.SUBMISSION_GRADED,
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // M3 ACTION: reopen-submission (Teacher or Admin)
+    // --------------------------------------------------------------------------
+    if (action === 'reopen-submission') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'teacher' && actor.role !== 'admin') {
+        return jsonResponse(
+          { success: false, message: 'Chỉ Giáo viên hoặc Quản trị viên mới có quyền mở lại bài nộp.', code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { submissionId } = payload as { submissionId?: string };
+      if (!isValidUUID(submissionId)) {
+        return jsonResponse(
+          { success: false, message: 'Mã bài nộp không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const { data: reopenData, error: reopenErr } = await adminClient.rpc('m3_reopen_submission', {
+        p_actor_profile_id: actor.profileId,
+        p_submission_id: submissionId,
+      });
+
+      if (reopenErr || !reopenData || reopenData.length === 0) {
+        return jsonResponse(
+          { success: false, message: reopenErr?.message || 'Không thể mở lại quyền nộp bài.', code: 'REOPEN_FAILED' },
+          400
+        );
+      }
+
+      return jsonResponse({
+        success: true,
+        data: reopenData[0],
+        message: STATIC_MESSAGES.SUBMISSION_REOPENED,
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // M3 ACTION: transfer-student (Admin only)
+    // --------------------------------------------------------------------------
+    if (action === 'transfer-student') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'admin') {
+        return jsonResponse(
+          { success: false, message: STATIC_MESSAGES.ADMIN_ONLY, code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { studentId, targetClassId } = payload as { studentId?: string; targetClassId?: string };
+      if (!isValidUUID(studentId) || !isValidUUID(targetClassId)) {
+        return jsonResponse(
+          { success: false, message: 'Mã học sinh hoặc lớp đích không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const { error: transferErr } = await adminClient.rpc('m3_transfer_student', {
+        p_admin_profile_id: actor.profileId,
+        p_student_id: studentId,
+        p_target_class_id: targetClassId,
+      });
+
+      if (transferErr) {
+        return jsonResponse(
+          { success: false, message: transferErr.message || 'Không thể chuyển lớp học sinh.', code: 'TRANSFER_FAILED' },
+          400
+        );
+      }
+
+      return jsonResponse({
+        success: true,
+        message: STATIC_MESSAGES.STUDENT_TRANSFERRED,
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // M3 ACTION: reset-student-progress (Admin only)
+    // --------------------------------------------------------------------------
+    if (action === 'reset-student-progress') {
+      const { actor, errorResponse } = await verifyActorSession(adminClient, body.accessToken);
+      if (errorResponse || !actor) {
+        return errorResponse ?? jsonResponse(
+          { success: false, message: STATIC_MESSAGES.UNAUTHORIZED, code: 'UNAUTHORIZED' },
+          401
+        );
+      }
+      if (actor.role !== 'admin') {
+        return jsonResponse(
+          { success: false, message: STATIC_MESSAGES.ADMIN_ONLY, code: 'FORBIDDEN' },
+          403
+        );
+      }
+
+      const { studentId } = payload as { studentId?: string };
+      if (!isValidUUID(studentId)) {
+        return jsonResponse(
+          { success: false, message: 'Mã học sinh không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      const { error: resetErr } = await adminClient.rpc('m3_reset_student_progress', {
+        p_admin_profile_id: actor.profileId,
+        p_student_id: studentId,
+      });
+
+      if (resetErr) {
+        return jsonResponse(
+          { success: false, message: resetErr.message || 'Không thể đặt lại kết quả học tập.', code: 'RESET_FAILED' },
+          400
+        );
+      }
+
+      return jsonResponse({
+        success: true,
+        message: STATIC_MESSAGES.PROGRESS_RESET,
       });
     }
 

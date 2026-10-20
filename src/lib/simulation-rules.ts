@@ -227,3 +227,100 @@ export function buildCourseCloseCsvContent(
     participantCount,
   };
 }
+
+export const ALLOWED_PRACTICE_EXTENSIONS = Object.freeze([
+  'zip', 'pdf', 'png', 'jpg', 'jpeg', 'webp',
+  'txt', 'py', 'js', 'html', 'css', 'json', 'md', 'sb3'
+]);
+
+export const MAX_PRACTICE_FILE_SIZE = 2 * 1024 * 1024; // 2 MB (2,097,152 bytes)
+export const MULTIPART_FORM_OVERHEAD_BYTES = 64 * 1024; // 64 KiB named overhead constant for multipart form boundaries and fields
+export const MAX_MULTIPART_REQUEST_BYTES = MAX_PRACTICE_FILE_SIZE + MULTIPART_FORM_OVERHEAD_BYTES; // 2 MiB + 64 KiB = 2,162,688 bytes
+
+export const PRACTICE_FILE_MIME_MAP: Record<string, { canonical: string; allowedBrowserMimes: readonly string[] }> = Object.freeze({
+  zip: { canonical: 'application/zip', allowedBrowserMimes: ['application/zip', 'application/x-zip-compressed'] },
+  pdf: { canonical: 'application/pdf', allowedBrowserMimes: ['application/pdf'] },
+  png: { canonical: 'image/png', allowedBrowserMimes: ['image/png'] },
+  jpg: { canonical: 'image/jpeg', allowedBrowserMimes: ['image/jpeg', 'image/jpg'] },
+  jpeg: { canonical: 'image/jpeg', allowedBrowserMimes: ['image/jpeg', 'image/jpg'] },
+  webp: { canonical: 'image/webp', allowedBrowserMimes: ['image/webp'] },
+  txt: { canonical: 'text/plain', allowedBrowserMimes: ['text/plain'] },
+  py: { canonical: 'text/x-python', allowedBrowserMimes: ['text/x-python', 'text/plain'] },
+  js: { canonical: 'text/javascript', allowedBrowserMimes: ['text/javascript', 'application/javascript'] },
+  html: { canonical: 'text/html', allowedBrowserMimes: ['text/html'] },
+  css: { canonical: 'text/css', allowedBrowserMimes: ['text/css'] },
+  json: { canonical: 'application/json', allowedBrowserMimes: ['application/json'] },
+  md: { canonical: 'text/markdown', allowedBrowserMimes: ['text/markdown', 'text/plain'] },
+  sb3: { canonical: 'application/x.scratch.sb3', allowedBrowserMimes: ['application/x.scratch.sb3', 'application/zip', 'application/x-zip-compressed'] },
+});
+
+export function getCanonicalMimeForExtension(ext: string): string | null {
+  const norm = ext.toLowerCase().replace(/^\./, '').trim();
+  return PRACTICE_FILE_MIME_MAP[norm]?.canonical || null;
+}
+
+export function validatePracticeFile(
+  fileName: string,
+  fileSizeBytes: number,
+  _clientMime?: string | null
+): { valid: boolean; error?: string; canonicalMime?: string; extension?: string } {
+  if (!fileName || typeof fileName !== 'string' || !fileName.trim()) {
+    return { valid: false, error: 'Tên tệp không được để trống.' };
+  }
+
+  if (typeof fileSizeBytes !== 'number' || fileSizeBytes <= 0) {
+    return { valid: false, error: 'Kích thước tệp không hợp lệ.' };
+  }
+
+  if (fileSizeBytes > MAX_PRACTICE_FILE_SIZE) {
+    return { valid: false, error: 'Kích thước tệp vượt quá giới hạn 2 MB.' };
+  }
+
+  const parts = fileName.trim().split('.');
+  if (parts.length < 2) {
+    return { valid: false, error: 'Tệp phải có phần mở rộng hợp lệ.' };
+  }
+
+  const ext = parts.pop()!.toLowerCase();
+  const canonicalMime = getCanonicalMimeForExtension(ext);
+  if (!ALLOWED_PRACTICE_EXTENSIONS.includes(ext) || !canonicalMime) {
+    return {
+      valid: false,
+      error: `Định dạng tệp ".${ext}" không được hỗ trợ. Chỉ chấp nhận các định dạng: ZIP, PDF, PNG, JPG/JPEG, WEBP, TXT, PY, JS, HTML, CSS, JSON, MD, SB3.`,
+    };
+  }
+
+  // Canonical MIME determined exclusively from extension; do not reject or accept based on browser file.type
+  return { valid: true, canonicalMime, extension: ext };
+}
+
+export async function readBoundedMultipartStream(
+  bodyStream: ReadableStream<Uint8Array>,
+  maxBytes: number = MAX_MULTIPART_REQUEST_BYTES
+): Promise<
+  | { success: true; buffer: Buffer; totalBytes: number }
+  | { success: false; code: 'PAYLOAD_TOO_LARGE' | 'STREAM_READ_ERROR'; totalBytes: number }
+> {
+  const reader = bodyStream.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalStreamBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        totalStreamBytes += value.byteLength;
+        if (totalStreamBytes > maxBytes) {
+          await reader.cancel('PAYLOAD_TOO_LARGE');
+          return { success: false, code: 'PAYLOAD_TOO_LARGE', totalBytes: totalStreamBytes };
+        }
+        chunks.push(value);
+      }
+    }
+  } catch {
+    return { success: false, code: 'STREAM_READ_ERROR', totalBytes: totalStreamBytes };
+  }
+
+  return { success: true, buffer: Buffer.concat(chunks), totalBytes: totalStreamBytes };
+}

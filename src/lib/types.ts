@@ -92,6 +92,7 @@ export interface StudentProfile {
 export interface QuizResult {
   studentId: string;
   lessonId: string;
+  classId?: string;
   highestScore: number; // 0..100
   attemptsCount: number;
   passed: boolean; // highestScore >= 70
@@ -99,12 +100,13 @@ export interface QuizResult {
 }
 
 export type SubmissionStatus = 'submitted' | 'approved' | 'needs_revision';
-export type SubmissionType = 'link' | 'file';
+export type SubmissionType = 'link' | 'file' | 'text';
 
 export interface PracticeSubmission {
   id: string;
   studentId: string;
   lessonId: string;
+  classId?: string;
   type: SubmissionType;
   content: string; // URL or filename
   fileSizeBytes?: number; // <= 2MB

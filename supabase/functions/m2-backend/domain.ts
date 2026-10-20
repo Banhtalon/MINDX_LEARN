@@ -109,7 +109,76 @@ export const STATIC_MESSAGES = {
   STUDENT_ARCHIVED: 'Lưu trữ học sinh thành công. Phiên làm việc đã bị thu hồi.',
   STUDENT_RESTORED: 'Khôi phục học sinh thành công.',
   STUDENT_UPDATED: 'Cập nhật thông tin học sinh thành công.',
+  COURSE_CREATED: 'Tạo khóa học thành công.',
+  COURSE_UPDATED: 'Cập nhật khóa học thành công.',
+  LESSON_UPDATED: 'Cập nhật bài học thành công.',
+  CANNOT_PUBLISH_THEORY_ONLY: 'Chặn xuất bản: Buổi học phải có Quiz, Thực hành hoặc cả hai; không được xuất bản bài chỉ có lý thuyết.',
+  QUIZ_SUBMITTED: 'Nộp bài trắc nghiệm thành công.',
+  PRACTICE_SUBMITTED: 'Nộp bài thực hành thành công.',
+  SUBMISSION_GRADED: 'Chấm bài thực hành thành công.',
+  SUBMISSION_REOPENED: 'Mở lại quyền nộp bài thành công.',
+  CANNOT_RESUBMIT_APPROVED: 'Bài nộp đã được giáo viên duyệt Đạt. Giáo viên phải mở lại quyền nộp bài trước khi học sinh được nộp bản thay thế.',
+  STUDENT_TRANSFERRED: 'Chuyển lớp học sinh thành công. Tiến độ đợt học mới đã được thiết lập.',
+  PROGRESS_RESET: 'Đặt lại kết quả học tập thành công.',
+  FILE_TOO_LARGE: 'Kích thước tệp vượt quá giới hạn 2 MB.',
 } as const;
+
+export interface CourseDTO {
+  id: string;
+  title: string;
+  description: string;
+  totalSessions: 14;
+  createdAt: string;
+}
+
+export interface QuestionDTO {
+  id: string;
+  prompt: string;
+  options: string[];
+  correctOptionIndex?: number;
+}
+
+export interface LessonDTO {
+  id: string;
+  courseId: string;
+  sessionNumber: number;
+  title: string;
+  description: string;
+  materials: string;
+  videoUrl: string;
+  status: 'draft' | 'published';
+  hasQuiz: boolean;
+  hasPractice: boolean;
+  practiceMode: 'link_only' | 'file_allowed';
+  questions: QuestionDTO[];
+}
+
+export interface QuizResultDTO {
+  studentId: string;
+  lessonId: string;
+  classId?: string;
+  highestScore: number;
+  attemptsCount: number;
+  passed: boolean;
+  lastAttemptAt: string;
+}
+
+export interface PracticeSubmissionDTO {
+  id: string;
+  studentId: string;
+  lessonId: string;
+  classId?: string;
+  type: 'link' | 'file' | 'text';
+  content: string;
+  fileSizeBytes?: number;
+  notes?: string;
+  status: 'submitted' | 'approved' | 'needs_revision';
+  teacherFeedback?: string;
+  submittedAt: string;
+  gradedAt?: string;
+  gradedBy?: string;
+  canResubmit: boolean;
+}
 
 export async function computeSha256Hex(input: string): Promise<string> {
   const enc = new TextEncoder();

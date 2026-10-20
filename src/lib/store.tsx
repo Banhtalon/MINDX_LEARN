@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
   User,
   Role,
@@ -189,11 +189,34 @@ export interface StoreContextType {
   refreshData: () => Promise<void>;
 }
 
+export function createDefaultLessonSlots(courseId: string): Lesson[] {
+  return Array.from({ length: 14 }, (_, index) => {
+    const sessionNumber = index + 1;
+    return {
+      id: `les_${courseId}_${sessionNumber.toString().padStart(2, '0')}`,
+      courseId,
+      sessionNumber,
+      title: `Buổi ${sessionNumber}: Bài học Buổi ${sessionNumber}`,
+      description: `Nội dung tóm tắt buổi ${sessionNumber}`,
+      materials: '',
+      videoUrl: '',
+      status: 'draft',
+      hasQuiz: false,
+      hasPractice: false,
+      practiceMode: 'link_only',
+      questions: [],
+    };
+  });
+}
+
 const StoreContext = createContext<StoreContextType | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Mode detection: explicit demo env variable only
   const isLiveMode = process.env.NEXT_PUBLIC_MINDX_DEMO !== '1';
+
+  const authEpochRef = useRef<number>(0);
+  const bootstrapSeqRef = useRef<number>(0);
 
   // State: in live mode, start unauthenticated (null), never auto-Admin!
   const [currentUser, setCurrentUser] = useState<User | null>(
@@ -226,20 +249,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Fetch bootstrap data from real server in live mode
   const fetchBootstrapData = useCallback(async () => {
     if (!isLiveMode) return;
+    const epoch = authEpochRef.current;
+    const seq = ++bootstrapSeqRef.current;
+
     try {
       const res = await fetch('/api/m2/bootstrap', { cache: 'no-store' });
+      if (authEpochRef.current !== epoch || bootstrapSeqRef.current !== seq) return;
+
       const data = await res.json().catch(() => null);
+      if (authEpochRef.current !== epoch || bootstrapSeqRef.current !== seq) return;
 
       if (!res.ok || !data || !data.success) {
-        setBootstrapError(data?.message || 'Không thể tải dữ liệu từ máy chủ. Vui lòng bấm Thử lại.');
+        if (authEpochRef.current === epoch && bootstrapSeqRef.current === seq) {
+          setBootstrapError(data?.message || 'Không thể tải dữ liệu từ máy chủ. Vui lòng bấm Thử lại.');
+        }
         return;
       }
 
       const d = data.data;
       if (!d || typeof d !== 'object') {
-        setBootstrapError('Cấu trúc dữ liệu máy chủ không hợp lệ.');
+        if (authEpochRef.current === epoch && bootstrapSeqRef.current === seq) {
+          setBootstrapError('Cấu trúc dữ liệu máy chủ không hợp lệ.');
+        }
         return;
       }
+
+      if (authEpochRef.current !== epoch || bootstrapSeqRef.current !== seq) return;
 
       if (d.currentUser) setCurrentUser(d.currentUser);
       if (Array.isArray(d.classes)) setClasses(d.classes);
@@ -268,7 +303,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
       setBootstrapError(null);
     } catch {
-      setBootstrapError('Lỗi kết nối máy chủ khi nạp dữ liệu. Vui lòng kiểm tra mạng và thử lại.');
+      if (authEpochRef.current === epoch && bootstrapSeqRef.current === seq) {
+        setBootstrapError('Lỗi kết nối máy chủ khi nạp dữ liệu. Vui lòng kiểm tra mạng và thử lại.');
+      }
     }
   }, [isLiveMode]);
 
@@ -282,23 +319,34 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     async function initSession() {
+      const epoch = ++authEpochRef.current;
+      ++bootstrapSeqRef.current;
+
       try {
         const res = await fetch('/api/m2/session', { cache: 'no-store' });
+        if (!isMounted || authEpochRef.current !== epoch) return;
+
         if (res.ok) {
-          const data = await res.json();
-          if (isMounted && data.success && data.user) {
+          const data = await res.json().catch(() => null);
+          if (!isMounted || authEpochRef.current !== epoch) return;
+
+          if (data?.success && data?.user) {
             setCurrentUser(data.user);
             await fetchBootstrapData();
-          } else if (isMounted) {
+          } else {
             setCurrentUser(null);
           }
-        } else if (isMounted) {
+        } else {
           setCurrentUser(null);
         }
       } catch {
-        if (isMounted) setCurrentUser(null);
+        if (isMounted && authEpochRef.current === epoch) {
+          setCurrentUser(null);
+        }
       } finally {
-        if (isMounted) setIsLoadingSession(false);
+        if (isMounted && authEpochRef.current === epoch) {
+          setIsLoadingSession(false);
+        }
       }
     }
 
@@ -357,6 +405,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }): Promise<{ success: boolean; message: string; user?: User }> => {
     setLogoutWarning(null);
     if (isLiveMode) {
+      const epoch = ++authEpochRef.current;
+      ++bootstrapSeqRef.current;
+      setCurrentUser(null);
+      setClasses([]);
+      setStudents([]);
+      setUsers([]);
+      setCourses([]);
+      setLessons([]);
+      setQuizResults([]);
+      setSubmissions([]);
+      setBootstrapError(null);
+      setIsLoadingSession(false);
+
       try {
         if (credentials.studentCode) {
           const res = await fetch('/api/m2/student-login-prepare', {
@@ -367,13 +428,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               pin: credentials.pin,
             }),
           });
-          const data = await res.json();
-          if (res.ok && data.success && data.user) {
+          if (authEpochRef.current !== epoch) {
+            return { success: false, message: 'Thao tác đăng nhập đã bị hủy.' };
+          }
+          const data = await res.json().catch(() => null);
+          if (authEpochRef.current !== epoch) {
+            return { success: false, message: 'Thao tác đăng nhập đã bị hủy.' };
+          }
+          if (res.ok && data?.success && data?.user) {
             setCurrentUser(data.user);
             await fetchBootstrapData();
+            if (authEpochRef.current !== epoch) {
+              return { success: false, message: 'Thao tác đăng nhập đã bị hủy.' };
+            }
             return { success: true, message: data.message, user: data.user };
           }
-          return { success: false, message: data.message || 'Thông tin đăng nhập không chính xác.' };
+          return { success: false, message: data?.message || 'Thông tin đăng nhập không chính xác.' };
         }
 
         if (credentials.email) {
@@ -385,13 +455,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               password: credentials.password,
             }),
           });
-          const data = await res.json();
-          if (res.ok && data.success && data.user) {
+          if (authEpochRef.current !== epoch) {
+            return { success: false, message: 'Thao tác đăng nhập đã bị hủy.' };
+          }
+          const data = await res.json().catch(() => null);
+          if (authEpochRef.current !== epoch) {
+            return { success: false, message: 'Thao tác đăng nhập đã bị hủy.' };
+          }
+          if (res.ok && data?.success && data?.user) {
             setCurrentUser(data.user);
             await fetchBootstrapData();
+            if (authEpochRef.current !== epoch) {
+              return { success: false, message: 'Thao tác đăng nhập đã bị hủy.' };
+            }
             return { success: true, message: data.message, user: data.user };
           }
-          return { success: false, message: data.message || 'Email hoặc mật khẩu không chính xác.' };
+          return { success: false, message: data?.message || 'Email hoặc mật khẩu không chính xác.' };
         }
 
         return { success: false, message: 'Vui lòng nhập đầy đủ thông tin đăng nhập.' };
@@ -503,12 +582,49 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async (): Promise<LogoutResult> => {
+    const epoch = ++authEpochRef.current;
+    ++bootstrapSeqRef.current;
+
+    if (isLiveMode) {
+      setCurrentUser(null);
+      setClasses([]);
+      setStudents([]);
+      setUsers([]);
+      setCourses([]);
+      setLessons([]);
+      setQuizResults([]);
+      setSubmissions([]);
+      setBootstrapError(null);
+      setIsLoadingSession(false);
+    } else {
+      if (qaState.scenario === 'session_expired') {
+        setQaState({ scenario: 'normal', delayMs: 0 });
+      }
+      setCurrentUser(null);
+    }
+
     let serverConfirmed = false;
     let warningMsg: string | null = null;
     if (isLiveMode) {
       try {
         const res = await fetch('/api/m2/logout', { method: 'POST' });
+        if (authEpochRef.current !== epoch) {
+          return {
+            success: false,
+            serverConfirmed: false,
+            warning: null,
+            message: 'Phiên đã thay đổi.',
+          };
+        }
         const data = await res.json().catch(() => null);
+        if (authEpochRef.current !== epoch) {
+          return {
+            success: false,
+            serverConfirmed: false,
+            warning: null,
+            message: 'Phiên đã thay đổi.',
+          };
+        }
         if (res.ok && data?.success === true) {
           serverConfirmed = true;
         } else {
@@ -516,22 +632,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           warningMsg = data?.message || 'Đã thoát trên thiết bị này nhưng chưa xác nhận đóng phiên trên máy chủ. Vui lòng thử lại/liên hệ quản trị.';
         }
       } catch {
+        if (authEpochRef.current !== epoch) {
+          return {
+            success: false,
+            serverConfirmed: false,
+            warning: null,
+            message: 'Phiên đã thay đổi.',
+          };
+        }
         serverConfirmed = false;
         warningMsg = 'Đã thoát trên thiết bị này nhưng chưa xác nhận đóng phiên trên máy chủ. Vui lòng thử lại/liên hệ quản trị.';
       }
     } else {
       serverConfirmed = true;
     }
-    if (qaState.scenario === 'session_expired') {
-      setQaState({ scenario: 'normal', delayMs: 0 });
+
+    if (authEpochRef.current === epoch) {
+      setLogoutWarning(warningMsg);
     }
-    setCurrentUser(null);
-    if (isLiveMode) {
-      setClasses([]);
-      setStudents([]);
-      setUsers([]);
-    }
-    setLogoutWarning(warningMsg);
+
     return {
       success: serverConfirmed,
       serverConfirmed,
@@ -641,6 +760,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const payloadData: Record<string, unknown> = {};
         if (data.name !== undefined) payloadData.name = data.name;
         if (data.code !== undefined) payloadData.code = data.code;
+        if (data.courseId !== undefined) payloadData.courseId = data.courseId;
         if (data.teacherId !== undefined) payloadData.teacherId = data.teacherId;
 
         const res = await fetch('/api/m2/update-class', {
@@ -666,6 +786,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               ...c,
               ...(data.name !== undefined ? { name: data.name } : {}),
               ...(data.code !== undefined ? { code: data.code } : {}),
+              ...(data.courseId !== undefined ? { courseId: data.courseId } : {}),
               ...(data.teacherId !== undefined ? { teacherId: data.teacherId } : {}),
             }
           : c
@@ -722,15 +843,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   // Lesson & Course Actions
   const updateLesson = async (id: string, data: Partial<Lesson>) => {
-    if (isLiveMode) {
-      return {
-        success: false,
-        message: 'Chức năng cập nhật bài học thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-      };
-    }
-
     const qaCheck = checkQABlock('Lưu bài học');
     if (qaCheck.blocked) return { success: false, message: qaCheck.message! };
+
+    if (isLiveMode) {
+      try {
+        const res = await fetch('/api/m2/update-lesson', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, data }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Cập nhật bài học thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể cập nhật bài học.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
+    }
 
     const targetLesson = lessons.find((l) => l.id === id);
     if (!targetLesson) return { success: false, message: 'Không tìm thấy bài học.' };
@@ -749,15 +881,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateCourse = async (id: string, data: Partial<Course>) => {
-    if (isLiveMode) {
-      return {
-        success: false,
-        message: 'Chức năng cập nhật khóa học thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-      };
-    }
-
     const qaCheck = checkQABlock('Cập nhật khóa học');
     if (qaCheck.blocked) return { success: false, message: qaCheck.message! };
+
+    if (isLiveMode) {
+      try {
+        const res = await fetch('/api/m2/update-course', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, title: data.title, description: data.description }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Cập nhật khóa học thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể cập nhật khóa học.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
+    }
 
     if (currentUser?.role !== 'admin') {
       return { success: false, message: 'Chỉ Admin mới có quyền cập nhật khóa học.' };
@@ -768,15 +911,29 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createCourse = async (title: string, description: string = '') => {
-    if (isLiveMode) {
-      return {
-        success: false,
-        message: 'Chức năng tạo khóa học thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-      };
-    }
+    const qaCheck = checkQABlock('Tạo khóa học');
+    if (qaCheck.blocked) return { success: false, message: qaCheck.message! };
 
     const cleanTitle = title.trim();
     if (!cleanTitle) return { success: false, message: 'Tiêu đề không được để trống.' };
+
+    if (isLiveMode) {
+      try {
+        const res = await fetch('/api/m2/create-course', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: cleanTitle, description: description.trim() }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Tạo khóa học thành công.', course: d.data };
+        }
+        return { success: false, message: d?.message || 'Không thể tạo khóa học.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
+    }
 
     const newCourseId = `crs_${Date.now()}`;
     const newCourse: Course = {
@@ -787,7 +944,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString(),
     };
 
+    const newLessons = createDefaultLessonSlots(newCourseId);
+
     setCourses((prev) => [...prev, newCourse]);
+    setLessons((prev) => [...prev, ...newLessons]);
     return { success: true, message: 'Tạo khóa học thành công (Mô phỏng).', course: newCourse };
   };
 
@@ -828,10 +988,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const transferStudent = async (studentId: string, targetClassId: string) => {
     if (isLiveMode) {
-      return {
-        success: false,
-        message: 'Chức năng chuyển lớp học sinh thuộc phạm vi Mốc 3 (kèm reset tiến độ đợt mới). Hiện đang khóa ở Mốc 2.',
-      };
+      try {
+        const res = await fetch('/api/m2/transfer-student', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId, targetClassId }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Chuyển lớp học sinh thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể chuyển lớp học sinh.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
     }
 
     const targetClass = classes.find((c) => c.id === targetClassId);
@@ -847,10 +1018,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const resetStudentProgress = async (studentId: string) => {
     if (isLiveMode) {
-      return {
-        success: false,
-        message: 'Chức năng đặt lại điểm thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-      };
+      try {
+        const res = await fetch('/api/m2/reset-student-progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Đặt lại kết quả học tập thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể đặt lại kết quả học tập.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
     }
 
     setQuizResults((prev) => prev.filter((q) => q.studentId !== studentId));
@@ -1155,28 +1337,236 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
-  // Quiz / Practice placeholders
-  const submitQuizAttempt = async () => ({
-    success: false,
-    message: 'Nộp bài Quiz thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-    score: 0,
-    passed: false,
-  });
+  // Quiz / Practice Actions
+  const submitQuizAttempt = async (
+    studentId: string,
+    lessonId: string,
+    answers: number[]
+  ) => {
+    if (isLiveMode) {
+      try {
+        const res = await fetch('/api/m2/submit-quiz', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lessonId, answers }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return {
+            success: true,
+            message: d.message || 'Nộp bài trắc nghiệm thành công.',
+            score: d.score ?? 0,
+            passed: d.passed ?? false,
+          };
+        }
+        return {
+          success: false,
+          message: d?.message || 'Không thể nộp bài trắc nghiệm.',
+          score: 0,
+          passed: false,
+        };
+      } catch {
+        return {
+          success: false,
+          message: 'Lỗi kết nối máy chủ khi nộp bài trắc nghiệm.',
+          score: 0,
+          passed: false,
+        };
+      }
+    }
 
-  const submitPractice = async () => ({
-    success: false,
-    message: 'Nộp bài thực hành thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-  });
+    // Demo mode simulation with 70% threshold and highest score retained
+    const targetLesson = lessons.find((l) => l.id === lessonId);
+    if (!targetLesson || !targetLesson.questions || targetLesson.questions.length === 0) {
+      return { success: false, message: 'Bài học không có câu hỏi trắc nghiệm.', score: 0, passed: false };
+    }
 
-  const gradeSubmission = async () => ({
-    success: false,
-    message: 'Chấm bài thực hành thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-  });
+    let correctCount = 0;
+    targetLesson.questions.forEach((q, idx) => {
+      if (answers[idx] === q.correctOptionIndex) {
+        correctCount++;
+      }
+    });
 
-  const reopenSubmission = async () => ({
-    success: false,
-    message: 'Mở lại bài nộp thuộc phạm vi Mốc 3. Hiện đang khóa ở Mốc 2.',
-  });
+    const score = Math.round((correctCount / targetLesson.questions.length) * 100);
+    const passed = score >= 70;
+
+    const student = students.find((s) => s.id === studentId);
+    setQuizResults((prev) => {
+      const existing = prev.find(
+        (q) => q.studentId === studentId && q.lessonId === lessonId && (!q.classId || q.classId === student?.currentClassId)
+      );
+      if (existing) {
+        return prev.map((q) =>
+          q.studentId === studentId && q.lessonId === lessonId && (!q.classId || q.classId === student?.currentClassId)
+            ? {
+                ...q,
+                classId: student?.currentClassId,
+                highestScore: Math.max(q.highestScore, score),
+                attemptsCount: q.attemptsCount + 1,
+                passed: q.passed || passed,
+                lastAttemptAt: new Date().toISOString(),
+              }
+            : q
+        );
+      }
+      return [
+        ...prev,
+        {
+          studentId,
+          lessonId,
+          classId: student?.currentClassId,
+          highestScore: score,
+          attemptsCount: 1,
+          passed,
+          lastAttemptAt: new Date().toISOString(),
+        },
+      ];
+    });
+
+    return {
+      success: true,
+      message: passed
+        ? 'Chúc mừng! Bạn đã đạt bài trắc nghiệm.'
+        : 'Bạn chưa đạt ngưỡng 70%. Bạn có thể làm lại bài không giới hạn số lần.',
+      score,
+      passed,
+    };
+  };
+
+  const submitPractice = async (
+    studentId: string,
+    lessonId: string,
+    data: { type: SubmissionType; content: string; notes?: string; fileSizeBytes?: number }
+  ) => {
+    if (isLiveMode) {
+      try {
+        const res = await fetch('/api/m2/submit-practice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lessonId, ...data }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Nộp bài thực hành thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể nộp bài thực hành.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
+    }
+
+    // Demo mode simulation with can_resubmit rule
+    const existing = submissions.find((s) => s.studentId === studentId && s.lessonId === lessonId);
+    if (existing && existing.status === 'approved' && !existing.canResubmit) {
+      return {
+        success: false,
+        message: 'Bài nộp đã được giáo viên duyệt Đạt. Giáo viên phải mở lại quyền nộp bài trước khi học sinh được nộp bản thay thế.',
+      };
+    }
+
+    const student = students.find((s) => s.id === studentId);
+    const newSubmission: PracticeSubmission = {
+      id: existing ? existing.id : `sub_${Date.now()}`,
+      studentId,
+      lessonId,
+      classId: student?.currentClassId,
+      type: data.type,
+      content: data.content,
+      fileSizeBytes: data.fileSizeBytes,
+      notes: data.notes,
+      status: 'submitted',
+      teacherFeedback: undefined,
+      submittedAt: new Date().toISOString(),
+      canResubmit: true,
+    };
+
+    setSubmissions((prev) => {
+      const filtered = prev.filter(
+        (s) => !(s.studentId === studentId && s.lessonId === lessonId && (!s.classId || s.classId === student?.currentClassId))
+      );
+      return [...filtered, newSubmission];
+    });
+
+    return { success: true, message: 'Nộp bài thực hành thành công (Mô phỏng).' };
+  };
+
+  const gradeSubmission = async (
+    submissionId: string,
+    data: { status: 'approved' | 'needs_revision'; feedback: string }
+  ) => {
+    if (isLiveMode) {
+      try {
+        const res = await fetch('/api/m2/grade-submission', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submissionId, ...data }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Chấm bài thực hành thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể chấm bài thực hành.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
+    }
+
+    // Demo mode simulation
+    setSubmissions((prev) =>
+      prev.map((s) =>
+        s.id === submissionId
+          ? {
+              ...s,
+              status: data.status,
+              teacherFeedback: data.feedback,
+              gradedAt: new Date().toISOString(),
+              gradedBy: currentUser?.id,
+              canResubmit: data.status === 'needs_revision',
+            }
+          : s
+      )
+    );
+
+    return { success: true, message: 'Chấm bài thực hành thành công (Mô phỏng).' };
+  };
+
+  const reopenSubmission = async (submissionId: string) => {
+    if (isLiveMode) {
+      try {
+        const res = await fetch('/api/m2/reopen-submission', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submissionId }),
+        });
+        const d = await res.json().catch(() => null);
+        if (res.ok && d?.success) {
+          await fetchBootstrapData();
+          return { success: true, message: d.message || 'Mở lại quyền nộp bài thành công.' };
+        }
+        return { success: false, message: d?.message || 'Không thể mở lại quyền nộp bài.' };
+      } catch {
+        return { success: false, message: 'Lỗi kết nối máy chủ.' };
+      }
+    }
+
+    // Demo mode simulation
+    setSubmissions((prev) =>
+      prev.map((s) =>
+        s.id === submissionId
+          ? {
+              ...s,
+              canResubmit: true,
+            }
+          : s
+      )
+    );
+
+    return { success: true, message: 'Mở lại quyền nộp bài thành công (Mô phỏng).' };
+  };
 
   const previewTeachingSync = async (fixtureData?: any) => {
     return {
@@ -1197,13 +1587,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   });
 
   const getStudentProgress = (studentId: string, courseId = 'crs_rob_k14'): StudentOverallProgress => {
+    const student = students.find((s) => s.id === studentId);
+    const currentClassId = student?.currentClassId;
+
     const sortedLessons = [...lessons]
       .filter((l) => l.courseId === courseId)
       .sort((a, b) => a.sessionNumber - b.sessionNumber);
 
     const summaries: StudentSessionSummary[] = sortedLessons.map((les) => {
-      const quiz = quizResults.find((q) => q.studentId === studentId && q.lessonId === les.id);
-      const sub = submissions.find((s) => s.studentId === studentId && s.lessonId === les.id);
+      const quiz = quizResults.find(
+        (q) => q.studentId === studentId && q.lessonId === les.id && (!q.classId || !currentClassId || q.classId === currentClassId)
+      );
+      const sub = submissions.find(
+        (s) => s.studentId === studentId && s.lessonId === les.id && (!s.classId || !currentClassId || s.classId === currentClassId)
+      );
       const quizPassed = les.hasQuiz ? (quiz?.passed ?? false) : true;
       const practicePassed = les.hasPractice ? (sub?.status === 'approved') : true;
 
