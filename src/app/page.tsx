@@ -5,108 +5,117 @@ import Link from 'next/link';
 import { useStore } from '@/lib/store';
 import {
   IconShield,
-  IconUser,
   IconBookOpen,
   IconCheckCircle,
-  IconArrowLeft,
-  IconExternalLink,
-  IconAlertTriangle,
-  IconLock,
   IconFileText,
   IconUsers,
-  IconDatabase,
 } from '@/components/icons';
 
 export default function HomePage() {
   const { currentUser, switchDemoUser, isLiveMode } = useStore();
 
-  const routes = [
-    { code: 'UI-01', path: '/login', name: 'Đăng nhập chung', area: 'Xác thực', desc: 'HS dùng mã + PIN 8 số; Admin/GV dùng email + mật khẩu. Có Quên mật khẩu.' },
-    { code: 'UI-02', path: '/account', name: 'Hồ sơ tài khoản', area: 'Tài khoản', desc: 'Đổi PIN 8 số cho HS; đổi mật khẩu cho Admin/GV; đăng xuất.' },
-    { code: 'UI-03', path: '/manage', name: 'Tổng quan quản lý', area: 'Admin / GV', desc: 'Bảng theo dõi lớp được giao, số bài cần chấm, thông tin vai trò.' },
-    { code: 'UI-04', path: '/manage/classes', name: 'Quản lý lớp & PIN', area: 'Admin / GV', desc: 'Admin gán khóa/GV; cấp PIN lần đầu / cấp lại 1 HS (GV không có nút PIN); kết thúc khóa 14 buổi.' },
-    { code: 'UI-05', path: '/admin/courses', name: 'Khóa học 14 buổi', area: 'Admin', desc: 'Khóa cố định 14 vị trí; trạng thái Nháp / Đã xuất bản từng buổi.' },
-    { code: 'UI-06', path: '/admin/lessons/les_rob_01/edit', name: 'Soạn thảo bài học', area: 'Admin', desc: 'Sửa video/tài liệu/quiz/thực hành; Chặn xuất bản bài chỉ có lý thuyết.' },
-    { code: 'UI-07', path: '/admin/teachers', name: 'Quản lý giáo viên', area: 'Admin', desc: 'Tạo tài khoản email GV, gửi link mật khẩu giả lập, phân công lớp.' },
-    { code: 'UI-08', path: '/admin/sync', name: 'Đồng bộ Teaching', area: 'Admin', desc: 'Thử nghiệm nguồn giả fixture, đối chiếu lớp ROB, không gửi mật khẩu/cookie.' },
-    { code: 'UI-09', path: '/teacher/submissions', name: 'Hàng đợi chấm bài', area: 'Giáo viên', desc: 'Chấm Đạt / Cần làm lại, nhận xét, mở lại quyền nộp cho học sinh.' },
-    { code: 'UI-10', path: '/student', name: 'Góc học sinh', area: 'Học sinh', desc: 'Tổng quan khóa, tiến độ cố định "Đã hoàn thành X/14 buổi" (X/14)*100%.' },
-    { code: 'UI-11', path: '/student/course', name: 'Danh sách 14 buổi', area: 'Học sinh', desc: 'Xem mọi bài đã xuất bản (bài nháp bị ẩn); mở bài học tùy ý.' },
-    { code: 'UI-12', path: '/student/lessons/les_rob_01', name: 'Chi tiết bài học', area: 'Học sinh', desc: 'Xem video, tài liệu, nộp bài thực hành dạng link hoặc tệp <= 2MB.' },
-    { code: 'UI-13', path: '/student/lessons/les_rob_01/quiz', name: 'Làm bài trắc nghiệm', area: 'Học sinh', desc: 'Làm quiz, ngưỡng đạt 70%, làm lại không giới hạn, giữ điểm cao nhất.' },
-  ];
+  const primaryWorkspaceHref =
+    currentUser?.role === 'student'
+      ? '/student'
+      : currentUser?.role === 'teacher' || currentUser?.role === 'admin'
+      ? '/manage'
+      : '/login';
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
-        <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/40 border border-blue-400/40 text-xs font-semibold uppercase tracking-wider mb-3">
-            {isLiveMode ? 'Mốc 2 — Hệ thống Xác thực Bảo mật & Quản lý Lớp' : 'Mốc 1 — Khung Web & Các luồng giao diện giả lập'}
+    <div className="relative space-y-8 py-2">
+      {/* Ambient Background Glow */}
+      <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[680px] h-[340px] bg-blue-100/40 rounded-full blur-3xl pointer-events-none -z-10" />
+
+      {/* Hero Welcome Card */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(8,112,184,0.07)] p-8 sm:p-10 relative overflow-hidden">
+        <div className="absolute -right-16 -top-16 w-64 h-64 bg-blue-50/70 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="max-w-3xl relative">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200/70 text-[#1d63ed] text-xs font-semibold mb-4">
+            <span className="w-2 h-2 rounded-full bg-[#1d63ed]" />
+            <span>Hệ thống Quản lý Lớp học & Học tập 14 Buổi</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
-            MINDX LEARN — Nền tảng Học tập & Quản lý Lớp
+
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+            Chào mừng đến với MINDX LEARN
           </h1>
-          <p className="text-blue-100 text-sm leading-relaxed mb-6">
-            {isLiveMode
-              ? 'Hệ thống học tập và quản lý lớp phân quyền với xác thực phiên bảo mật (AES-256-GCM), kiểm soát truy cập RLS và quản lý cấp mã PIN an toàn.'
-              : 'Bản thử nghiệm giao diện dành cho Owner và Reviewer kiểm duyệt theo Kế hoạch v3. Toàn bộ dữ liệu hiện đang chạy trong bộ nhớ máy (RAM).'}
+          <p className="text-slate-500 text-sm sm:text-base leading-relaxed mb-7 max-w-2xl">
+            Không gian học tập trực tuyến theo lộ trình chuẩn{' '}
+            <strong className="text-slate-700 font-semibold">Basic → Advanced → Intensive</strong> với
+            14 buổi học cố định mỗi khóa, kết hợp làm bài Trắc nghiệm và nộp dự án Thực hành trực tiếp.
           </p>
 
-          {/* Quick Demo Switcher - EXCLUSIVELY in demo mode */}
           {!isLiveMode ? (
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
-              <div className="text-xs font-bold uppercase tracking-wider text-blue-200 mb-2">
-                Chọn nhanh vai trò để bắt đầu trải nghiệm:
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/70">
+              <div className="text-xs font-bold text-slate-600 mb-2.5">
+                Chuyển nhanh vai trò thử nghiệm:
               </div>
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => switchDemoUser('admin')}
-                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                     currentUser?.role === 'admin'
-                      ? 'bg-white text-blue-700 ring-2 ring-white'
-                      : 'bg-blue-800/80 text-white hover:bg-blue-800'
+                      ? 'bg-[#1d63ed] text-white shadow-md shadow-blue-500/25'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  1. Đóng vai ADMIN Quản Trị
+                  Quản trị viên (Admin)
                 </button>
                 <button
                   onClick={() => switchDemoUser('teacher')}
-                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                     currentUser?.role === 'teacher'
-                      ? 'bg-white text-emerald-700 ring-2 ring-white'
-                      : 'bg-emerald-800/80 text-white hover:bg-emerald-800'
+                      ? 'bg-[#1d63ed] text-white shadow-md shadow-blue-500/25'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  2. Đóng vai GIÁO VIÊN
+                  Giáo viên
                 </button>
                 <button
                   onClick={() => switchDemoUser('student')}
-                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                     currentUser?.role === 'student'
-                      ? 'bg-white text-amber-700 ring-2 ring-white'
-                      : 'bg-amber-800/80 text-white hover:bg-amber-800'
+                      ? 'bg-[#1d63ed] text-white shadow-md shadow-blue-500/25'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  3. Đóng vai HỌC SINH
+                  Học sinh
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {currentUser ? (
-                <Link
-                  href={currentUser.role === 'student' ? '/student' : '/manage'}
-                  className="px-5 py-2.5 bg-white text-blue-700 font-bold rounded-lg text-sm shadow hover:bg-blue-50 transition-colors"
-                >
-                  Vào khu vực làm việc ({currentUser.role === 'student' ? 'Học sinh' : currentUser.role === 'teacher' ? 'Giáo viên' : 'Admin'}) →
-                </Link>
+                <>
+                  <Link
+                    href={primaryWorkspaceHref}
+                    className="min-h-[44px] px-6 py-3 bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-lg shadow-blue-500/25 transition-all inline-flex items-center gap-2"
+                  >
+                    <span>
+                      Vào không gian làm việc (
+                      {currentUser.role === 'student'
+                        ? 'Học sinh'
+                        : currentUser.role === 'teacher'
+                        ? 'Giáo viên'
+                        : 'Quản trị viên'}
+                      )
+                    </span>
+                    <span>→</span>
+                  </Link>
+                  <Link
+                    href="/account"
+                    className="min-h-[44px] px-5 py-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold rounded-xl text-sm shadow-sm transition-all inline-flex items-center"
+                  >
+                    Hồ sơ tài khoản
+                  </Link>
+                </>
               ) : (
                 <Link
                   href="/login"
-                  className="px-5 py-2.5 bg-white text-blue-700 font-bold rounded-lg text-sm shadow hover:bg-blue-50 transition-colors"
+                  className="min-h-[44px] px-6 py-3 bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-lg shadow-blue-500/25 transition-all inline-flex items-center gap-2"
                 >
-                  Đăng nhập hệ thống →
+                  <span>Đăng nhập vào lớp học</span>
+                  <span>→</span>
                 </Link>
               )}
             </div>
@@ -114,133 +123,164 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 4 Main Areas Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-400 transition-all">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-3">
-            <IconLock className="w-5 h-5" />
+      {/* 3 Role Portals */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* Student Portal Card */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(15,23,42,0.04)] hover:border-blue-200 transition-all flex flex-col justify-between">
+          <div>
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-b from-blue-50 to-blue-100/80 border border-blue-200/60 text-[#1d63ed] flex items-center justify-center mb-4 shadow-sm">
+              <IconBookOpen className="w-5 h-5" />
+            </div>
+            <h2 className="font-bold text-slate-900 text-base mb-1.5 tracking-tight">
+              Khu vực Học sinh
+            </h2>
+            <p className="text-xs text-slate-500 mb-5 leading-relaxed">
+              Đăng nhập bằng Mã học sinh và mã PIN 8 chữ số. Xem bài giảng 14 buổi, làm bài Trắc nghiệm
+              (đạt từ 70%) và nộp bài Thực hành.
+            </p>
           </div>
-          <h3 className="font-bold text-slate-900 text-base mb-1">Khu Xác thực & Đổi PIN</h3>
-          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-            HS đăng nhập mã + PIN 8 số. Admin/GV dùng email + pass. Có Quên mật khẩu & đổi PIN 8 số.
-          </p>
-          <div className="space-y-1 text-xs">
-            <Link href="/login" className="block text-blue-600 font-semibold hover:underline">
-              → UI-01: Đăng nhập
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <Link
+              href="/student"
+              className="text-[#1d63ed] font-semibold hover:underline inline-flex items-center gap-1"
+            >
+              <span>Góc học tập</span>
+              <span>→</span>
             </Link>
-            <Link href="/account" className="block text-blue-600 font-semibold hover:underline">
-              → UI-02: Đổi PIN / Mật khẩu
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-400 transition-all">
-          <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
-            <IconBookOpen className="w-5 h-5" />
-          </div>
-          <h3 className="font-bold text-slate-900 text-base mb-1">Khu Học Sinh</h3>
-          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-            Tiến độ cố định X/14 buổi. Mở bài đã xuất bản tùy ý. Nộp link/file 2MB. Làm quiz đạt 70%.
-          </p>
-          <div className="space-y-1 text-xs">
-            <Link href="/student" className="block text-emerald-600 font-semibold hover:underline">
-              → UI-10: Tổng quan & Tiến độ
-            </Link>
-            <Link href="/student/course" className="block text-emerald-600 font-semibold hover:underline">
-              → UI-11: Danh sách 14 bài
+            <Link
+              href="/student/course"
+              className="text-slate-500 hover:text-slate-800 font-medium"
+            >
+              Lộ trình 14 buổi
             </Link>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-400 transition-all">
-          <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
-            <IconFileText className="w-5 h-5" />
+        {/* Teacher Portal Card */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(15,23,42,0.04)] hover:border-blue-200 transition-all flex flex-col justify-between">
+          <div>
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-b from-emerald-50 to-emerald-100/80 border border-emerald-200/60 text-emerald-700 flex items-center justify-center mb-4 shadow-sm">
+              <IconFileText className="w-5 h-5" />
+            </div>
+            <h2 className="font-bold text-slate-900 text-base mb-1.5 tracking-tight">
+              Khu vực Giáo viên
+            </h2>
+            <p className="text-xs text-slate-500 mb-5 leading-relaxed">
+              Theo dõi danh sách học sinh và tiến độ X/14 buổi của các lớp được phân công. Chấm duyệt
+              bài thực hành và gửi nhận xét chi tiết.
+            </p>
           </div>
-          <h3 className="font-bold text-slate-900 text-base mb-1">Khu Giáo Viên</h3>
-          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-            Xem lớp phân công, danh sách học sinh. Hàng đợi chấm bài Đạt / Cần làm lại, mở lại quyền nộp.
-          </p>
-          <div className="space-y-1 text-xs">
-            <Link href="/manage" className="block text-purple-600 font-semibold hover:underline">
-              → UI-03: Việc cần chấm
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <Link
+              href="/teacher/submissions"
+              className="text-[#1d63ed] font-semibold hover:underline inline-flex items-center gap-1"
+            >
+              <span>Chấm bài thực hành</span>
+              <span>→</span>
             </Link>
-            <Link href="/teacher/submissions" className="block text-purple-600 font-semibold hover:underline">
-              → UI-09: Hàng đợi chấm bài
+            <Link
+              href="/manage/classes"
+              className="text-slate-500 hover:text-slate-800 font-medium"
+            >
+              Danh sách lớp
             </Link>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-400 transition-all">
-          <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
-            <IconShield className="w-5 h-5" />
+        {/* Admin Portal Card */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(15,23,42,0.04)] hover:border-blue-200 transition-all flex flex-col justify-between">
+          <div>
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-b from-slate-100 to-slate-200/80 border border-slate-300/60 text-slate-800 flex items-center justify-center mb-4 shadow-sm">
+              <IconShield className="w-5 h-5" />
+            </div>
+            <h2 className="font-bold text-slate-900 text-base mb-1.5 tracking-tight">
+              Khu vực Quản trị viên
+            </h2>
+            <p className="text-xs text-slate-500 mb-5 leading-relaxed">
+              Quản lý chương trình 14 buổi, phân công Giáo viên, cấp mã PIN 8 chữ số một lần, đồng bộ
+              danh sách từ Teaching và xuất CSV tổng kết khóa.
+            </p>
           </div>
-          <h3 className="font-bold text-slate-900 text-base mb-1">Khu Quản Trị Admin</h3>
-          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-            Khóa 14 buổi, chặn bài chỉ lý thuyết. Cấp PIN 2 chế độ (CSV 1 lần). Đóng khóa & xóa dữ liệu.
-          </p>
-          <div className="space-y-1 text-xs">
-            <Link href="/manage/classes" className="block text-indigo-600 font-semibold hover:underline">
-              → UI-04: Lớp & Cấp PIN
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <Link
+              href="/manage/classes"
+              className="text-[#1d63ed] font-semibold hover:underline inline-flex items-center gap-1"
+            >
+              <span>Quản lý lớp & PIN</span>
+              <span>→</span>
             </Link>
-            <Link href="/admin/courses" className="block text-indigo-600 font-semibold hover:underline">
-              → UI-05: Khóa 14 buổi
-            </Link>
-            <Link href="/admin/sync" className="block text-indigo-600 font-semibold hover:underline">
-              → UI-08: Thử sync fixture
+            <Link
+              href="/admin/courses"
+              className="text-slate-500 hover:text-slate-800 font-medium"
+            >
+              Khóa học 14 buổi
             </Link>
           </div>
         </div>
       </div>
 
-      {/* UI Table (UI-01 to UI-13) */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+      {/* Standard MindX Course Track Overview */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(15,23,42,0.04)] p-6 sm:p-7">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Bảng tổng hợp 13 màn hình UI-01 đến UI-13</h2>
-            <p className="text-xs text-slate-500">
-              Đối chiếu chính xác theo Mục 4 của PROJECT_PLAN.md. Bấm vào bất kỳ trang nào để duyệt thử.
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">
+              Lộ trình Đào tạo Chuẩn 3 Cấp Độ (Mỗi khóa 14 Buổi cố định)
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Thứ tự học tập từ cơ bản đến chuyên sâu áp dụng thống nhất cho các bộ môn Robotics và Lập trình
             </p>
           </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
+            <IconCheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Basic → Advanced → Intensive</span>
+          </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
-              <tr>
-                <th className="px-4 py-3 w-16">Mã UI</th>
-                <th className="px-4 py-3 w-44">Tên trang & Đường dẫn</th>
-                <th className="px-4 py-3 w-28">Khu vực</th>
-                <th className="px-4 py-3">Mô tả hành vi & Quy tắc kiểm thử</th>
-                <th className="px-4 py-3 w-24 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {routes.map((r) => (
-                <tr key={r.code} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="px-4 py-3 font-mono font-bold text-blue-600">{r.code}</td>
-                  <td className="px-4 py-3">
-                    <div className="font-semibold text-slate-900">{r.name}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">{r.path}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded bg-slate-100 font-medium text-slate-700 text-[11px]">
-                      {r.area}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">{r.desc}</td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={r.path}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 font-bold hover:bg-blue-100 transition-colors"
-                    >
-                      <span>Mở</span>
-                      <IconExternalLink className="w-3.5 h-3.5" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-5">
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-[#1d63ed] uppercase tracking-wider">
+                Cấp độ 1 • Khởi đầu
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#1d63ed] text-[11px] font-semibold">
+                14 Buổi
+              </span>
+            </div>
+            <div className="font-bold text-slate-900 text-sm mb-1">Basic (Cơ bản)</div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Làm quen tư duy cốt lõi, công cụ nền tảng và hoàn thành sản phẩm đầu tay (`ROBB`, `C4K-SB`, `JSB`, `CSB`).
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Cấp độ 2 • Phát triển
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700 text-[11px] font-semibold">
+                14 Buổi
+              </span>
+            </div>
+            <div className="font-bold text-slate-900 text-sm mb-1">Advanced (Nâng cao)</div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Mở rộng thuật toán, kết hợp cảm biến/tương tác giao diện và tối ưu hóa cấu trúc dự án (`ROBA`, `C4K-SA`, `JSA`, `CSA`).
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                Cấp độ 3 • Hoàn thiện
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold">
+                14 Buổi
+              </span>
+            </div>
+            <div className="font-bold text-slate-900 text-sm mb-1">Intensive (Chuyên sâu)</div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Thực hiện dự án tổng hợp cuối khóa và bảo vệ sản phẩm hoàn chỉnh (`ROBI`, `C4K-SI`, `JSI`, `CSI`).
+            </p>
+          </div>
         </div>
       </div>
     </div>

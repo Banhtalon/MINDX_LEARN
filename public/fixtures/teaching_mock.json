@@ -1,61 +1,544 @@
 {
-  "description": "Mock DataTables response simulation for Teaching MindX synchronization (TEST Fixture)",
+  "fixtureId": "m4_synthetic_datatables_v1",
+  "snapshotVersion": "m4_synthetic_datatables_v1_rev1",
+  "description": "Bộ fixture giả lập giao thức server-side DataTables nhiều trang cho Mốc 4 (3 trang: 15 + 15 + 5 = 35 bản ghi giả lập, tuyệt đối không chứa tên hay mã học sinh thật).",
+  "pageLength": 15,
   "draw": 1,
-  "recordsTotal": 8,
-  "recordsFiltered": 8,
+  "recordsTotal": 35,
+  "recordsFiltered": 35,
+  "pages": [
+    {
+      "draw": 1,
+      "snapshotVersion": "m4_synthetic_datatables_v1_rev1",
+      "recordsTotal": 35,
+      "recordsFiltered": 35,
+      "data": [
+        {
+          "id": "HS_ROB_001",
+          "student_name": "Lê Bảo Nam",
+          "class_code": "ROB-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh",
+          "source_quiz_score": 0,
+          "source_pin_override": "00000000"
+        },
+        {
+          "id": "HS_ROB_002",
+          "student_name": "Phạm Quỳnh Chi (Đồng bộ M4)",
+          "class_code": "ROB-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_004",
+          "student_name": "Vũ Minh Khôi (Đã lưu trữ)",
+          "class_code": "ROB-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_101",
+          "student_name": "Học Sinh Giả Lập M4-01",
+          "class_code": "ROB-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_102",
+          "student_name": "Học Sinh Giả Lập M4-02",
+          "class_code": "rob-k14-01",
+          "status": "Đang học",
+          "class_status": "Đang hoạt động",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_103",
+          "student_name": "Học Sinh Giả Lập M4-03",
+          "class_code": "ROB-K14-02",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_104",
+          "student_name": "Học Sinh Giả Lập M4-04",
+          "class_code": "ROB-K14-02",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_105",
+          "student_name": "Học Sinh Giả Lập M4-05",
+          "class_code": "ROB-K14-03",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Cô Thu Trang"
+        },
+        {
+          "id": "HS_ROB_M4_106",
+          "student_name": "Học Sinh Giả Lập M4-06",
+          "class_code": "ROB-K14-03",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Cô Thu Trang"
+        },
+        {
+          "id": "HS_ROB_M4_107",
+          "student_name": "Học Sinh Giả Lập M4-07",
+          "class_code": "ROB-K14-M4-04",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Cô Thu Trang"
+        },
+        {
+          "id": "HS_ROB_M4_108",
+          "student_name": "Học Sinh Giả Lập M4-08",
+          "class_code": "ROB-K14-M4-04",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Cô Thu Trang"
+        },
+        {
+          "id": "HS_ROB_M4_901",
+          "student_name": "Lê Bảo Nam",
+          "class_code": "ROB-K14-02",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_902",
+          "student_name": "Học Sinh Giả Trùng Tên M4",
+          "class_code": "ROB-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_WEB_M4_201",
+          "student_name": "Học Sinh Giả Web 01",
+          "class_code": "WEB-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Web"
+        },
+        {
+          "id": "HS_GAM_M4_202",
+          "student_name": "Học Sinh Giả Game 02",
+          "class_code": "GAM-K14-02",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Game"
+        }
+      ]
+    },
+    {
+      "draw": 2,
+      "snapshotVersion": "m4_synthetic_datatables_v1_rev1",
+      "recordsTotal": 35,
+      "recordsFiltered": 35,
+      "data": [
+        {
+          "id": "HS_ROB_M4_903",
+          "student_name": "Học Sinh Giả Trùng Tên M4",
+          "class_code": "ROB-K14-02",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_904",
+          "student_name": "Học Sinh Giả Trạng Thái Lạ 01",
+          "class_code": "ROB-K14-01",
+          "status": "Chờ xếp lớp (Test)",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_905",
+          "student_name": "Học Sinh Giả Trạng Thái Lớp Lạ 02",
+          "class_code": "ROB-K14-02",
+          "status": "Đang học",
+          "class_status": "PendingReview",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_301",
+          "student_name": "Học Sinh Giả Nghỉ Học 01",
+          "class_code": "ROB-K14-01",
+          "status": "Đã nghỉ học",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_302",
+          "student_name": "Học Sinh Giả Nghỉ Học 02",
+          "class_code": "ROB-K14-02",
+          "status": "Nghỉ",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_303",
+          "student_name": "Học Sinh Giả Hết Khóa 03",
+          "class_code": "ROB-K14-01",
+          "status": "Đã hết khóa",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_304",
+          "student_name": "Học Sinh Giả Bảo Lưu 04",
+          "class_code": "ROB-K14-02",
+          "status": "Bảo lưu",
+          "class_status": "Running",
+          "teacher_main": "Thầy Hoàng Minh"
+        },
+        {
+          "id": "HS_ROB_M4_305",
+          "student_name": "Học Sinh Giả Lớp Đóng 05",
+          "class_code": "ROB-K14-09",
+          "status": "Đang học",
+          "class_status": "Closed",
+          "teacher_main": "GV Giả Lập"
+        },
+        {
+          "id": "HS_ROB_M4_306",
+          "student_name": "Học Sinh Giả Lớp Kết Thúc 06",
+          "class_code": "ROB-K14-10",
+          "status": "Đang học",
+          "class_status": "Finished",
+          "teacher_main": "GV Giả Lập"
+        },
+        {
+          "id": "HS_ROB_M4_307",
+          "student_name": "Học Sinh Giả Lớp Đã Đóng 07",
+          "class_code": "ROB-K14-11",
+          "status": "Đang học",
+          "class_status": "Đã đóng",
+          "teacher_main": "GV Giả Lập"
+        },
+        {
+          "id": "HS_WEB_M4_203",
+          "student_name": "Học Sinh Giả Web 03",
+          "class_code": "WEB-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Web"
+        },
+        {
+          "id": "HS_WEB_M4_204",
+          "student_name": "Học Sinh Giả Web 04",
+          "class_code": "WEB-K14-02",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Web"
+        },
+        {
+          "id": "HS_PYT_M4_205",
+          "student_name": "Học Sinh Giả Python 05",
+          "class_code": "PYT-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Python"
+        },
+        {
+          "id": "HS_PYT_M4_206",
+          "student_name": "Học Sinh Giả Python 06",
+          "class_code": "PYT-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Python"
+        },
+        {
+          "id": "HS_UIX_M4_207",
+          "student_name": "Học Sinh Giả UIUX 07",
+          "class_code": "UIX-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập UIUX"
+        }
+      ]
+    },
+    {
+      "draw": 3,
+      "snapshotVersion": "m4_synthetic_datatables_v1_rev1",
+      "recordsTotal": 35,
+      "recordsFiltered": 35,
+      "data": [
+        {
+          "id": "HS_UIX_M4_208",
+          "student_name": "Học Sinh Giả UIUX 08",
+          "class_code": "UIX-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập UIUX"
+        },
+        {
+          "id": "HS_DAT_M4_209",
+          "student_name": "Học Sinh Giả Data 09",
+          "class_code": "DAT-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Data"
+        },
+        {
+          "id": "HS_DAT_M4_210",
+          "student_name": "Học Sinh Giả Data 10",
+          "class_code": "DAT-K14-01",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Data"
+        },
+        {
+          "id": "HS_GAM_M4_211",
+          "student_name": "Học Sinh Giả Game 11",
+          "class_code": "GAM-K14-03",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Game"
+        },
+        {
+          "id": "HS_GAM_M4_212",
+          "student_name": "Học Sinh Giả Game 12",
+          "class_code": "GAM-K14-03",
+          "status": "Đang học",
+          "class_status": "Running",
+          "teacher_main": "GV Giả Lập Game"
+        }
+      ]
+    }
+  ],
+  "scenarios": {
+    "class_transfer_id_check": {
+      "fixtureId": "m4_class_transfer_id_check",
+      "description": "Kịch bản kiểm chứng ý nghĩa id khi học sinh chuyển lớp: (1) Cùng mã HS_ROB_001 nhưng đổi lớp từ ROB-K14-01 sang ROB-K14-02, (2) Cùng tên Phạm Quỳnh Chi nhưng mã ID bị đổi thành HS_ROB_NEW_002 khi sang ROB-K14-02 -> cả hai đều dừng ở trạng thái cần Admin đối chiếu, không tự gộp theo tên.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 1,
+          "recordsTotal": 3,
+          "recordsFiltered": 3,
+          "data": [
+            {
+              "id": "HS_ROB_001",
+              "student_name": "Lê Bảo Nam",
+              "class_code": "ROB-K14-02",
+              "status": "Đang học",
+              "class_status": "Running"
+            },
+            {
+              "id": "HS_ROB_NEW_002",
+              "student_name": "Phạm Quỳnh Chi",
+              "class_code": "ROB-K14-02",
+              "status": "Đang học",
+              "class_status": "Running"
+            },
+            {
+              "id": "HS_ROB_M4_101",
+              "student_name": "Học Sinh Giả Lập M4-01",
+              "class_code": "ROB-K14-01",
+              "status": "Đang học",
+              "class_status": "Running"
+            }
+          ]
+        }
+      ]
+    },
+    "session_expired_mid_pagination": {
+      "fixtureId": "m4_session_expired_page2",
+      "description": "Trang 1 đọc thành công 15 dòng, nhưng sang Trang 2 phiên đăng nhập Teaching hết hạn (401/Redirect Login) -> hủy toàn bộ lượt đọc, không áp dụng một phần dữ liệu.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 1,
+          "recordsTotal": 20,
+          "recordsFiltered": 20,
+          "data": [
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T02", "student_name": "Học Sinh Giả T02", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T03", "student_name": "Học Sinh Giả T03", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T04", "student_name": "Học Sinh Giả T04", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T05", "student_name": "Học Sinh Giả T05", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T06", "student_name": "Học Sinh Giả T06", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T07", "student_name": "Học Sinh Giả T07", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T08", "student_name": "Học Sinh Giả T08", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T09", "student_name": "Học Sinh Giả T09", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T10", "student_name": "Học Sinh Giả T10", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T11", "student_name": "Học Sinh Giả T11", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T12", "student_name": "Học Sinh Giả T12", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T13", "student_name": "Học Sinh Giả T13", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T14", "student_name": "Học Sinh Giả T14", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T15", "student_name": "Học Sinh Giả T15", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" }
+          ]
+        },
+        {
+          "status": 401,
+          "redirectedToLogin": true,
+          "__simulateSessionExpired": true
+        }
+      ]
+    },
+    "total_changed_between_pages": {
+      "fixtureId": "m4_total_changed_page2",
+      "description": "Trang 1 báo recordsFiltered=20 nhưng sang Trang 2 nguồn thay đổi thành recordsFiltered=22 -> hủy toàn bộ lượt đọc.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 1,
+          "recordsTotal": 20,
+          "recordsFiltered": 20,
+          "data": [
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T02", "student_name": "Học Sinh Giả T02", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T03", "student_name": "Học Sinh Giả T03", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T04", "student_name": "Học Sinh Giả T04", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T05", "student_name": "Học Sinh Giả T05", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T06", "student_name": "Học Sinh Giả T06", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T07", "student_name": "Học Sinh Giả T07", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T08", "student_name": "Học Sinh Giả T08", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T09", "student_name": "Học Sinh Giả T09", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T10", "student_name": "Học Sinh Giả T10", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T11", "student_name": "Học Sinh Giả T11", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T12", "student_name": "Học Sinh Giả T12", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T13", "student_name": "Học Sinh Giả T13", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T14", "student_name": "Học Sinh Giả T14", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T15", "student_name": "Học Sinh Giả T15", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" }
+          ]
+        },
+        {
+          "draw": 2,
+          "recordsTotal": 22,
+          "recordsFiltered": 22,
+          "data": [
+            { "id": "HS_ROB_T16", "student_name": "Học Sinh Giả T16", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T17", "student_name": "Học Sinh Giả T17", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T18", "student_name": "Học Sinh Giả T18", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T19", "student_name": "Học Sinh Giả T19", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T20", "student_name": "Học Sinh Giả T20", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" }
+          ]
+        }
+      ]
+    },
+    "draw_mismatch": {
+      "fixtureId": "m4_draw_mismatch",
+      "description": "Trang 1 yêu cầu draw=1 nhưng phản hồi trả về draw=99 -> hủy toàn bộ lượt đọc.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 99,
+          "recordsTotal": 2,
+          "recordsFiltered": 2,
+          "data": [
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T02", "student_name": "Học Sinh Giả T02", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" }
+          ]
+        }
+      ]
+    },
+    "last_page_mismatch": {
+      "fixtureId": "m4_last_page_mismatch",
+      "description": "Tổng số báo 18 bản ghi (Trang 1: 15 dòng, Trang 2 kỳ vọng 3 dòng cuối), nhưng Trang 2 chỉ trả về 2 dòng -> hủy toàn bộ lượt đọc.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 1,
+          "recordsTotal": 18,
+          "recordsFiltered": 18,
+          "data": [
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T02", "student_name": "Học Sinh Giả T02", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T03", "student_name": "Học Sinh Giả T03", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T04", "student_name": "Học Sinh Giả T04", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T05", "student_name": "Học Sinh Giả T05", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T06", "student_name": "Học Sinh Giả T06", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T07", "student_name": "Học Sinh Giả T07", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T08", "student_name": "Học Sinh Giả T08", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T09", "student_name": "Học Sinh Giả T09", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T10", "student_name": "Học Sinh Giả T10", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T11", "student_name": "Học Sinh Giả T11", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T12", "student_name": "Học Sinh Giả T12", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T13", "student_name": "Học Sinh Giả T13", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T14", "student_name": "Học Sinh Giả T14", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T15", "student_name": "Học Sinh Giả T15", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" }
+          ]
+        },
+        {
+          "draw": 2,
+          "recordsTotal": 18,
+          "recordsFiltered": 18,
+          "data": [
+            { "id": "HS_ROB_T16", "student_name": "Học Sinh Giả T16", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T17", "student_name": "Học Sinh Giả T17", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" }
+          ]
+        }
+      ]
+    },
+    "duplicate_id_across_pages": {
+      "fixtureId": "m4_duplicate_id",
+      "description": "Phát hiện mã học sinh HS_ROB_T01 trùng lặp trong nguồn phân trang -> hủy toàn bộ lượt đọc.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 1,
+          "recordsTotal": 2,
+          "recordsFiltered": 2,
+          "data": [
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01 Bản Sao", "class_code": "ROB-K14-02", "status": "Đang học", "class_status": "Running" }
+          ]
+        }
+      ]
+    },
+    "missing_id_on_page": {
+      "fixtureId": "m4_missing_id",
+      "description": "Phát hiện bản ghi thiếu trường định danh id (id rỗng) -> hủy toàn bộ lượt đọc.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 1,
+          "recordsTotal": 2,
+          "recordsFiltered": 2,
+          "data": [
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "   ", "student_name": "Học Sinh Giả Thiếu Mã", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" }
+          ]
+        }
+      ]
+    },
+    "malformed_structure": {
+      "fixtureId": "m4_malformed_structure",
+      "description": "Phát hiện bản ghi thiếu trường bắt buộc class_status -> hủy toàn bộ lượt đọc.",
+      "pageLength": 15,
+      "pages": [
+        {
+          "draw": 1,
+          "recordsTotal": 2,
+          "recordsFiltered": 2,
+          "data": [
+            { "id": "HS_ROB_T01", "student_name": "Học Sinh Giả T01", "class_code": "ROB-K14-01", "status": "Đang học", "class_status": "Running" },
+            { "id": "HS_ROB_T02", "student_name": "Học Sinh Giả Lỗi Cấu Trúc", "class_code": "ROB-K14-01", "status": "Đang học" }
+          ]
+        }
+      ]
+    }
+  },
   "data": [
     {
-      "id": "MX_STU_101",
-      "student_name": "Nguyễn Văn Giả 01",
+      "id": "HS_ROB_001",
+      "student_name": "Lê Bảo Nam",
       "class_code": "ROB-K14-01",
       "status": "Đang học",
       "class_status": "Running"
     },
     {
-      "id": "MX_STU_102",
-      "student_name": "Trần Thị Giả 02",
-      "class_code": "ROB-K14-01",
-      "status": "Đang học",
-      "class_status": "Running"
-    },
-    {
-      "id": "MX_STU_103",
-      "student_name": "Lê Hoàng Giả 03",
-      "class_code": "ROB-K14-01",
-      "status": "Đang học",
-      "class_status": "Running"
-    },
-    {
-      "id": "MX_STU_104",
-      "student_name": "Phạm Minh Giả 04",
-      "class_code": "ROB-K14-02",
-      "status": "Đang học",
-      "class_status": "Running"
-    },
-    {
-      "id": "MX_STU_105",
-      "student_name": "Vũ Hải Giả 05",
-      "class_code": "WEB-K10-01",
-      "status": "Đang học",
-      "class_status": "Running"
-    },
-    {
-      "id": "MX_STU_106",
-      "student_name": "Đỗ Thu Giả 06",
-      "class_code": "ROB-K14-02",
-      "status": "Đã nghỉ học",
-      "class_status": "Running"
-    },
-    {
-      "id": "MX_STU_107",
-      "student_name": "Hoàng Anh Giả 07",
-      "class_code": "ROB-K14-03",
-      "status": "Đang học",
-      "class_status": "Closed"
-    },
-    {
-      "id": "MX_STU_108",
-      "student_name": "Bùi Đức Giả 08",
+      "id": "HS_ROB_002",
+      "student_name": "Phạm Quỳnh Chi (Đồng bộ M4)",
       "class_code": "ROB-K14-01",
       "status": "Đang học",
       "class_status": "Running"

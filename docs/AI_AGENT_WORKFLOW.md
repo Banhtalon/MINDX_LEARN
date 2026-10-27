@@ -2,17 +2,22 @@
 
 Tệp này áp dụng cho các agent làm việc trong kho MINDX LEARN. Nó bổ sung cho yêu cầu Owner và an toàn dữ liệu hiện có, không thay thế chúng.
 
+## Đọc nhanh ngữ cảnh và cập nhật tiến độ đầu mỗi phiên
+
+- **Trước khi bắt đầu bất kỳ công việc nào:** AI bắt buộc đọc [`PROJECT_OVERVIEW.md`](../PROJECT_OVERVIEW.md) (tổng quan kiến trúc, quy tắc 14 buổi và thứ tự cấp độ khóa học chuẩn `Basic -> Advanced -> Intensive`), [`projectstates.md`](../projectstates.md) (trạng thái môi trường PROD, số liệu DB và các việc đang chờ) và [`changelog.md`](../changelog.md) (lịch sử phát triển tính năng & sổ tay cách làm từng feature) để nắm nhanh ngữ cảnh mà không phải quét lại từ đầu.
+- **Sau khi hoàn thành mỗi hạng mục hoặc thay đổi trạng thái hệ thống:** AI bắt buộc cập nhật lại [`projectstates.md`](../projectstates.md) và ghi nhật ký thay đổi vào [`changelog.md`](../changelog.md) để phiên làm việc tiếp theo đọc được ngay trạng thái và cách làm mới nhất.
+
 ## Phân vai bắt buộc và bàn giao chat
 
 Đây là quy tắc phân vai chuẩn cho mọi gói việc trong dự án. Yêu cầu của Owner, an toàn dữ liệu và hướng dẫn Next.js trong AGENTS.md vẫn được ưu tiên. Nếu một prompt cũ phân vai khác, dùng quy tắc này mà không tự thay đổi phạm vi sản phẩm đã duyệt.
 
-### Phân vai
+### Phân vai thực thi và kiểm duyệt
 
-- **Điều phối — GPT-6.1 Sol:** chỉ phân rã yêu cầu, giao đúng vai trò, theo dõi, tổng hợp bằng chứng và báo Owner. Sol không trực tiếp sửa mã, tài liệu hay cấu hình; không tự chạy test/kiểm tra, thao tác Git, cloud hoặc nghiên cứu thay agent được giao.
-- **Worker mã — Gemini 3.8 Flash High qua AGY:** dùng đúng model gemini-3.8-flash-high và effort high cho công việc viết/sửa mã. Worker chỉ làm phạm vi được giao và có thể chạy kiểm tra trực tiếp cần thiết để xác nhận phần mã của mình.
-- **Reviewer độc lập — GPT-6 Luna Max:** giao một subagent riêng với đúng model gpt-6-luna và effort max để review. Reviewer phải đọc trạng thái hiện tại và bằng chứng mới nhất; không review mã do chính reviewer đó viết. Không lấy báo cáo của worker làm bằng chứng review.
-- **Các việc khác:** tài liệu, nghiên cứu, rà soát, kiểm chứng không thuộc phần mã, chuẩn bị Git/cloud và việc điều phối kỹ thuật đều giao cho subagent GPT-6 Luna Max phù hợp. Sol chỉ theo dõi và tổng hợp.
-- **Không tự đổi model hoặc vai trò:** khi model, AGY, quyền truy cập hoặc hạn mức không dùng được, ghi rõ vai trò đang thiếu và giữ nguyên công việc; không âm thầm thay bằng model khác hoặc để agent khác làm thay vai trò đó. Chỉ tiếp tục phần độc lập đã được giao và vẫn đúng ranh giới trên.
+- **Điều phối & Code chính:** Agent hiện tại trực tiếp điều phối công việc và thực hiện viết/sửa code chính.
+- **Tham vấn việc quá khó:** Khi gặp bài toán hoặc lỗi kỹ thuật quá phức tạp, tham khảo `opus 5.5 high` (`claude-opus-5-5-high`, effort `high`).
+- **Reviewer độc lập (Chính):** Dùng Codex CLI model `gpt-6.1-sol` mức `high` (`codex exec -m gpt-6.1-sol -c 'model_reasoning_effort="high"' -s read-only -`).
+- **Reviewer dự phòng (Backup Reviewer):** Dùng `claude-sonnet-5-5-high` (effort `high`) khi Reviewer chính không khả dụng hoặc chạm giới hạn.
+- **Cách báo cáo cho Owner:** Luôn trình bày ngắn gọn, đi thẳng vào kết quả bằng ngôn ngữ đời thường dễ hiểu, hạn chế tối đa thuật ngữ kỹ thuật/tên hàm vì Owner không biết code.
 
 ### Bàn giao khi ngữ cảnh vượt 60%
 

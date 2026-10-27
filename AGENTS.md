@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Quy tắc làm việc AI của dự án
 
-Đọc [docs/AI_AGENT_WORKFLOW.md](docs/AI_AGENT_WORKFLOW.md) trước khi thay đổi mã, cấu hình hoặc tài liệu kỹ thuật. Quy tắc Owner, an toàn dữ liệu, tiếng Việt dễ hiểu, nghiệm thu và hướng dẫn Next.js trong tệp này luôn được ưu tiên.
+Đọc [docs/AI_AGENT_WORKFLOW.md](docs/AI_AGENT_WORKFLOW.md), [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md), [projectstates.md](projectstates.md) và [changelog.md](changelog.md) đầu tiên trước khi thay đổi mã, cấu hình hoặc tài liệu kỹ thuật để nắm nhanh toàn bộ kiến trúc, tiến độ hiện tại và sổ tay cách làm từng tính năng. Luôn cập nhật lại [projectstates.md](projectstates.md) và [changelog.md](changelog.md) sau mỗi thay đổi quan trọng. Quy tắc Owner, an toàn dữ liệu, tiếng Việt dễ hiểu, nghiệm thu và hướng dẫn Next.js trong tệp này luôn được ưu tiên.
 
 Khi thiết kế hoặc chỉnh giao diện tiếp theo, áp dụng **UI UX Pro Max** và **Taste Skill** theo yêu cầu và trạng thái xác minh nguồn trong tài liệu trên.
 

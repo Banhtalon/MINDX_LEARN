@@ -3,9 +3,42 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --mindx-blue: #1d63ed;
+    --mindx-dark: #0f172a;
+    --mindx-surface: #ffffff;
+    --mindx-canvas: #f8fafc;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+    @apply bg-[#f8fafc] text-slate-900 antialiased font-sans selection:bg-blue-100 selection:text-[#1d63ed];
     min-height: 100vh;
+  }
+}
+
+@layer components {
+  .mindx-card-hero {
+    @apply bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(8,112,184,0.07)] transition-all;
+  }
+
+  .mindx-card {
+    @apply bg-white rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition-all;
+  }
+
+  .mindx-input {
+    @apply w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-blue-500/20 text-slate-800 placeholder:text-slate-400 min-h-[44px] transition-all;
+  }
+
+  .mindx-btn-primary {
+    @apply min-h-[44px] px-4 py-2.5 bg-[#1d63ed] hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all active:scale-[0.99] inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500;
+  }
+
+  .mindx-btn-dark {
+    @apply min-h-[44px] px-4 py-2.5 bg-[#0f172a] hover:bg-slate-800 disabled:opacity-50 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-[0.99] inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700;
+  }
+
+  .mindx-btn-secondary {
+    @apply min-h-[44px] px-4 py-2.5 bg-white hover:bg-slate-50 disabled:opacity-50 text-slate-700 border border-slate-200 font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-[0.99] inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500;
   }
 }
 
@@ -40,4 +73,15 @@
 
 .animate-spin-slow {
   animation: spinSlow 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

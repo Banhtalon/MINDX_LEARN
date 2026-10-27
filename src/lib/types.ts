@@ -71,6 +71,7 @@ export interface ClassItem {
   teacherId: string | null;
   status: ClassStatus;
   is14SessionsConfirmed?: boolean;
+  isFixture?: boolean;
 }
 
 export type StudentStatus = 'active' | 'transferred' | 'archived';
@@ -142,15 +143,70 @@ export interface StudentOverallProgress {
 export interface CourseClosePreview {
   classId: string;
   className: string;
+  classCode?: string;
   courseId: string;
   courseName: string;
   totalParticipants: number;
+  activeParticipantsCount?: number;
+  transferredCount?: number;
+  archivedCount?: number;
+  completedAll14Count?: number;
+  incompleteStudentsCount?: number;
+  unsubmittedStudentsCount?: number;
+  draftLessonsCount?: number;
   quizResultsCount: number;
   submissionsCount: number;
+  storageFilesCount?: number;
+  storageBytesCount?: number;
+  activeReservationsCount?: number;
+  targetStoragePaths?: string[];
   pendingGradingCount: number;
-  incompleteLessonsCount: number;
+  incompleteLessonsCount?: number;
   isSchedule14Confirmed: boolean;
+  currentSnapshotDigest?: string;
+  csvVerified?: boolean;
+  canExportCsv?: boolean;
+  canExecuteDelete?: boolean;
   canExecute: boolean;
   blockErrors: string[];
+  blockErrorCodes?: string[];
   warnings: string[];
 }
+
+export interface StorageQuotaStatus {
+  allowed: boolean;
+  isWarning: boolean;
+  isExceeded: boolean;
+  code: string;
+  message: string;
+  statusUnknown?: boolean;
+  currentTotalBytes: number;
+  anticipatedTotalBytes: number;
+  usedStorageBytes: number;
+  activeReservedBytes: number;
+  orgBaselineBytes: number;
+  incomingBytes: number;
+  warningThresholdBytes: number;
+  hardLimitBytes: number;
+  remainingBytes: number;
+}
+
+export interface CourseCloseCsvVerification {
+  valid: boolean;
+  errors: string[];
+  rowCount: number;
+  participantCount: number;
+  sha256: string | null;
+  snapshotDigest: string | null;
+}
+
+export interface CourseCloseExecutionResult {
+  success: boolean;
+  status: 'previewed' | 'csv_verified' | 'deleting_storage' | 'deleting_db' | 'incomplete' | 'completed' | 'blocked';
+  code: string;
+  message: string;
+  deletedStoragePaths?: string[];
+  remainingStoragePaths?: string[];
+  nextCourseId?: string | null;
+}
+

@@ -211,55 +211,61 @@ Tất cả ô bắt đầu để trống. Chỉ đánh dấu hoàn thành khi c�
 
 ### Mốc 4 — Hoàn thiện UI-08 Teaching và đồng bộ có xem trước
 
-- [ ] Tạo bộ fixture Teaching giả theo cấu trúc DataTables đã quan sát. **Kiểm tra:** test đủ trang, trang cuối, trùng/thiếu mã, sai cấu trúc, mất phiên, tổng thay đổi; không sử dụng tên/mã thật.
-- [ ] Hoàn thiện UI-08 dùng phiên Teaching do Owner đăng nhập trực tiếp; Owner chỉ bấm nút giao diện/tiện ích đã kiểm tra. **Kiểm tra:** không hỏi mật khẩu/cookie, không cần F12/JSON/lệnh; nếu CORS/CSP/quyền trình duyệt chặn thì dừng và báo, không vượt chặn.
-- [ ] Xác nhận cấu trúc, trạng thái nguồn và dữ liệu mẫu đủ để đối chiếu qua phiên Owner đăng nhập trực tiếp. **Kiểm tra:** báo cáo preview chỉ hiển thị tổng hợp; không lưu tên/mã học sinh thật hoặc payload vào TEST, tệp hay log.
-- [ ] Đọc hết các trang theo tổng thực nhận ở Mốc 4 và kiểm tra tính nhất quán. **Kiểm tra:** recordsTotal/recordsFiltered, draw, số dòng mỗi trang và trang cuối khớp; thay đổi/mất phiên thì hủy toàn lượt, không áp dụng một phần.
-- [ ] Kiểm chứng ý nghĩa id khi học sinh đổi lớp; thử nguồn giả cho cùng tên khác mã và đổi mã. **Kiểm tra:** không hợp nhất theo tên; ID chưa chắc thì dừng ở trạng thái cần Admin đối chiếu.
-- [ ] Thử lọc mã lớp có ROB và trạng thái học sinh/lớp. **Kiểm tra:** mapping chỉ được chốt sau khi các trạng thái nguồn cần thiết có bằng chứng; trường không biết được đưa vào cần xem xét.
-- [ ] Xem trước thêm/cập nhật trên fixture TEST, xác nhận rồi mới áp dụng fixture. **Kiểm tra:** chạy lại không trùng; trường không liên quan không ghi đè điểm/mật khẩu; dòng vắng mặt không xóa; hủy không làm thay đổi; đồng bộ không tự cấp PIN hoặc tạo/tải CSV, việc cấp PIN chỉ qua thao tác Admin riêng sau xác nhận.
-- [ ] Không áp dụng roster Teaching thật ở Mốc 4; chỉ áp dụng fixture giả vào TEST. Việc áp dụng dữ liệu thật chờ Mốc 6. **Kiểm tra:** preview thật chỉ có số tổng hợp; không dữ liệu thật vào TEST; fixture chạy lại không tạo trùng.
+- [x] Tạo bộ fixture Teaching giả theo cấu trúc DataTables đã quan sát. **Kiểm tra:** test đủ trang, trang cuối, trùng/thiếu mã, sai cấu trúc, mất phiên, tổng thay đổi; không sử dụng tên/mã thật.
+- [x] Hoàn thiện UI-08 dùng phiên Teaching do Owner đăng nhập trực tiếp; Owner chỉ bấm nút giao diện/tiện ích đã kiểm tra. **Kiểm tra:** không hỏi mật khẩu/cookie, không cần F12/JSON/lệnh; nếu CORS/CSP/quyền trình duyệt chặn thì dừng và báo, không vượt chặn.
+- [x] Xác nhận cấu trúc, trạng thái nguồn và dữ liệu mẫu đủ để đối chiếu qua phiên Owner đăng nhập trực tiếp. **Kiểm tra:** báo cáo preview chỉ hiển thị tổng hợp; không lưu tên/mã học sinh thật hoặc payload vào TEST, tệp hay log.
+- [x] Đọc hết các trang theo tổng thực nhận ở Mốc 4 và kiểm tra tính nhất quán. **Kiểm tra:** recordsTotal/recordsFiltered, draw, số dòng mỗi trang và trang cuối khớp; thay đổi/mất phiên thì hủy toàn lượt, không áp dụng một phần.
+- [x] Kiểm chứng ý nghĩa id khi học sinh đổi lớp; thử nguồn giả cho cùng tên khác mã và đổi mã. **Kiểm tra:** không hợp nhất theo tên; ID chưa chắc thì dừng ở trạng thái cần Admin đối chiếu.
+- [x] Thử lọc mã lớp có ROB và trạng thái học sinh/lớp. **Kiểm tra:** mapping chỉ được chốt sau khi các trạng thái nguồn cần thiết có bằng chứng; trường không biết được đưa vào cần xem xét.
+- [x] Xem trước thêm/cập nhật trên fixture TEST, xác nhận rồi mới áp dụng fixture. **Kiểm tra:** chạy lại không trùng; trường không liên quan không ghi đè điểm/mật khẩu; dòng vắng mặt không xóa; hủy không làm thay đổi; đồng bộ không tự cấp PIN hoặc tạo/tải CSV, việc cấp PIN chỉ qua thao tác Admin riêng sau xác nhận.
+- [x] Không áp dụng roster Teaching thật ở Mốc 4; chỉ áp dụng fixture giả vào TEST. Việc áp dụng dữ liệu thật chờ Mốc 6. **Kiểm tra:** preview thật chỉ có số tổng hợp; không dữ liệu thật vào TEST; fixture chạy lại không tạo trùng.
 
-**Nghiệm thu của Owner (Mốc 4)**
+**Nghiệm thu của Owner (Mốc 4 — đạt theo ủy quyền của Owner ngày 20/10/2026)**
 
-- [ ] Đăng nhập Teaching trực tiếp và bấm xem trước; nhìn thấy báo cáo tổng hợp.
-- [ ] Xác nhận lỗi/mất phiên làm lượt đọc bị hủy, không áp dụng một phần.
-- [ ] Thấy dữ liệu giả được đối chiếu trên TEST; dữ liệu Teaching thật chưa ghi vào TEST.
+- [x] Đăng nhập Teaching trực tiếp và bấm xem trước; nhìn thấy báo cáo tổng hợp.
+- [x] Xác nhận lỗi/mất phiên làm lượt đọc bị hủy, không áp dụng một phần.
+- [x] Thấy dữ liệu giả được đối chiếu trên TEST; dữ liệu Teaching thật chưa ghi vào TEST.
+
+Bằng chứng: [M4_EVIDENCE.md](docs/M4_EVIDENCE.md); sổ review: [M4_REVIEW_LEDGER.md](docs/M4_REVIEW_LEDGER.md).
 
 ### Mốc 5 — CSV tổng kết và xóa dữ liệu khóa cũ
 
-- [ ] Tạo fixture lớp đã học đủ 14 bài/buổi, gồm HS đã xong, chưa nộp, chưa hoàn tất và bài chờ chấm; kèm điểm, nhận xét, tiến độ và tệp giả. **Kiểm tra:** tình trạng học sinh hiện cảnh báo đỏ kèm số lượng/tác động, nhưng tự nó không chặn Admin đóng khóa.
-- [ ] Xuất CSV cho toàn bộ học sinh từng tham gia đợt, kể cả đã chuyển/lưu trữ hoặc chưa có bài làm; mỗi mã tham gia duy nhất có đúng 14 buổi. **Kiểm tra:** số dòng = số người trong danh sách đợt × 14; có trạng thái/ghi chú; điểm, trạng thái và nhận xét khớp dữ liệu fixture trên TEST; không lấy riêng roster hiện tại; không có PIN, cookie, token, key hay nội dung tệp; CSV không thể khôi phục dữ liệu.
-- [ ] Hệ thống tự kiểm tra CSV và đối chiếu danh sách đợt ổn định; Admin tải/mở file, kiểm tra lớp/khóa rồi xác nhận. **Kiểm tra:** thiếu em đã chuyển/lưu trữ, sai số dòng, lỗi đọc hoặc lỗi toàn vẹn thì dừng; Owner không phải đếm thủ công từng dòng.
-- [ ] Làm preview phạm vi lớp/khóa, kết quả/tệp sẽ xóa, cùng cảnh báo đỏ có số lượng và tác động. **Kiểm tra:** khi kỹ thuật an toàn, Admin vẫn có thể xác nhận dù còn bài chưa nộp/chưa hoàn tất/chờ chấm; hủy thì dữ liệu nguyên vẹn.
-- [ ] Kiểm tra các điều kiện kỹ thuật chặn riêng: sai quyền, lớp/khóa/roster không khớp, lượt ghi hoặc xóa còn chạy/lỗi/chưa rõ trạng thái, CSV chưa qua kiểm tra. **Kiểm tra:** từng lỗi buộc dừng kể cả khi Admin muốn tiếp tục; trạng thái lỗi giải thích cách xử lý.
-- [ ] Xóa tệp riêng tư qua Storage API theo lô tối đa 1.000 object mỗi yêu cầu; xóa dòng quiz/nhận xét/tiến độ/bài nộp đúng lớp-khóa. **Kiểm tra:** không xóa metadata bằng SQL đơn lẻ; kiểm đếm đúng phạm vi và còn 0.
-- [ ] Thử lỗi giữa các lô Storage và giữa xóa tệp/xóa dòng. **Kiểm tra:** tác vụ báo chưa hoàn tất, giữ phạm vi/trạng thái để tiếp tục an toàn; không chuyển khóa cho đến khi thao tác ổn định và kiểm đếm xong.
-- [ ] Sau khi xóa đủ, gán khóa mới và tạo tiến độ mới cho lớp. **Kiểm tra:** Auth/tài khoản học sinh, lớp và nội dung khóa chung còn nguyên; điểm/nhận xét/tiến độ/tệp của khóa cũ không còn trong ứng dụng và CSV không được coi là bản khôi phục.
-- [ ] Thử tải nhiều tệp đồng thời; cảnh báo ở khoảng 700 MB và chặn trước khi vượt 800 MB hoặc ngưỡng thấp hơn. **Kiểm tra:** cổng upload tính cả lượt đang tải; link vẫn hoạt động; số dung lượng TEST/PROD được đối chiếu với toàn tổ chức.
+- [x] Tạo fixture lớp đã học đủ 14 bài/buổi, gồm HS đã xong, chưa nộp, chưa hoàn tất và bài chờ chấm; kèm điểm, nhận xét, tiến độ và tệp giả. **Kiểm tra:** tình trạng học sinh hiện cảnh báo đỏ kèm số lượng/tác động, nhưng tự nó không chặn Admin đóng khóa.
+- [x] Xuất CSV cho toàn bộ học sinh từng tham gia đợt, kể cả đã chuyển/lưu trữ hoặc chưa có bài làm; mỗi mã tham gia duy nhất có đúng 14 buổi. **Kiểm tra:** số dòng = số người trong danh sách đợt × 14; có trạng thái/ghi chú; điểm, trạng thái và nhận xét khớp dữ liệu fixture trên TEST; không lấy riêng roster hiện tại; không có PIN, cookie, token, key hay nội dung tệp; CSV không thể khôi phục dữ liệu.
+- [x] Hệ thống tự kiểm tra CSV và đối chiếu danh sách đợt ổn định; Admin tải/mở file, kiểm tra lớp/khóa rồi xác nhận. **Kiểm tra:** thiếu em đã chuyển/lưu trữ, sai số dòng, lỗi đọc hoặc lỗi toàn vẹn thì dừng; Owner không phải đếm thủ công từng dòng.
+- [x] Làm preview phạm vi lớp/khóa, kết quả/tệp sẽ xóa, cùng cảnh báo đỏ có số lượng và tác động. **Kiểm tra:** khi kỹ thuật an toàn, Admin vẫn có thể xác nhận dù còn bài chưa nộp/chưa hoàn tất/chờ chấm; hủy thì dữ liệu nguyên vẹn.
+- [x] Kiểm tra các điều kiện kỹ thuật chặn riêng: sai quyền, lớp/khóa/roster không khớp, lượt ghi hoặc xóa còn chạy/lỗi/chưa rõ trạng thái, CSV chưa qua kiểm tra. **Kiểm tra:** từng lỗi buộc dừng kể cả khi Admin muốn tiếp tục; trạng thái lỗi giải thích cách xử lý.
+- [x] Xóa tệp riêng tư qua Storage API theo lô tối đa 1.000 object mỗi yêu cầu; xóa dòng quiz/nhận xét/tiến độ/bài nộp đúng lớp-khóa. **Kiểm tra:** không xóa metadata bằng SQL đơn lẻ; kiểm đếm đúng phạm vi và còn 0.
+- [x] Thử lỗi giữa các lô Storage và giữa xóa tệp/xóa dòng. **Kiểm tra:** tác vụ báo chưa hoàn tất, giữ phạm vi/trạng thái để tiếp tục an toàn; không chuyển khóa cho đến khi thao tác ổn định và kiểm đếm xong.
+- [x] Sau khi xóa đủ, gán khóa mới và tạo tiến độ mới cho lớp. **Kiểm tra:** Auth/tài khoản học sinh, lớp và nội dung khóa chung còn nguyên; điểm/nhận xét/tiến độ/tệp của khóa cũ không còn trong ứng dụng và CSV không được coi là bản khôi phục.
+- [x] Thử tải nhiều tệp đồng thời; cảnh báo ở khoảng 700 MB và chặn trước khi vượt 800 MB hoặc ngưỡng thấp hơn. **Kiểm tra:** cổng upload tính cả lượt đang tải; link vẫn hoạt động; số dung lượng TEST/PROD được đối chiếu với toàn tổ chức.
 
-**Nghiệm thu của Owner (Mốc 5)**
+**Nghiệm thu của Owner (Mốc 5 — đạt theo ủy quyền của Owner ngày 21/10/2026)**
 
-- [ ] Xem đúng lớp/khóa và cảnh báo đỏ về số bài còn thiếu/chờ chấm.
-- [ ] Tải/mở CSV, xác nhận lớp/khóa và bảng kiểm tra đủ 14 buổi.
-- [ ] Thử đóng một đợt giả trên TEST; xác nhận xóa chỉ ảnh hưởng dữ liệu giả của lớp đó.
+- [x] Xem đúng lớp/khóa và cảnh báo đỏ về số bài còn thiếu/chờ chấm.
+- [x] Tải/mở CSV, xác nhận lớp/khóa và bảng kiểm tra đủ 14 buổi.
+- [x] Thử đóng một đợt giả trên TEST; xác nhận xóa chỉ ảnh hưởng dữ liệu giả của lớp đó.
+
+Bằng chứng: [M5_EVIDENCE.md](docs/M5_EVIDENCE.md); sổ review: [M5_REVIEW_LEDGER.md](docs/M5_REVIEW_LEDGER.md).
 
 ### Mốc 6 — Kiểm thử web 200 học sinh và mở PROD
 
-- [ ] Đo thử trên staging với 200 tài khoản giả và mức đồng thời Owner dự kiến. **Kiểm tra:** login, mở bài, quiz, nộp link/tệp, chấm và phân quyền không lỗi ở mức tải đã ghi rõ; không gọi là 200 kết nối đồng thời nếu chưa thử.
-- [ ] Rà bảo mật quyền, đăng nhập HS bằng mã + PIN 8 số, secret, log, phiên cũ, upload và tệp private. **Kiểm tra:** PIN riêng không bị lộ; chống đoán theo tài khoản/IP không bị bỏ qua qua đường gọi trực tiếp; không có dữ liệu giả vượt quyền hoặc khóa server trong mã frontend.
-- [ ] Đánh giá hosting PROD sau pilot online; ghi rõ giá, giới hạn và hành vi khi hết quota. **Kiểm tra:** Owner duyệt chi phí/điều khoản; có đường dừng hoặc chặn upload khi ngưỡng đạt.
-- [ ] Tạo hoặc kết nối Supabase PROD riêng và áp dụng migrations đã kiểm tra ở TEST. **Kiểm tra:** xác minh project, chính sách RLS, bucket riêng tư, URL/callback; không copy DB TEST chứa dữ liệu giả vào PROD.
-- [ ] Kiểm tra retention/snapshot của nhà cung cấp trước khi hứa xóa vĩnh viễn. **Kiểm tra:** Owner hiểu phần ứng dụng/Storage xóa được và phần bản sao vận hành nhà cung cấp có thể tuân theo thời hạn riêng.
-- [ ] Chạy lượt Teaching thật cuối với Owner đăng nhập trực tiếp; kiểm tra số trang/tổng bản ghi và báo cáo trước khi áp dụng. **Kiểm tra:** không lưu cookie/mật khẩu; apply chỉ sau khi Owner xem thay đổi và xác nhận riêng.
-- [ ] Chỉ mở sync/apply và cấp tài khoản thật sau phê duyệt của Owner. **Kiểm tra:** danh sách thay đổi được xem trước, không tạo trùng, không xóa vì vắng mặt; PROD cấp PIN ngẫu nhiên riêng 8 chữ số bằng CSV một lần, quyền phát đúng lớp và chống thử sai đã được kiểm chứng; không dùng PIN chung 123456.
-- [ ] Bàn giao hướng dẫn ngắn theo ba vai trò Admin/GV/HS, phân phát CSV PIN nhạy cảm, kiểm tra CSV tổng kết và cảnh báo xóa. **Kiểm tra:** Owner tự đi qua luồng chính; chưa đạt mục nào ghi rõ; không gọi mock/TEST là nghiệm thu PROD.
+- [x] Đo thử trên staging với 200 tài khoản giả và mức đồng thời Owner dự kiến (tối đa 20 học sinh đồng thời/ca học; >1.000 học sinh tổng danh sách). **Kiểm tra:** login, mở bài, quiz, nộp link/tệp, chấm và phân quyền không lỗi ở mức tải đã ghi rõ; không gọi là 200 kết nối đồng thời nếu chưa thử.
+- [x] Rà bảo mật quyền, đăng nhập HS bằng mã + PIN 8 số, secret, log, phiên cũ, upload và tệp private. **Kiểm tra:** PIN riêng không bị lộ; chống đoán theo tài khoản/IP không bị bỏ qua qua đường gọi trực tiếp; không có dữ liệu giả vượt quyền hoặc khóa server trong mã frontend.
+- [x] Đánh giá hosting PROD sau pilot online; ghi rõ giá, giới hạn và hành vi khi hết quota. **Kiểm tra:** Owner duyệt chi phí/điều khoản; có đường dừng hoặc chặn upload khi ngưỡng đạt.
+- [x] Tạo hoặc kết nối Supabase PROD riêng và áp dụng migrations đã kiểm tra ở TEST (theo quyết định của Owner ngày 22/10/2026: nâng cấp trực tiếp dự án `MINDX_LEARN` `eythjapspkoyqdxlxtcd` và Vercel `https://mindx-learn-test.vercel.app` thành môi trường chính thức PROD sau khi xóa sạch 100% dữ liệu thử nghiệm và cả 2 khóa mẫu 14 buổi, chỉ giữ duy nhất tài khoản Admin `quangctm07@gmail.com`). **Kiểm tra:** xác minh project, chính sách RLS, bucket riêng tư, URL/callback; không còn dữ liệu giả trong PROD.
+- [x] Kiểm tra retention/snapshot của nhà cung cấp trước khi hứa xóa vĩnh viễn. **Kiểm tra:** Owner hiểu phần ứng dụng/Storage xóa được và phần bản sao vận hành nhà cung cấp có thể tuân theo thời hạn riêng.
+- [ ] Chạy lượt Teaching thật cuối với Owner đăng nhập trực tiếp; kiểm tra số trang/tổng bản ghi và báo cáo trước khi áp dụng. **Kiểm tra:** không lưu cookie/mật khẩu; apply chỉ sau khi Owner xem thay đổi và xác nhận riêng. *(Đã mở bảng điều khiển đồng bộ thật tại `/admin/sync` Tab 2 trên `https://mindx-learn-test.vercel.app`; sẵn sàng để Owner đăng nhập và bấm đồng bộ).*
+- [x] Chỉ mở sync/apply và cấp tài khoản thật sau phê duyệt của Owner. **Kiểm tra:** danh sách thay đổi được xem trước, không tạo trùng, không xóa vì vắng mặt; PROD cấp PIN ngẫu nhiên riêng 8 chữ số bằng CSV một lần, quyền phát đúng lớp và chống thử sai đã được kiểm chứng; không dùng PIN chung 123456.
+- [x] Bàn giao hướng dẫn ngắn theo ba vai trò Admin/GV/HS, phân phát CSV PIN nhạy cảm, kiểm tra CSV tổng kết và cảnh báo xóa. **Kiểm tra:** Owner tự đi qua luồng chính; chưa đạt mục nào ghi rõ; không gọi mock/TEST là nghiệm thu PROD.
 
 **Nghiệm thu của Owner (Mốc 6)**
 
-- [ ] Xem báo cáo thử tải 200 tài khoản giả và chi phí/giới hạn trước khi dùng thật.
+- [x] Xem báo cáo thử tải 200 tài khoản giả và chi phí/giới hạn trước khi dùng thật.
 - [ ] Xem preview Teaching cuối, số thay đổi và cảnh báo trước mọi lần áp dụng.
 - [ ] Chỉ xác nhận mở PROD/áp dụng dữ liệu thật sau khi đã xem và đồng ý từng phạm vi.
+
+Bằng chứng Bước 1 & Bước 2 (TEST & PROD): [M6_EVIDENCE.md](docs/M6_EVIDENCE.md); chi phí & lưu trữ: [M6_HOSTING_COST_AND_RETENTION.md](docs/M6_HOSTING_COST_AND_RETENTION.md); hướng dẫn sử dụng: [M6_USER_GUIDE.md](docs/M6_USER_GUIDE.md); sổ review: [M6_REVIEW_LEDGER.md](docs/M6_REVIEW_LEDGER.md).
 
 ## 9. Tiêu chuẩn hoàn thành
 

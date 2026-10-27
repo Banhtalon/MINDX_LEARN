@@ -20,6 +20,194 @@ export const SESSION_COOKIE_NAME = 'mindx_session';
 export const RECOVERY_COOKIE_NAME = 'mindx_recovery';
 export const DEFAULT_SESSION_MAX_AGE_SEC = 7 * 24 * 60 * 60; // 7 days
 export const RECOVERY_MAX_AGE_SEC = 900; // 15 minutes
+export const TEST_SUPABASE_PROJECT_REF = 'eythjapspkoyqdxlxtcd';
+export const DEFAULT_TEST_SUPABASE_URL = `https://${TEST_SUPABASE_PROJECT_REF}.supabase.co`;
+export const DEFAULT_TEST_SITE_URL = 'https://mindx-learn-test.vercel.app';
+
+const ALLOWED_PROD_ENV_VALUES = new Set(['production', 'prod']);
+const ALLOWED_NON_PROD_ENV_VALUES = new Set(['test', 'staging', 'development', 'dev', 'local']);
+
+function inspectEnvironmentFlags(env = process.env) {
+  if (!env || typeof env !== 'object') {
+    return { hasProdFlag: false, hasNonProdFlag: false, hasNonTestSupabase: false, hasNonTestSite: false };
+  }
+
+  const flagKeys = ['MINDX_ENV', 'MINDX_APP_ENV', 'NEXT_PUBLIC_MINDX_ENV'];
+  let hasProdFlag = false;
+  let hasNonProdFlag = false;
+
+  for (const key of flagKeys) {
+    const rawVal = typeof env[key] === 'string' ? env[key].trim() : '';
+    if (!rawVal) continue;
+    const normalized = rawVal.toLowerCase();
+    if (ALLOWED_PROD_ENV_VALUES.has(normalized)) {
+      hasProdFlag = true;
+    } else if (ALLOWED_NON_PROD_ENV_VALUES.has(normalized)) {
+      hasNonProdFlag = true;
+    } else {
+      throw new Error(
+        `Chốt chặn an toàn Mốc 6: Giá trị biến môi trường ${key}="${rawVal}" không hợp lệ (chỉ chấp nhận test/staging/development hoặc production/prod).`
+      );
+    }
+  }
+
+  if (hasProdFlag && hasNonProdFlag) {
+    throw new Error(
+      'Chốt chặn an toàn Mốc 6: Xung đột biến môi trường TEST và PROD giữa MINDX_ENV, MINDX_APP_ENV và NEXT_PUBLIC_MINDX_ENV.'
+    );
+  }
+
+  let hasNonTestSupabase = false;
+  const supabaseKeys = ['MINDX_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_URL'];
+  for (const key of supabaseKeys) {
+    const rawUrl = typeof env[key] === 'string' ? env[key].trim() : '';
+    if (!rawUrl) continue;
+    let parsed;
+    try {
+      parsed = new URL(rawUrl);
+    } catch {
+      throw new Error(`${key} không phải là URL hợp lệ.`);
+    }
+    const host = parsed.hostname.toLowerCase();
+    const isTestOrLocal =
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === `${TEST_SUPABASE_PROJECT_REF}.supabase.co`;
+    if (!isTestOrLocal) {
+      hasNonTestSupabase = true;
+    }
+  }
+
+  let hasNonTestSite = false;
+  const siteKeys = ['MINDX_SITE_URL', 'NEXT_PUBLIC_SITE_URL'];
+  for (const key of siteKeys) {
+    const rawSite = typeof env[key] === 'string' ? env[key].trim() : '';
+    if (!rawSite) continue;
+    let parsed;
+    try {
+      parsed = new URL(rawSite);
+    } catch {
+      throw new Error(`${key} không phải là URL hợp lệ.`);
+    }
+    const host = parsed.hostname.toLowerCase();
+    const isTestOrLocal =
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.includes('mindx-learn-test');
+    if (!isTestOrLocal) {
+      hasNonTestSite = true;
+    }
+  }
+
+  if (hasNonProdFlag && (hasNonTestSupabase || hasNonTestSite)) {
+    throw new Error(
+      `Chốt chặn an toàn Mốc 6: Cờ môi trường đang đặt là TEST nhưng địa chỉ Supabase hoặc Site URL lại trỏ ra ngoài dự án TEST (${TEST_SUPABASE_PROJECT_REF}).`
+    );
+  }
+
+  return { hasProdFlag, hasNonProdFlag, hasNonTestSupabase, hasNonTestSite };
+}
+
+/**
+ * Checks whether the current runtime environment is Production (explicit flag or non-TEST target URL)
+ * and fails closed on unknown or conflicting environment flags (Mốc 6).
+ * @param {object} [env=process.env]
+ * @returns {boolean}
+ */
+export function isProductionEnvironment(env = process.env) {
+  const { hasProdFlag, hasNonTestSupabase, hasNonTestSite } = inspectEnvironmentFlags(env);
+  return hasProdFlag || hasNonTestSupabase || hasNonTestSite;
+}
+
+/**
+ * Resolves the Supabase project URL with strict TEST/PROD separation (Mốc 6).
+ * In Production, requires an explicit HTTPS URL and rejects the TEST project ref or loopback.
+ * @param {object} [env=process.env]
+ * @returns {string}
+ */
+export function resolveSupabaseUrl(env = process.env) {
+  const isProd = isProductionEnvironment(env);
+  const rawUrl = typeof env?.MINDX_SUPABASE_URL === 'string' ? env.MINDX_SUPABASE_URL.trim() : '';
+  const publicUrl = typeof env?.NEXT_PUBLIC_SUPABASE_URL === 'string' ? env.NEXT_PUBLIC_SUPABASE_URL.trim() : '';
+  if (isProd) {
+    if (!rawUrl) {
+      throw new Error('MINDX_SUPABASE_URL bắt buộc phải được cấu hình tường minh trên môi trường Production.');
+    }
+    let parsed;
+    try {
+      parsed = new URL(rawUrl);
+    } catch {
+      throw new Error('MINDX_SUPABASE_URL không phải là URL hợp lệ.');
+    }
+    const host = parsed.hostname.toLowerCase();
+    if (parsed.protocol !== 'https:' || host === 'localhost' || host === '127.0.0.1') {
+      throw new Error('MINDX_SUPABASE_URL trên môi trường Production bắt buộc phải dùng giao thức HTTPS chính thức.');
+    }
+    if (host.includes(TEST_SUPABASE_PROJECT_REF)) {
+      throw new Error(
+        `Chốt chặn an toàn Mốc 6: MINDX_SUPABASE_URL trên môi trường Production tuyệt đối không được trỏ vào dự án TEST (${TEST_SUPABASE_PROJECT_REF}).`
+      );
+    }
+    if (publicUrl && publicUrl.toLowerCase().includes(TEST_SUPABASE_PROJECT_REF)) {
+      throw new Error(
+        `Chốt chặn an toàn Mốc 6: NEXT_PUBLIC_SUPABASE_URL trên môi trường Production tuyệt đối không được trỏ vào dự án TEST (${TEST_SUPABASE_PROJECT_REF}).`
+      );
+    }
+    return rawUrl.replace(/\/+$/, '');
+  }
+  return (rawUrl || DEFAULT_TEST_SUPABASE_URL).replace(/\/+$/, '');
+}
+
+/**
+ * Resolves the trusted site URL for auth callbacks with strict TEST/PROD separation (Mốc 6).
+ * @param {object} [env=process.env]
+ * @param {boolean} [isDev=false]
+ * @returns {string}
+ */
+export function resolveTrustedSiteUrl(env = process.env, isDev = false) {
+  const isProd = isProductionEnvironment(env);
+  const rawSite = typeof env?.MINDX_SITE_URL === 'string' ? env.MINDX_SITE_URL.trim() : '';
+  const publicSite = typeof env?.NEXT_PUBLIC_SITE_URL === 'string' ? env.NEXT_PUBLIC_SITE_URL.trim() : '';
+  if (isProd) {
+    if (!rawSite) {
+      throw new Error('MINDX_SITE_URL bắt buộc phải được cấu hình tường minh trên môi trường Production.');
+    }
+    let parsed;
+    try {
+      parsed = new URL(rawSite);
+    } catch {
+      throw new Error('MINDX_SITE_URL không phải là URL hợp lệ.');
+    }
+    const host = parsed.hostname.toLowerCase();
+    if (parsed.protocol !== 'https:' || host === 'localhost' || host === '127.0.0.1') {
+      throw new Error('MINDX_SITE_URL trên môi trường Production bắt buộc phải dùng giao thức HTTPS chính thức.');
+    }
+    if (host.includes('mindx-learn-test')) {
+      throw new Error('Chốt chặn an toàn Mốc 6: MINDX_SITE_URL trên môi trường Production không được trỏ vào tên miền TEST (mindx-learn-test).');
+    }
+    if (publicSite && publicSite.toLowerCase().includes('mindx-learn-test')) {
+      throw new Error('Chốt chặn an toàn Mốc 6: NEXT_PUBLIC_SITE_URL trên môi trường Production không được trỏ vào tên miền TEST (mindx-learn-test).');
+    }
+    return rawSite.replace(/\/+$/, '');
+  }
+  return (rawSite || (isDev ? 'http://localhost:3000' : DEFAULT_TEST_SITE_URL)).replace(/\/+$/, '');
+}
+
+/**
+ * Build/startup/render guard that enforces environment consistency and blocks NEXT_PUBLIC_MINDX_DEMO=1
+ * on Production even before any API route is called (Mốc 6).
+ * @param {object} [env=process.env]
+ */
+export function assertRuntimeEnvironmentGuard(env = process.env) {
+  const isProd = isProductionEnvironment(env);
+  if (isProd) {
+    if (String(env?.NEXT_PUBLIC_MINDX_DEMO || '').trim() === '1') {
+      throw new Error('Chốt chặn an toàn Mốc 6: Chế độ dữ liệu giả (NEXT_PUBLIC_MINDX_DEMO=1) bị cấm hoàn toàn trên môi trường Production.');
+    }
+    resolveSupabaseUrl(env);
+    resolveTrustedSiteUrl(env, false);
+  }
+}
 
 // Allowed actions whitelist on Next BFF
 export const ALLOWED_BFF_ACTIONS = Object.freeze([
@@ -55,6 +243,14 @@ export const ALLOWED_BFF_ACTIONS = Object.freeze([
   'reopen-submission',
   'transfer-student',
   'reset-student-progress',
+  'apply-teaching-sync',
+  'reset-teaching-sync',
+  'm5-seed-fixture',
+  'm5-storage-quota-status',
+  'm5-set-storage-quota-baseline',
+  'm5-course-close-preview',
+  'm5-export-course-csv',
+  'm5-execute-course-close',
 ]);
 
 // Explicitly blocked/coordination actions that must never be exposed publicly
@@ -62,6 +258,7 @@ export const BLOCKED_BFF_ACTIONS = Object.freeze([
   'bootstrap-admin',
   'coordinator-seed',
   'coordinator-seed-fixture',
+  'coordinator-cleanup-m6-qa',
   'raw-sql',
   'debug-token',
 ]);
@@ -157,6 +354,18 @@ export function assertServerConfiguration(env = process.env) {
   const pinPepper = env.MINDX_PIN_PEPPER;
   if (!pinPepper || typeof pinPepper !== 'string' || pinPepper.trim().length < 16) {
     throw new Error('MINDX_PIN_PEPPER chưa được cấu hình hoặc độ dài không đủ an toàn (tối thiểu 16 ký tự).');
+  }
+
+  if (isProductionEnvironment(env)) {
+    if (String(env.NEXT_PUBLIC_MINDX_DEMO || '').trim() === '1') {
+      throw new Error('Chốt chặn an toàn Mốc 6: Chế độ dữ liệu giả (NEXT_PUBLIC_MINDX_DEMO=1) bị cấm hoàn toàn trên môi trường Production.');
+    }
+    const bffSecret = env.MINDX_BFF_SECRET;
+    if (!bffSecret || typeof bffSecret !== 'string' || bffSecret.trim().length < 16) {
+      throw new Error('MINDX_BFF_SECRET chưa được cấu hình hoặc độ dài không đủ an toàn (tối thiểu 16 ký tự) trên môi trường Production.');
+    }
+    resolveSupabaseUrl(env);
+    resolveTrustedSiteUrl(env, false);
   }
 }
 

@@ -50,9 +50,16 @@ import {
   generatePinCsvFilename,
   resolvePinPrepOutcome,
   resolveLogoutOutcome,
+  resolveTrustedSiteUrl,
   ValidatedSessionPayload,
 } from '@/lib/server/crypto';
 import { callEdgeBackend } from '@/lib/server/edge-client';
+import {
+  buildCanonicalM4SyncedClassName,
+  normalizeClassCode,
+  validateCanonicalM4SyntheticDiffReport,
+  validateRealTeachingSyncDiffReport,
+} from '@/lib/simulation-rules';
 
 interface RouteContext {
   params: Promise<{ action: string }>;
@@ -605,7 +612,12 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
       createdAt: Date.now(),
     });
 
-    const trustedSiteURL = process.env.MINDX_SITE_URL || (isDev ? 'http://localhost:3000' : 'https://mindx-learn-test.vercel.app');
+    let trustedSiteURL: string;
+    try {
+      trustedSiteURL = resolveTrustedSiteUrl(process.env, isDev);
+    } catch (err: any) {
+      return apiResponse({ success: false, message: err.message, code: 'CONFIG_ERROR' }, 500);
+    }
 
     const edgeRes = await callEdgeBackend({
       action: 'password-reset-request',
@@ -1389,6 +1401,14 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
     'update-lesson',
     'transfer-student',
     'reset-student-progress',
+    'apply-teaching-sync',
+    'reset-teaching-sync',
+    'm5-seed-fixture',
+    'm5-storage-quota-status',
+    'm5-set-storage-quota-baseline',
+    'm5-course-close-preview',
+    'm5-export-course-csv',
+    'm5-execute-course-close',
   ];
 
   if (ADMIN_ACTIONS.includes(action) && session?.user?.role !== 'admin') {
@@ -1526,6 +1546,151 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
     cleanPayload = {
       studentId: body.studentId,
     };
+  } else if (action === 'apply-teaching-sync') {
+    const rawReport = body.diffReport && typeof body.diffReport === 'object' ? body.diffReport : body;
+    if (!rawReport || typeof rawReport !== 'object' || Array.isArray(rawReport)) {
+      return apiResponse(
+        {
+          success: false,
+          code: 'INVALID_DIFF_REPORT',
+          message: 'Báo cáo xem trước đồng bộ không hợp lệ. Không thực hiện thay đổi nào.',
+        },
+        400
+      );
+    }
+    const isRealTeachingSync = rawReport.sourceMode === 'real_teaching_sync';
+    if (rawReport.sourceMode !== 'synthetic_fixture' && !isRealTeachingSync) {
+      return apiResponse(
+        {
+          success: false,
+          code: 'REAL_ROSTER_APPLY_FORBIDDEN_IN_M4',
+          message:
+            'Chốt chặn an toàn Mốc 4: Chỉ chấp nhận báo cáo xem trước có sourceMode="synthetic_fixture" hoặc "real_teaching_sync". Tuyệt đối không áp dụng danh sách học sinh Teaching thật vào TEST.',
+        },
+        403
+      );
+    }
+    const validationCheck = isRealTeachingSync
+      ? validateRealTeachingSyncDiffReport(rawReport)
+      : validateCanonicalM4SyntheticDiffReport(rawReport);
+    if (!validationCheck.valid) {
+      return apiResponse(
+        {
+          success: false,
+          code: validationCheck.code || 'REAL_ROSTER_APPLY_FORBIDDEN_IN_M4',
+          message: validationCheck.message,
+        },
+        validationCheck.code === 'INVALID_DIFF_REPORT' ? 400 : 403
+      );
+    }
+    cleanPayload = {
+      diffReport: {
+        sourceMode: isRealTeachingSync ? 'real_teaching_sync' : 'synthetic_fixture',
+        robFilterMode: rawReport.robFilterMode === 'exclude_rob' ? 'exclude_rob' : 'include_rob',
+        newClassesToCreate: Array.isArray(rawReport.newClassesToCreate)
+          ? rawReport.newClassesToCreate.map((c: any) => {
+              const normCode = normalizeClassCode(c?.code).slice(0, 50);
+              return {
+                code: normCode,
+                name: buildCanonicalM4SyncedClassName(normCode),
+              };
+            })
+          : [],
+        added: Array.isArray(rawReport.added)
+          ? rawReport.added.map((a: any) => ({
+              id: String(a?.id || '').trim().slice(0, 64),
+              name: String(a?.name || '').trim().slice(0, 100),
+              classCode: String(a?.classCode || '').trim().slice(0, 50),
+            }))
+          : [],
+        updated: Array.isArray(rawReport.updated)
+          ? rawReport.updated.map((u: any) => ({
+              id: String(u?.id || '').trim().slice(0, 64),
+              studentId: typeof u?.studentId === 'string' ? u.studentId.trim().slice(0, 64) : undefined,
+              name: String(u?.name || '').trim().slice(0, 100),
+              previousName:
+                typeof u?.previousName === 'string'
+                  ? u.previousName.trim().replace(/\s+/g, ' ').slice(0, 100)
+                  : '',
+              classCode: String(u?.classCode || '').trim().slice(0, 50),
+              previousClassCode:
+                typeof u?.previousClassCode === 'string'
+                  ? u.previousClassCode.trim().slice(0, 50)
+                  : '',
+            }))
+          : [],
+      },
+    };
+  } else if (action === 'reset-teaching-sync') {
+    cleanPayload = {};
+  } else if (action === 'm5-seed-fixture') {
+    cleanPayload = {
+      resetOnly: Boolean(body?.resetOnly),
+    };
+  } else if (action === 'm5-storage-quota-status') {
+    cleanPayload = {
+      incomingBytes: typeof body?.incomingBytes === 'number' ? body.incomingBytes : 0,
+    };
+  } else if (action === 'm5-set-storage-quota-baseline') {
+    cleanPayload = {
+      orgBaselineBytes: Number(body?.orgBaselineBytes) || 0,
+      warningThresholdBytes: Number(body?.warningThresholdBytes) || 734003200,
+      hardLimitBytes: Number(body?.hardLimitBytes) || 838860800,
+    };
+  } else if (action === 'm5-course-close-preview') {
+    cleanPayload = {
+      classId: String(body?.classId || '').trim(),
+      // R17-03: courseId giúp máy chủ bỏ qua việc ghi xác nhận 14 buổi của khóa cũ sang khóa mới
+      courseId: body?.courseId ? String(body.courseId).trim() : undefined,
+      confirmed14Sessions: body?.confirmed14Sessions !== undefined ? Boolean(body.confirmed14Sessions) : undefined,
+    };
+  } else if (action === 'm5-export-course-csv') {
+    cleanPayload = {
+      classId: String(body?.classId || '').trim(),
+      // R20-02: courseId Admin đang xác nhận để máy chủ từ chối khi lớp đã sang khóa khác
+      courseId: body?.courseId ? String(body.courseId).trim() : undefined,
+      confirmed14Sessions: Boolean(body?.confirmed14Sessions),
+    };
+  } else if (action === 'm5-execute-course-close') {
+    const isResume = Boolean(body?.isResume);
+    if (!isResume && body?.confirmedCsvOpened !== true) {
+      return apiResponse(
+        {
+          success: false,
+          status: 'blocked',
+          code: 'CSV_OPEN_NOT_CONFIRMED',
+          message: 'Admin phải mở tệp CSV, kiểm tra đúng lớp/khóa và đánh dấu xác nhận trước khi thực thi xóa dữ liệu.',
+        },
+        400
+      );
+    }
+    // R10-02: Khi bắt đầu đóng khóa mới, bắt buộc có mã SHA-256 không rỗng của CSV đã mở
+    const confirmedCsvSha256 =
+      typeof body?.confirmedCsvSha256 === 'string' && body.confirmedCsvSha256.trim()
+        ? body.confirmedCsvSha256.trim()
+        : null;
+    if (!isResume && !confirmedCsvSha256) {
+      return apiResponse(
+        {
+          success: false,
+          status: 'blocked',
+          code: 'CSV_OPEN_NOT_CONFIRMED',
+          message: 'Phải cung cấp mã kiểm tra SHA-256 của tệp CSV đã mở và xác nhận trước khi thực thi xóa dữ liệu.',
+        },
+        400
+      );
+    }
+    cleanPayload = {
+      classId: String(body?.classId || '').trim(),
+      // R20-02: courseId của đợt học Admin đang đóng khóa
+      courseId: body?.courseId ? String(body.courseId).trim() : undefined,
+      confirmed14Sessions: Boolean(body?.confirmed14Sessions),
+      confirmedCsvOpened: isResume ? true : Boolean(body?.confirmedCsvOpened),
+      confirmedCsvSha256: confirmedCsvSha256,
+      nextCourseId: body?.nextCourseId ? String(body.nextCourseId).trim() : null,
+      simulateFailureStage: body?.simulateFailureStage || null,
+      isResume,
+    };
   } else {
     cleanPayload = {};
   }
@@ -1540,12 +1705,14 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
 
   // Ensure mutation data returned to client is sanitized (no nativeAuthUUID/tokens leak)
   const sanitizedData = edgeRes.data ? sanitizePublicUserDto(edgeRes.data as any) : undefined;
+  const httpStatus = typeof edgeRes.status === 'number' ? edgeRes.status : 200;
 
   return apiResponse(
     {
       ...edgeRes,
       ...(sanitizedData ? { data: sanitizedData } : {}),
+      ...(edgeRes.operationStatus ? { status: edgeRes.operationStatus } : {}),
     },
-    edgeRes.status || 200
+    httpStatus
   );
 }

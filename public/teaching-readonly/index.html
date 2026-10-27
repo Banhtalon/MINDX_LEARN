@@ -211,7 +211,7 @@
         <p style="font-size: 13px; color: #1e40af; font-weight: 600;">
           Kéo nút bên dưới thả vào Thanh Dấu Trang (Bookmarks Bar) trên trình duyệt Chrome:
         </p>
-        <a href="javascript:(function()%7B%0A%2F**%0A%20*%20Core%20reader%20logic%20for%20Teaching%20MindX%20read-only%20DOM%20spike%20(Milestone%201%20-%20C2%20%2F%20E2)%0A%20*%0A%20*%20SPECIFICATION%20%26%20SAFETY%20CONTRACT%20(M1-E2%20Hardened)%3A%0A%20*%201.%20STRICT%20ORIGIN%20%26%20PATH%20GUARD%3A%0A%20*%20%20%20%20-%20Only%20accepts%20exact%20origin%20'https%3A%2F%2Fteachingmindx.top'%20and%20exact%20pathname%20'%2Fhocsinh.php'.%0A%20*%20%20%20%20-%20Rejects%20variations%20(%2Fnot-hocsinh.php%2C%20%2Fhocsinh.php-extra%2C%20%2Fadmin%2Fhocsinh.php).%0A%20*%20%20%20%20-%20Returns%20FIXED%20error%20message%20without%20echoing%20arbitrary%20origin%20or%20pathname%20into%20the%20panel.%0A%20*%202.%20TABLE%20MATCHING%20EVIDENCE%3A%0A%20*%20%20%20%20-%20Matches%208%20expected%20columns%20from%202026-10-14%20DOM%20inspection%3A%0A%20*%20%20%20%20%20%20%5B'STT'%2C%20'T%C3%AAn%20h%E1%BB%8Dc%20sinh'%2C%20'M%C3%A3%20l%E1%BB%9Bp'%2C%20'Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh'%2C%20'GV%20ch%C3%ADnh'%2C%20'Tr%E1%BB%A3%20gi%E1%BA%A3ng'%2C%20'Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp'%2C%20'Thao%20t%C3%A1c'%5D%0A%20*%20%20%20%20-%20Error%20message%20reports%20only%20column%20count%2C%20never%20echoes%20unvalidated%2Farbitrary%20header%20text.%0A%20*%20%20%20%20-%20Valid%20result%20exposes%20only%20static%20metadata%20columns.%0A%20*%203.%20ZERO%20PERSONAL%20DATA%20EXTRACTION%20(NO%20TEXTCONTENT%20ON%20DATA%20CELLS)%3A%0A%20*%20%20%20%20-%20Counts%20valid%20rows%20using%20DOM%20structure%20%26%20attributes%20only.%0A%20*%20%20%20%20-%20Never%20accesses%20row.textContent%20or%20cell.textContent%20for%20data%20rows.%0A%20*%20%20%20%20-%20Empty%20placeholder%20detected%20strictly%20via%20.dataTables_empty%20or%20single%20cell%20colspan%20%3E%3D%208.%0A%20*%20%20%20%20-%20Single%20data%20row%20with%208%20cells%20is%20counted%20as%201%20student%20row%20without%20reading%20any%20text.%0A%20*%204.%20STRUCTURED%20SOURCE%20PAGINATION%20PARSING%3A%0A%20*%20%20%20%20-%20Parses%20strictly%20formatted%20pagination%20numbers%20(start%2C%20end%2C%20total).%0A%20*%20%20%20%20-%20Re-renders%20as%20static%20Vietnamese%20text%20%2B%20numbers.%0A%20*%20%20%20%20-%20Rejects%20any%20string%20with%20filter%2Fsearch%20clauses%20or%20adverse%20names%2FIDs%2C%20falling%20back%20to%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'.%0A%20*%205.%20PURE%20CLIENT%20DOM%3A%0A%20*%20%20%20%20-%20Absolutely%20NO%20fetch%20%2F%20XHR%20%2F%20network%20requests.%0A%20*%20%20%20%20-%20Absolutely%20NO%20localStorage%20%2F%20sessionStorage%20%2F%20cookie%20%2F%20IndexedDB.%0A%20*%20%20%20%20-%20Absolutely%20NO%20console%20output%20of%20student%20data.%0A%20*%20%20%20%20-%20Absolutely%20NO%20clipboard%20or%20download%20payload.%0A%20*%20%20%20%20-%20Safe%20DOM%20manipulation%20using%20document.createElement%20and%20textContent%20ONLY.%0A%20*%206.%20NO%20CACHE%3A%0A%20*%20%20%20%20-%20Fresh%20run%20on%20every%20click%3B%20removes%20existing%20panel%20if%20present.%0A%20*%207.%20REQUIRED%20LABELS%3A%0A%20*%20%20%20%20-%20'%C4%90%E1%BB%8Dc%20m%E1%BA%ABu%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i'%0A%20*%20%20%20%20-%20'Kh%C3%B4ng%20ph%E1%BA%A3i%20to%C3%A0n%20b%E1%BB%99%20danh%20s%C3%A1ch'%0A%20*%20%20%20%20-%20'Ch%E1%BB%89%20%C4%91%E1%BB%8Dc%20%E2%80%94%20kh%C3%B4ng%20ghi%20TEST'%0A%20*%2F%0A%0Aconst%20TEACHING_ORIGIN%20%3D%20'https%3A%2F%2Fteachingmindx.top'%3B%0Aconst%20TEACHING_PATH%20%3D%20'%2Fhocsinh.php'%3B%0A%0Aconst%20EXPECTED_COLUMNS%20%3D%20%5B%0A%20%20'STT'%2C%0A%20%20'T%C3%AAn%20h%E1%BB%8Dc%20sinh'%2C%0A%20%20'M%C3%A3%20l%E1%BB%9Bp'%2C%0A%20%20'Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh'%2C%0A%20%20'GV%20ch%C3%ADnh'%2C%0A%20%20'Tr%E1%BB%A3%20gi%E1%BA%A3ng'%2C%0A%20%20'Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp'%2C%0A%20%20'Thao%20t%C3%A1c'%2C%0A%5D%3B%0A%0Aconst%20REQUIRED_LABELS%20%3D%20%7B%0A%20%20SAMPLE%3A%20'%C4%90%E1%BB%8Dc%20m%E1%BA%ABu%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i'%2C%0A%20%20NOT_FULL%3A%20'Kh%C3%B4ng%20ph%E1%BA%A3i%20to%C3%A0n%20b%E1%BB%99%20danh%20s%C3%A1ch'%2C%0A%20%20READONLY%3A%20'Ch%E1%BB%89%20%C4%91%E1%BB%8Dc%20%E2%80%94%20kh%C3%B4ng%20ghi%20TEST'%2C%0A%7D%3B%0A%0A%2F**%0A%20*%20Parses%20source%20pagination%20notice%20safely.%0A%20*%20Only%20accepts%20clean%20numeric%20patterns%20(start%2C%20end%2C%20total)%3B%20rejects%20search%2Ffilter%20noise.%0A%20*%20Never%20echoes%20raw%20text%20that%20could%20contain%20student%20names%2FIDs.%0A%20*%0A%20*%20%40param%20%7BElement%7Cnull%7D%20infoEl%0A%20*%20%40returns%20%7Bstring%7D%20Safe%20summary%20string%20or%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%0A%20*%2F%0Afunction%20parseSafePaginationNotice(infoEl)%20%7B%0A%20%20if%20(!infoEl)%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%0A%20%20const%20raw%20%3D%20(infoEl.textContent%20%7C%7C%20'').trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20')%3B%0A%20%20if%20(!raw)%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%0A%20%20%2F%2F%20Reject%20noise%20that%20might%20contain%20student%20names%2C%20search%20keywords%2C%20or%20filter%20fragments%0A%20%20if%20(%2Ffiltered%7Cl%E1%BB%8Dc%7Csearch%7Ct%C3%ACm%2Fi.test(raw))%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Strict%20regex%3A%20matches%20only%20standard%20pagination%20statements%0A%20%20%2F%2F%20English%3A%20Showing%201%20to%2025%20of%20120%20entries%0A%20%20%2F%2F%20Vietnamese%3A%20Hi%E1%BB%83n%20th%E1%BB%8B%201%20%C4%91%E1%BA%BFn%2025%20trong%20%5Bt%E1%BB%95ng%20s%E1%BB%91%5D%20120%20b%E1%BA%A3n%20ghi%2Fh%E1%BB%8Dc%20sinh%0A%20%20const%20pattern%20%3D%20%2F%5E(%3F%3AShowing%7CHi%E1%BB%83n%20th%E1%BB%8B)%5Cs%2B(%5Cd%2B)%5Cs%2B(%3F%3Ato%7C%C4%91%E1%BA%BFn)%5Cs%2B(%5Cd%2B)%5Cs%2B(%3F%3Aof%7Ctrong%7Ctr%C3%AAn%7Ctrong%20t%E1%BB%95ng%20s%E1%BB%91)%5Cs%2B(%5Cd%2B)%5Cs*(%3F%3Aentries%7Cb%E1%BA%A3n%20ghi%7Ch%E1%BB%8Dc%20sinh%7Cm%E1%BB%A5c)%3F%5C.%3F%24%2Fi%3B%0A%20%20const%20match%20%3D%20raw.match(pattern)%3B%0A%0A%20%20if%20(!match)%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20const%20startNum%20%3D%20Number(match%5B1%5D)%3B%0A%20%20const%20endNum%20%3D%20Number(match%5B2%5D)%3B%0A%20%20const%20totalNum%20%3D%20Number(match%5B3%5D)%3B%0A%0A%20%20if%20(Number.isNaN(startNum)%20%7C%7C%20Number.isNaN(endNum)%20%7C%7C%20Number.isNaN(totalNum))%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20return%20%60Hi%E1%BB%83n%20th%E1%BB%8B%20%24%7BstartNum%7D%20-%20%24%7BendNum%7D%20tr%C3%AAn%20t%E1%BB%95ng%20s%E1%BB%91%20%24%7BtotalNum%7D%20b%E1%BA%A3n%20ghi%20(DOM%20ngu%E1%BB%93n)%60%3B%0A%7D%0A%0A%2F**%0A%20*%20Inspects%20a%20Document%20and%20Location%20for%20Teaching%20MindX%20student%20roster%20structure.%0A%20*%20Pure%20inspection%20function%3A%20safe%20for%20unit%20testing%20with%20JSDOM%20and%20live%20browser%20execution.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%20-%20DOM%20Document%20object%0A%20*%20%40param%20%7BLocation%7CObject%7D%20loc%20-%20Location%20object%20(%7B%20origin%2C%20pathname%20%7D)%0A%20*%20%40returns%20%7BObject%7D%20Inspection%20result%20summary%20(numbers%20and%20status%20ONLY)%0A%20*%2F%0Afunction%20inspectTeachingDom(doc%2C%20loc)%20%7B%0A%20%20const%20timestamp%20%3D%20new%20Date().toISOString()%3B%0A%0A%20%20%2F%2F%20Guard%201%3A%20Strict%20Origin%20%26%20Exact%20Pathname%20Verification%0A%20%20const%20origin%20%3D%20loc%3F.origin%20%7C%7C%20''%3B%0A%20%20const%20pathname%20%3D%20loc%3F.pathname%20%7C%7C%20''%3B%0A%20%20const%20isExactOrigin%20%3D%20origin%20%3D%3D%3D%20TEACHING_ORIGIN%3B%0A%20%20const%20isExactPath%20%3D%20pathname%20%3D%3D%3D%20TEACHING_PATH%3B%0A%0A%20%20if%20(!isExactOrigin%20%7C%7C%20!isExactPath)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'WRONG_ORIGIN'%2C%0A%20%20%20%20%20%20%2F%2F%20FIXED%20message%3A%20never%20echoes%20arbitrary%20origin%20or%20pathname%20into%20the%20panel%0A%20%20%20%20%20%20message%3A%20%60Sai%20%C4%91%E1%BB%8Ba%20ch%E1%BB%89%20trang.%20Ti%E1%BB%87n%20%C3%ADch%20ch%E1%BB%89%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20tr%C3%AAn%20%24%7BTEACHING_ORIGIN%7D%24%7BTEACHING_PATH%7D%60%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%202%3A%20Login%20Screen%20Detection%20(Checks%20input%20type%20without%20reading%20passwords)%0A%20%20const%20passwordInput%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('input%5Btype%3D%22password%22%5D')%20%3A%20null%3B%0A%20%20const%20loginForm%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('form%5Baction*%3D%22login%22%5D%2C%20form.login-form%2C%20%23login-form')%20%3A%20null%3B%0A%20%20if%20(passwordInput%20%7C%7C%20loginForm)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'LOGIN_REQUIRED'%2C%0A%20%20%20%20%20%20message%3A%20'Ph%C3%A1t%20hi%E1%BB%87n%20m%C3%A0n%20h%C3%ACnh%20%C4%91%C4%83ng%20nh%E1%BA%ADp.%20Vui%20l%C3%B2ng%20%C4%91%C4%83ng%20nh%E1%BA%ADp%20Teaching%20MindX%20tr%C6%B0%E1%BB%9Bc%20khi%20b%E1%BA%A5m%20ti%E1%BB%87n%20%C3%ADch.'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%203%3A%20Locate%20Table%20and%20Validate%20Column%20Structure%0A%20%20const%20tables%20%3D%20doc%3F.querySelectorAll%20%3F%20Array.from(doc.querySelectorAll('table'))%20%3A%20%5B%5D%3B%0A%20%20if%20(tables.length%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'TABLE_NOT_FOUND'%2C%0A%20%20%20%20%20%20message%3A%20'Kh%C3%B4ng%20t%C3%ACm%20th%E1%BA%A5y%20b%E1%BA%A3ng%20d%E1%BB%AF%20li%E1%BB%87u%20h%E1%BB%8Dc%20sinh%20n%C3%A0o%20tr%C3%AAn%20trang.'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20let%20targetTable%20%3D%20null%3B%0A%20%20let%20detectedHeaderCount%20%3D%200%3B%0A%20%20let%20headerMatch%20%3D%20false%3B%0A%0A%20%20for%20(const%20table%20of%20tables)%20%7B%0A%20%20%20%20const%20headerCells%20%3D%20Array.from(table.querySelectorAll('thead%20th%2C%20thead%20td%2C%20tr%3Afirst-child%20th'))%3B%0A%20%20%20%20const%20headers%20%3D%20headerCells.map((th)%20%3D%3E%20(th.textContent%20%7C%7C%20'').trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20'))%3B%0A%20%20%20%20detectedHeaderCount%20%3D%20headers.length%3B%0A%0A%20%20%20%20if%20(headers.length%20%3D%3D%3D%20EXPECTED_COLUMNS.length)%20%7B%0A%20%20%20%20%20%20const%20matchesAll%20%3D%20EXPECTED_COLUMNS.every((expectedCol%2C%20idx)%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20const%20detected%20%3D%20(headers%5Bidx%5D%20%7C%7C%20'').toLowerCase()%3B%0A%20%20%20%20%20%20%20%20return%20detected%20%3D%3D%3D%20expectedCol.toLowerCase()%3B%0A%20%20%20%20%20%20%7D)%3B%0A%0A%20%20%20%20%20%20if%20(matchesAll)%20%7B%0A%20%20%20%20%20%20%20%20targetTable%20%3D%20table%3B%0A%20%20%20%20%20%20%20%20headerMatch%20%3D%20true%3B%0A%20%20%20%20%20%20%20%20break%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20if%20(!headerMatch%20%7C%7C%20!targetTable)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'INVALID_HEADERS'%2C%0A%20%20%20%20%20%20%2F%2F%20Fixed%20error%20message%3A%20does%20NOT%20echo%20arbitrary%20header%20text%2C%20reports%20only%20column%20count%0A%20%20%20%20%20%20message%3A%20%60C%E1%BA%A5u%20tr%C3%BAc%20b%E1%BA%A3ng%20kh%C3%B4ng%20kh%E1%BB%9Bp%20m%E1%BA%ABu%20%C4%91%E1%BB%91i%20so%C3%A1t%20ng%C3%A0y%2014%2F10%2F2026%20(y%C3%AAu%20c%E1%BA%A7u%20%C4%91%C3%BAng%208%20c%E1%BB%99t%3A%20STT%2C%20T%C3%AAn%20h%E1%BB%8Dc%20sinh%2C%20M%C3%A3%20l%E1%BB%9Bp%2C%20Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh%2C%20GV%20ch%C3%ADnh%2C%20Tr%E1%BB%A3%20gi%E1%BA%A3ng%2C%20Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp%2C%20Thao%20t%C3%A1c).%20Ph%C3%A1t%20hi%E1%BB%87n%20b%E1%BA%A3ng%20c%C3%B3%20%24%7BdetectedHeaderCount%7D%20c%E1%BB%99t%20kh%C3%B4ng%20h%E1%BB%A3p%20l%E1%BB%87.%60%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%20%2F%2F%20Do%20NOT%20return%20unvalidated%20header%20text%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%204%3A%20Inspect%20Rows%20%26%20Count%20Visible%20Rows%20Safely%0A%20%20%2F%2F%20Get%20body%20rows%2C%20excluding%20header%20row%0A%20%20let%20rowElements%20%3D%20%5B%5D%3B%0A%20%20const%20tbody%20%3D%20targetTable.querySelector('tbody')%3B%0A%20%20if%20(tbody)%20%7B%0A%20%20%20%20rowElements%20%3D%20Array.from(tbody.querySelectorAll('tr'))%3B%0A%20%20%7D%20else%20%7B%0A%20%20%20%20const%20allTrs%20%3D%20Array.from(targetTable.querySelectorAll('tr'))%3B%0A%20%20%20%20rowElements%20%3D%20allTrs.slice(1)%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Check%20empty%20table%20condition%20(0%20rows)%0A%20%20if%20(rowElements.length%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20true%2C%0A%20%20%20%20%20%20code%3A%20'EMPTY_TABLE'%2C%0A%20%20%20%20%20%20message%3A%20'B%E1%BA%A3ng%20h%E1%BB%8Dc%20sinh%20hi%E1%BB%87n%20t%E1%BA%A1i%20r%E1%BB%97ng%20(0%20d%C3%B2ng%20d%E1%BB%AF%20li%E1%BB%87u).'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20true%2C%0A%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Check%20single%20row%20placeholder%20ONLY%20via%20structural%20classes%20and%20attributes%0A%20%20%2F%2F%20CRITICAL%3A%20NEVER%20read%20singleRow.textContent%20or%20cell.textContent%20(prevents%20reading%20personal%20data%20of%20a%20single%20student)%0A%20%20if%20(rowElements.length%20%3D%3D%3D%201)%20%7B%0A%20%20%20%20const%20singleRow%20%3D%20rowElements%5B0%5D%3B%0A%20%20%20%20const%20isEmptyClass%20%3D%20singleRow.querySelector('.dataTables_empty')%20!%3D%3D%20null%3B%0A%20%20%20%20const%20singleRowCells%20%3D%20Array.from(singleRow.querySelectorAll('td%2C%20th'))%3B%0A%0A%20%20%20%20const%20isColspanPlaceholder%20%3D%20singleRowCells.length%20%3D%3D%3D%201%20%26%26%20(%0A%20%20%20%20%20%20(singleRowCells%5B0%5D.colSpan%20%26%26%20singleRowCells%5B0%5D.colSpan%20%3E%3D%208)%20%7C%7C%0A%20%20%20%20%20%20singleRowCells%5B0%5D.getAttribute('colspan')%20%3D%3D%3D%20'8'%0A%20%20%20%20)%3B%0A%0A%20%20%20%20if%20(isEmptyClass%20%7C%7C%20isColspanPlaceholder)%20%7B%0A%20%20%20%20%20%20return%20%7B%0A%20%20%20%20%20%20%20%20success%3A%20true%2C%0A%20%20%20%20%20%20%20%20code%3A%20'EMPTY_TABLE'%2C%0A%20%20%20%20%20%20%20%20message%3A%20'B%E1%BA%A3ng%20hi%E1%BB%83n%20th%E1%BB%8B%20tr%E1%BA%A1ng%20th%C3%A1i%20placeholder%3A%20Kh%C3%B4ng%20c%C3%B3%20d%E1%BB%AF%20li%E1%BB%87u.'%2C%0A%20%20%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20%20%20isPlaceholder%3A%20true%2C%0A%20%20%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20%2F%2F%20Validate%20each%20row%20structure%20and%20count%20visible%20rows%0A%20%20%2F%2F%20NEVER%20read%20textContent%20of%20data%20rows%20or%20individual%20cells!%0A%20%20let%20totalRowsCount%20%3D%200%3B%0A%20%20let%20visibleCount%20%3D%200%3B%0A%0A%20%20for%20(const%20row%20of%20rowElements)%20%7B%0A%20%20%20%20const%20cells%20%3D%20Array.from(row.querySelectorAll('td%2C%20th'))%3B%0A%0A%20%20%20%20%2F%2F%20Structure%20integrity%20check%3A%20each%20row%20MUST%20have%20exactly%208%20cells%0A%20%20%20%20if%20(cells.length%20!%3D%3D%20EXPECTED_COLUMNS.length)%20%7B%0A%20%20%20%20%20%20return%20%7B%0A%20%20%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20%20%20code%3A%20'INVALID_ROW_STRUCTURE'%2C%0A%20%20%20%20%20%20%20%20message%3A%20%60H%C3%A0ng%20d%E1%BB%AF%20li%E1%BB%87u%20th%E1%BB%A9%20%24%7BtotalRowsCount%20%2B%201%7D%20c%C3%B3%20s%E1%BB%91%20c%E1%BB%99t%20kh%C3%B4ng%20kh%E1%BB%9Bp%20(%24%7Bcells.length%7D%20thay%20v%C3%AC%208%20c%E1%BB%99t).%20C%E1%BA%A5u%20tr%C3%BAc%20b%E1%BA%A3ng%20ngu%E1%BB%93n%20%C4%91%C3%A3%20thay%20%C4%91%E1%BB%95i.%60%2C%0A%20%20%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20%20%20totalRowsCount%2C%0A%20%20%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Determine%20visibility%20safely%20without%20reading%20textContent%20or%20personal%20data%0A%20%20%20%20let%20isRowVisible%20%3D%20true%3B%0A%20%20%20%20if%20(row.style%20%26%26%20row.style.display%20%3D%3D%3D%20'none')%20%7B%0A%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%7D%20else%20if%20(row.hidden%20%7C%7C%20(typeof%20row.hasAttribute%20%3D%3D%3D%20'function'%20%26%26%20row.hasAttribute('hidden')))%20%7B%0A%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%7D%20else%20if%20(typeof%20doc.defaultView%3F.getComputedStyle%20%3D%3D%3D%20'function')%20%7B%0A%20%20%20%20%20%20try%20%7B%0A%20%20%20%20%20%20%20%20const%20computed%20%3D%20doc.defaultView.getComputedStyle(row)%3B%0A%20%20%20%20%20%20%20%20if%20(computed%20%26%26%20(computed.display%20%3D%3D%3D%20'none'%20%7C%7C%20computed.visibility%20%3D%3D%3D%20'hidden'))%20%7B%0A%20%20%20%20%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%20catch%20%7B%0A%20%20%20%20%20%20%20%20%2F%2F%20Fallback%20to%20inline%20display%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20totalRowsCount%2B%2B%3B%0A%20%20%20%20if%20(isRowVisible)%20%7B%0A%20%20%20%20%20%20visibleCount%2B%2B%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%205%3A%20Safe%20Pagination%20Notice%20Parsing%20(Strict%20template%20with%20numbers%20only)%0A%20%20const%20infoEl%20%3D%20doc.querySelector('.dataTables_info%2C%20%5Brole%3D%22status%22%5D.table-info%2C%20.pagination-info')%3B%0A%20%20const%20sourceTotalNotice%20%3D%20parseSafePaginationNotice(infoEl)%3B%0A%0A%20%20return%20%7B%0A%20%20%20%20success%3A%20true%2C%0A%20%20%20%20code%3A%20'OK'%2C%0A%20%20%20%20message%3A%20%60%C4%90%C3%A3%20%C4%91%E1%BB%91i%20so%C3%A1t%20%C4%91%C3%BAng%20c%E1%BA%A5u%20tr%C3%BAc%208%20c%E1%BB%99t.%20%C4%90%E1%BB%8Dc%20th%C3%A0nh%20c%C3%B4ng%20%24%7BvisibleCount%7D%20h%C3%A0ng%20hi%E1%BB%83n%20th%E1%BB%8B%20tr%C3%AAn%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i.%60%2C%0A%20%20%20%20visibleCount%2C%0A%20%20%20%20totalRowsCount%2C%0A%20%20%20%20sourceTotalNotice%2C%0A%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20timestamp%2C%0A%20%20%7D%3B%0A%7D%0A%0A%2F**%0A%20*%20Creates%20and%20renders%20the%20in-place%20floating%20panel%20on%20the%20DOM%20using%20textContent%20%26%20createElement%20ONLY.%0A%20*%20Removes%20any%20previous%20panel%20to%20prevent%20stale%20caching.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%20-%20DOM%20Document%20object%0A%20*%20%40param%20%7BObject%7D%20result%20-%20Result%20from%20inspectTeachingDom%0A%20*%20%40returns%20%7BHTMLElement%7D%20The%20created%20panel%20element%0A%20*%2F%0Afunction%20renderTeachingPanel(doc%2C%20result)%20%7B%0A%20%20const%20PANEL_ID%20%3D%20'teaching-readonly-spike-panel'%3B%0A%0A%20%20%2F%2F%20Fresh%20run%3A%20remove%20old%20panel%20if%20present%0A%20%20const%20existing%20%3D%20doc.getElementById(PANEL_ID)%3B%0A%20%20if%20(existing%20%26%26%20typeof%20existing.remove%20%3D%3D%3D%20'function')%20%7B%0A%20%20%20%20existing.remove()%3B%0A%20%20%7D%0A%0A%20%20const%20panel%20%3D%20doc.createElement('div')%3B%0A%20%20panel.id%20%3D%20PANEL_ID%3B%0A%20%20panel.setAttribute('role'%2C%20'dialog')%3B%0A%20%20panel.setAttribute('aria-label'%2C%20'B%E1%BA%A3ng%20th%C3%B4ng%20b%C3%A1o%20ti%E1%BB%87n%20%C3%ADch%20%C4%91%E1%BB%8Dc%20Teaching%20c%E1%BB%A5c%20b%E1%BB%99')%3B%0A%0A%20%20%2F%2F%20Strict%20inline%20styling%20for%20clean%20floating%20overlay%0A%20%20panel.style.position%20%3D%20'fixed'%3B%0A%20%20panel.style.top%20%3D%20'16px'%3B%0A%20%20panel.style.right%20%3D%20'16px'%3B%0A%20%20panel.style.width%20%3D%20'390px'%3B%0A%20%20panel.style.maxWidth%20%3D%20'calc(100vw%20-%2032px)'%3B%0A%20%20panel.style.backgroundColor%20%3D%20'%23ffffff'%3B%0A%20%20panel.style.color%20%3D%20'%230f172a'%3B%0A%20%20panel.style.border%20%3D%20result.success%20%3F%20'2px%20solid%20%232563eb'%20%3A%20'2px%20solid%20%23e11d48'%3B%0A%20%20panel.style.borderRadius%20%3D%20'12px'%3B%0A%20%20panel.style.boxShadow%20%3D%20'0%2020px%2025px%20-5px%20rgba(0%2C%200%2C%200%2C%200.25)%2C%200%208px%2010px%20-6px%20rgba(0%2C%200%2C%200%2C%200.2)'%3B%0A%20%20panel.style.zIndex%20%3D%20'2147483647'%3B%0A%20%20panel.style.fontFamily%20%3D%20'system-ui%2C%20-apple-system%2C%20BlinkMacSystemFont%2C%20%22Segoe%20UI%22%2C%20Roboto%2C%20sans-serif'%3B%0A%20%20panel.style.fontSize%20%3D%20'13px'%3B%0A%20%20panel.style.lineHeight%20%3D%20'1.45'%3B%0A%20%20panel.style.padding%20%3D%20'16px'%3B%0A%20%20panel.style.boxSizing%20%3D%20'border-box'%3B%0A%0A%20%20%2F%2F%201.%20Header%20Container%0A%20%20const%20header%20%3D%20doc.createElement('div')%3B%0A%20%20header.style.display%20%3D%20'flex'%3B%0A%20%20header.style.alignItems%20%3D%20'flex-start'%3B%0A%20%20header.style.justifyContent%20%3D%20'space-between'%3B%0A%20%20header.style.gap%20%3D%20'8px'%3B%0A%20%20header.style.paddingBottom%20%3D%20'10px'%3B%0A%20%20header.style.borderBottom%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%0A%20%20const%20titleGroup%20%3D%20doc.createElement('div')%3B%0A%0A%20%20const%20badge%20%3D%20doc.createElement('div')%3B%0A%20%20badge.textContent%20%3D%20'M%E1%BB%90C%201%20%E2%80%94%20SPIKE%20C%E1%BB%A4C%20B%E1%BB%98%20CH%E1%BB%88%20%C4%90%E1%BB%8CC'%3B%0A%20%20badge.style.fontSize%20%3D%20'10px'%3B%0A%20%20badge.style.fontWeight%20%3D%20'700'%3B%0A%20%20badge.style.letterSpacing%20%3D%20'0.5px'%3B%0A%20%20badge.style.color%20%3D%20result.success%20%3F%20'%231d4ed8'%20%3A%20'%23be123c'%3B%0A%20%20badge.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20const%20title%20%3D%20doc.createElement('div')%3B%0A%20%20title.textContent%20%3D%20'Ti%E1%BB%87n%20%C3%ADch%20%C4%90%E1%BA%BFm%20H%E1%BB%8Dc%20Sinh%20Teaching'%3B%0A%20%20title.style.fontSize%20%3D%20'15px'%3B%0A%20%20title.style.fontWeight%20%3D%20'800'%3B%0A%20%20title.style.color%20%3D%20'%230f172a'%3B%0A%0A%20%20titleGroup.appendChild(badge)%3B%0A%20%20titleGroup.appendChild(title)%3B%0A%0A%20%20%2F%2F%20Close%20button%0A%20%20const%20closeBtn%20%3D%20doc.createElement('button')%3B%0A%20%20closeBtn.type%20%3D%20'button'%3B%0A%20%20closeBtn.textContent%20%3D%20'%E2%9C%95%20%C4%90%C3%B3ng'%3B%0A%20%20closeBtn.style.background%20%3D%20'%23f1f5f9'%3B%0A%20%20closeBtn.style.color%20%3D%20'%23475569'%3B%0A%20%20closeBtn.style.border%20%3D%20'1px%20solid%20%23cbd5e1'%3B%0A%20%20closeBtn.style.borderRadius%20%3D%20'6px'%3B%0A%20%20closeBtn.style.padding%20%3D%20'4px%208px'%3B%0A%20%20closeBtn.style.fontSize%20%3D%20'11px'%3B%0A%20%20closeBtn.style.fontWeight%20%3D%20'600'%3B%0A%20%20closeBtn.style.cursor%20%3D%20'pointer'%3B%0A%20%20closeBtn.onclick%20%3D%20()%20%3D%3E%20%7B%0A%20%20%20%20panel.remove()%3B%0A%20%20%7D%3B%0A%0A%20%20header.appendChild(titleGroup)%3B%0A%20%20header.appendChild(closeBtn)%3B%0A%20%20panel.appendChild(header)%3B%0A%0A%20%20%2F%2F%202.%20Mandatory%20Warning%20Badges%0A%20%20const%20badgesRow%20%3D%20doc.createElement('div')%3B%0A%20%20badgesRow.style.display%20%3D%20'flex'%3B%0A%20%20badgesRow.style.flexWrap%20%3D%20'wrap'%3B%0A%20%20badgesRow.style.gap%20%3D%20'6px'%3B%0A%20%20badgesRow.style.marginTop%20%3D%20'10px'%3B%0A%0A%20%20const%20labels%20%3D%20%5BREQUIRED_LABELS.SAMPLE%2C%20REQUIRED_LABELS.NOT_FULL%2C%20REQUIRED_LABELS.READONLY%5D%3B%0A%20%20for%20(const%20labelText%20of%20labels)%20%7B%0A%20%20%20%20const%20lbl%20%3D%20doc.createElement('span')%3B%0A%20%20%20%20lbl.textContent%20%3D%20labelText%3B%0A%20%20%20%20lbl.style.display%20%3D%20'inline-block'%3B%0A%20%20%20%20lbl.style.padding%20%3D%20'2px%206px'%3B%0A%20%20%20%20lbl.style.fontSize%20%3D%20'10.5px'%3B%0A%20%20%20%20lbl.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20lbl.style.borderRadius%20%3D%20'4px'%3B%0A%20%20%20%20lbl.style.backgroundColor%20%3D%20'%23eff6ff'%3B%0A%20%20%20%20lbl.style.color%20%3D%20'%231e40af'%3B%0A%20%20%20%20lbl.style.border%20%3D%20'1px%20solid%20%23bfdbfe'%3B%0A%20%20%20%20badgesRow.appendChild(lbl)%3B%0A%20%20%7D%0A%20%20panel.appendChild(badgesRow)%3B%0A%0A%20%20%2F%2F%203.%20Status%20Alert%20Box%0A%20%20const%20statusBox%20%3D%20doc.createElement('div')%3B%0A%20%20statusBox.style.marginTop%20%3D%20'12px'%3B%0A%20%20statusBox.style.padding%20%3D%20'10px%2012px'%3B%0A%20%20statusBox.style.borderRadius%20%3D%20'8px'%3B%0A%20%20statusBox.style.fontSize%20%3D%20'12px'%3B%0A%20%20statusBox.style.fontWeight%20%3D%20'500'%3B%0A%0A%20%20if%20(result.success)%20%7B%0A%20%20%20%20statusBox.style.backgroundColor%20%3D%20'%23f0fdf4'%3B%0A%20%20%20%20statusBox.style.border%20%3D%20'1px%20solid%20%2386efac'%3B%0A%20%20%20%20statusBox.style.color%20%3D%20'%23166534'%3B%0A%0A%20%20%20%20const%20statusTitle%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusTitle.textContent%20%3D%20result.isPlaceholder%0A%20%20%20%20%20%20%3F%20'%E2%84%B9%20TH%C3%94NG%20B%C3%81O%3A%20B%E1%BA%A2NG%20KH%C3%94NG%20C%C3%93%20H%C3%80NG%20D%E1%BB%AE%20LI%E1%BB%86U'%0A%20%20%20%20%20%20%3A%20'%E2%9C%93%20%C4%90%C3%83%20NH%E1%BA%ACN%20DI%E1%BB%86N%20%C4%90%C3%9ANG%20B%E1%BA%A2NG%20H%E1%BB%8CC%20SINH%20(8%20C%E1%BB%98T)'%3B%0A%20%20%20%20statusTitle.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20statusTitle.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20%20%20const%20statusDesc%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusDesc.textContent%20%3D%20result.message%3B%0A%0A%20%20%20%20statusBox.appendChild(statusTitle)%3B%0A%20%20%20%20statusBox.appendChild(statusDesc)%3B%0A%20%20%7D%20else%20%7B%0A%20%20%20%20statusBox.style.backgroundColor%20%3D%20'%23fff1f2'%3B%0A%20%20%20%20statusBox.style.border%20%3D%20'1px%20solid%20%23fecdd3'%3B%0A%20%20%20%20statusBox.style.color%20%3D%20'%239f1239'%3B%0A%0A%20%20%20%20const%20statusTitle%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusTitle.textContent%20%3D%20%60%E2%9C%95%20D%E1%BB%AANG%20L%C6%AF%E1%BB%A2T%20%C4%90%E1%BB%8CC%20(%24%7Bresult.code%7D)%60%3B%0A%20%20%20%20statusTitle.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20statusTitle.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20%20%20const%20statusDesc%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusDesc.textContent%20%3D%20result.message%3B%0A%0A%20%20%20%20statusBox.appendChild(statusTitle)%3B%0A%20%20%20%20statusBox.appendChild(statusDesc)%3B%0A%20%20%7D%0A%20%20panel.appendChild(statusBox)%3B%0A%0A%20%20%2F%2F%204.%20Metrics%20Grid%20(Visible%20Count%2C%20DOM%20Rows)%0A%20%20const%20metricsGrid%20%3D%20doc.createElement('div')%3B%0A%20%20metricsGrid.style.marginTop%20%3D%20'12px'%3B%0A%20%20metricsGrid.style.display%20%3D%20'grid'%3B%0A%20%20metricsGrid.style.gridTemplateColumns%20%3D%20'1fr%201fr'%3B%0A%20%20metricsGrid.style.gap%20%3D%20'8px'%3B%0A%0A%20%20%2F%2F%20Visible%20Count%20Card%0A%20%20const%20visibleCard%20%3D%20doc.createElement('div')%3B%0A%20%20visibleCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20visibleCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20visibleCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20visibleCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20visibleTitle%20%3D%20doc.createElement('div')%3B%0A%20%20visibleTitle.textContent%20%3D%20'S%E1%BB%91%20h%C3%A0ng%20nh%C3%ACn%20th%E1%BA%A5y%3A'%3B%0A%20%20visibleTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20visibleTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20visibleValue%20%3D%20doc.createElement('div')%3B%0A%20%20visibleValue.textContent%20%3D%20%60%24%7Bresult.visibleCount%7D%20h%C3%A0ng%60%3B%0A%20%20visibleValue.style.fontSize%20%3D%20'18px'%3B%0A%20%20visibleValue.style.fontWeight%20%3D%20'800'%3B%0A%20%20visibleValue.style.color%20%3D%20result.success%20%3F%20'%2315803d'%20%3A%20'%2394a3b8'%3B%0A%0A%20%20visibleCard.appendChild(visibleTitle)%3B%0A%20%20visibleCard.appendChild(visibleValue)%3B%0A%0A%20%20%2F%2F%20Total%20DOM%20Rows%20Card%0A%20%20const%20totalCard%20%3D%20doc.createElement('div')%3B%0A%20%20totalCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20totalCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20totalCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20totalCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20totalTitle%20%3D%20doc.createElement('div')%3B%0A%20%20totalTitle.textContent%20%3D%20'T%E1%BB%95ng%20h%C3%A0ng%20trong%20DOM%3A'%3B%0A%20%20totalTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20totalTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20totalValue%20%3D%20doc.createElement('div')%3B%0A%20%20totalValue.textContent%20%3D%20%60%24%7Bresult.totalRowsCount%7D%20h%C3%A0ng%60%3B%0A%20%20totalValue.style.fontSize%20%3D%20'18px'%3B%0A%20%20totalValue.style.fontWeight%20%3D%20'800'%3B%0A%20%20totalValue.style.color%20%3D%20'%23334155'%3B%0A%0A%20%20totalCard.appendChild(totalTitle)%3B%0A%20%20totalCard.appendChild(totalValue)%3B%0A%0A%20%20metricsGrid.appendChild(visibleCard)%3B%0A%20%20metricsGrid.appendChild(totalCard)%3B%0A%20%20panel.appendChild(metricsGrid)%3B%0A%0A%20%20%2F%2F%205.%20Source%20Pagination%20%2F%20Total%20Notice%20Card%0A%20%20const%20paginationCard%20%3D%20doc.createElement('div')%3B%0A%20%20paginationCard.style.marginTop%20%3D%20'8px'%3B%0A%20%20paginationCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20paginationCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20paginationCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20paginationCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20paginationTitle%20%3D%20doc.createElement('div')%3B%0A%20%20paginationTitle.textContent%20%3D%20'Th%C3%B4ng%20b%C3%A1o%20ph%C3%A2n%20trang%20ngu%E1%BB%93n%20(DOM)%3A'%3B%0A%20%20paginationTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20paginationTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20paginationVal%20%3D%20doc.createElement('div')%3B%0A%20%20paginationVal.textContent%20%3D%20result.sourceTotalNotice%3B%0A%20%20paginationVal.style.fontSize%20%3D%20'12px'%3B%0A%20%20paginationVal.style.fontWeight%20%3D%20'600'%3B%0A%20%20paginationVal.style.color%20%3D%20'%231e293b'%3B%0A%20%20paginationVal.style.marginTop%20%3D%20'2px'%3B%0A%0A%20%20paginationCard.appendChild(paginationTitle)%3B%0A%20%20paginationCard.appendChild(paginationVal)%3B%0A%20%20panel.appendChild(paginationCard)%3B%0A%0A%20%20%2F%2F%206.%20Safety%20Commitments%20Notice%0A%20%20const%20safetyNote%20%3D%20doc.createElement('div')%3B%0A%20%20safetyNote.style.marginTop%20%3D%20'12px'%3B%0A%20%20safetyNote.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20safetyNote.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20safetyNote.style.borderRadius%20%3D%20'6px'%3B%0A%20%20safetyNote.style.borderLeft%20%3D%20'3px%20solid%20%233b82f6'%3B%0A%20%20safetyNote.style.fontSize%20%3D%20'11px'%3B%0A%20%20safetyNote.style.color%20%3D%20'%23475569'%3B%0A%20%20safetyNote.textContent%20%3D%0A%20%20%20%20'Cam%20k%E1%BA%BFt%20an%20to%C3%A0n%3A%20Ti%E1%BB%87n%20%C3%ADch%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20thu%E1%BA%A7n%20t%C3%BAy%20trong%20tr%C3%ACnh%20duy%E1%BB%87t.%20Kh%C3%B4ng%20%C4%91%E1%BB%8Dc%20m%E1%BA%ADt%20kh%E1%BA%A9u%2Fcookie%2C%20kh%C3%B4ng%20tr%C3%ADch%20xu%E1%BA%A5t%20h%E1%BB%8D%20t%C3%AAn%2FID%20h%E1%BB%8Dc%20sinh%2C%20kh%C3%B4ng%20g%E1%BB%ADi%20d%E1%BB%AF%20li%E1%BB%87u%20ra%20m%E1%BA%A1ng.'%3B%0A%20%20panel.appendChild(safetyNote)%3B%0A%0A%20%20%2F%2F%207.%20Footer%20timestamp%0A%20%20const%20footer%20%3D%20doc.createElement('div')%3B%0A%20%20footer.style.marginTop%20%3D%20'10px'%3B%0A%20%20footer.style.fontSize%20%3D%20'10px'%3B%0A%20%20footer.style.color%20%3D%20'%2394a3b8'%3B%0A%20%20footer.style.textAlign%20%3D%20'right'%3B%0A%20%20footer.textContent%20%3D%20%60Th%E1%BB%9Di%20%C4%91i%E1%BB%83m%20ki%E1%BB%83m%20tra%3A%20%24%7Bresult.timestamp%7D%60%3B%0A%20%20panel.appendChild(footer)%3B%0A%0A%20%20return%20panel%3B%0A%7D%0A%0A%2F**%0A%20*%20Top-level%20reader%20execution%20function.%0A%20*%20Called%20directly%20in%20the%20browser%20bookmarklet%20context%20or%20in%20QA%20fixture%20pages.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20%5Bdoc%3Ddocument%5D%20-%20Target%20Document%0A%20*%20%40param%20%7BLocation%7D%20%5Bloc%3Dwindow.location%5D%20-%20Target%20Location%0A%20*%20%40returns%20%7BObject%7D%20Inspection%20result%0A%20*%2F%0Afunction%20runTeachingReader(doc%20%3D%20(typeof%20document%20!%3D%3D%20'undefined'%20%3F%20document%20%3A%20null)%2C%20loc%20%3D%20(typeof%20window%20!%3D%3D%20'undefined'%20%3F%20window.location%20%3A%20null))%20%7B%0A%20%20if%20(!doc)%20%7B%0A%20%20%20%20return%20%7B%20success%3A%20false%2C%20code%3A%20'NO_DOCUMENT'%2C%20message%3A%20'Kh%C3%B4ng%20t%C3%ACm%20th%E1%BA%A5y%20%C4%91%E1%BB%91i%20t%C6%B0%E1%BB%A3ng%20Document.'%20%7D%3B%0A%20%20%7D%0A%20%20const%20result%20%3D%20inspectTeachingDom(doc%2C%20loc)%3B%0A%20%20const%20panel%20%3D%20renderTeachingPanel(doc%2C%20result)%3B%0A%20%20if%20(doc.body)%20%7B%0A%20%20%20%20doc.body.appendChild(panel)%3B%0A%20%20%7D%0A%20%20return%20result%3B%0A%7D%0A%0A%2F%2F%20Trigger%20reader%20on%20active%20page%0ArunTeachingReader(document%2C%20window.location)%3B%0A%7D)()%3B" class="bookmarklet-btn" title="Kéo nút này vào thanh dấu trang Chrome">
+        <a href="javascript:(function()%7B%0A%2F**%0A%20*%20Core%20reader%20logic%20for%20Teaching%20MindX%20read-only%20DOM%20spike%20(Milestone%201%20-%20C2%20%2F%20E2)%0A%20*%20and%20Milestone%204%20multi-page%20DataTables%20read-only%20aggregate%20preview.%0A%20*%0A%20*%20SPECIFICATION%20%26%20SAFETY%20CONTRACT%20(M1-E2%20%26%20M4%20Hardened)%3A%0A%20*%201.%20STRICT%20ORIGIN%20%26%20PATH%20GUARD%3A%0A%20*%20%20%20%20-%20Only%20accepts%20exact%20origin%20'https%3A%2F%2Fteachingmindx.top'%20and%20exact%20pathname%20'%2Fhocsinh.php'.%0A%20*%20%20%20%20-%20Rejects%20variations%20(%2Fnot-hocsinh.php%2C%20%2Fhocsinh.php-extra%2C%20%2Fadmin%2Fhocsinh.php).%0A%20*%20%20%20%20-%20Returns%20FIXED%20error%20message%20without%20echoing%20arbitrary%20origin%20or%20pathname%20into%20the%20panel.%0A%20*%202.%20TABLE%20MATCHING%20EVIDENCE%3A%0A%20*%20%20%20%20-%20Matches%208%20expected%20columns%20from%202026-10-14%20DOM%20inspection%3A%0A%20*%20%20%20%20%20%20%5B'STT'%2C%20'T%C3%AAn%20h%E1%BB%8Dc%20sinh'%2C%20'M%C3%A3%20l%E1%BB%9Bp'%2C%20'Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh'%2C%20'GV%20ch%C3%ADnh'%2C%20'Tr%E1%BB%A3%20gi%E1%BA%A3ng'%2C%20'Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp'%2C%20'Thao%20t%C3%A1c'%5D%0A%20*%20%20%20%20-%20Error%20message%20reports%20only%20column%20count%2C%20never%20echoes%20unvalidated%2Farbitrary%20header%20text.%0A%20*%20%20%20%20-%20Valid%20result%20exposes%20only%20static%20metadata%20columns.%0A%20*%203.%20ZERO%20PERSONAL%20DATA%20EXTRACTION%20(NO%20TEXTCONTENT%20ON%20DATA%20CELLS%20IN%20M1%20DOM%20SPIKE%3B%0A%20*%20%20%20%20AGGREGATE%20NUMBERS%20ONLY%20IN%20M4%20DATATABLES%20PAGINATION%20PREVIEW)%3A%0A%20*%20%20%20%20-%20Counts%20valid%20rows%20using%20DOM%20structure%20%26%20attributes%20only%20in%20M1%20DOM%20mode.%0A%20*%20%20%20%20-%20In%20M4%20DataTables%20multi-page%20preview%20mode%2C%20reads%20same-origin%20DataTables%20pages%0A%20*%20%20%20%20%20%20sequentially%20until%20%60start%20%3E%3D%20recordsFiltered%60%2C%20validates%20%60draw%60%2C%20%60recordsTotal%60%2C%0A%20*%20%20%20%20%20%20%60recordsFiltered%60%2C%20row%20count%20per%20page%2C%20last%20page%2C%20and%20ID%20integrity%2C%20and%20outputs%0A%20*%20%20%20%20%20%20ONLY%20aggregate%20numbers%20(zero%20student%20names%2C%20codes%2C%20or%20payloads%20stored%2Flogged%2Frendered).%0A%20*%204.%20STRUCTURED%20SOURCE%20PAGINATION%20PARSING%3A%0A%20*%20%20%20%20-%20Parses%20strictly%20formatted%20pagination%20numbers%20(start%2C%20end%2C%20total).%0A%20*%20%20%20%20-%20Re-renders%20as%20static%20Vietnamese%20text%20%2B%20numbers.%0A%20*%20%20%20%20-%20Rejects%20any%20string%20with%20filter%2Fsearch%20clauses%20or%20adverse%20names%2FIDs%2C%20falling%20back%20to%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'.%0A%20*%205.%20PURE%20CLIENT%20READ-ONLY%3A%0A%20*%20%20%20%20-%20Initial%20%60runTeachingReader%60%20performs%200%20fetch%20%2F%20XHR%20%2F%20network%20requests.%0A%20*%20%20%20%20-%20Absolutely%20NO%20localStorage%20%2F%20sessionStorage%20%2F%20cookie%20%2F%20IndexedDB.%0A%20*%20%20%20%20-%20Absolutely%20NO%20console%20output%20of%20student%20data.%0A%20*%20%20%20%20-%20Absolutely%20NO%20clipboard%20or%20download%20payload.%0A%20*%20%20%20%20-%20Safe%20DOM%20manipulation%20using%20document.createElement%20and%20textContent%20ONLY.%0A%20*%206.%20NO%20CACHE%3A%0A%20*%20%20%20%20-%20Fresh%20run%20on%20every%20click%3B%20removes%20existing%20panel%20if%20present.%0A%20*%207.%20REQUIRED%20LABELS%3A%0A%20*%20%20%20%20-%20'%C4%90%E1%BB%8Dc%20m%E1%BA%ABu%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i'%0A%20*%20%20%20%20-%20'Kh%C3%B4ng%20ph%E1%BA%A3i%20to%C3%A0n%20b%E1%BB%99%20danh%20s%C3%A1ch'%0A%20*%20%20%20%20-%20'Ch%E1%BB%89%20%C4%91%E1%BB%8Dc%20%E2%80%94%20kh%C3%B4ng%20ghi%20TEST'%0A%20*%2F%0A%0Aconst%20TEACHING_ORIGIN%20%3D%20'https%3A%2F%2Fteachingmindx.top'%3B%0Aconst%20TEACHING_PATH%20%3D%20'%2Fhocsinh.php'%3B%0Aconst%20TEACHING_DATATABLES_ENDPOINT%20%3D%20'%2Fhocsinh.php%3Fdatatable%3Dstudents'%3B%0Aconst%20TEACHING_DEFAULT_PAGE_LENGTH%20%3D%2015%3B%0Aconst%20TEACHING_MAX_SAFE_PAGES%20%3D%20500%3B%0A%0Aconst%20EXPECTED_COLUMNS%20%3D%20%5B%0A%20%20'STT'%2C%0A%20%20'T%C3%AAn%20h%E1%BB%8Dc%20sinh'%2C%0A%20%20'M%C3%A3%20l%E1%BB%9Bp'%2C%0A%20%20'Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh'%2C%0A%20%20'GV%20ch%C3%ADnh'%2C%0A%20%20'Tr%E1%BB%A3%20gi%E1%BA%A3ng'%2C%0A%20%20'Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp'%2C%0A%20%20'Thao%20t%C3%A1c'%2C%0A%5D%3B%0A%0Aconst%20REQUIRED_LABELS%20%3D%20%7B%0A%20%20SAMPLE%3A%20'%C4%90%E1%BB%8Dc%20m%E1%BA%ABu%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i'%2C%0A%20%20NOT_FULL%3A%20'Kh%C3%B4ng%20ph%E1%BA%A3i%20to%C3%A0n%20b%E1%BB%99%20danh%20s%C3%A1ch'%2C%0A%20%20READONLY%3A%20'Ch%E1%BB%89%20%C4%91%E1%BB%8Dc%20%E2%80%94%20kh%C3%B4ng%20ghi%20TEST'%2C%0A%7D%3B%0A%0Aconst%20M4_ACTIVE_STUDENT_STATUSES%20%3D%20%5B'%C4%91ang%20h%E1%BB%8Dc'%2C%20'dang%20hoc'%2C%20'active'%5D%3B%0Aconst%20M4_INACTIVE_STUDENT_STATUSES%20%3D%20%5B%0A%20%20'ngh%E1%BB%89'%2C%0A%20%20'nghi'%2C%0A%20%20'ngh%E1%BB%89%20h%E1%BB%8Dc'%2C%0A%20%20'nghi%20hoc'%2C%0A%20%20'%C4%91%C3%A3%20ngh%E1%BB%89'%2C%0A%20%20'da%20nghi'%2C%0A%20%20'%C4%91%C3%A3%20ngh%E1%BB%89%20h%E1%BB%8Dc'%2C%0A%20%20'da%20nghi%20hoc'%2C%0A%20%20'%C4%91%C3%A3%20h%E1%BA%BFt%20kh%C3%B3a'%2C%0A%20%20'da%20het%20khoa'%2C%0A%20%20'h%E1%BA%BFt%20kh%C3%B3a'%2C%0A%20%20'het%20khoa'%2C%0A%20%20'b%E1%BA%A3o%20l%C6%B0u'%2C%0A%20%20'bao%20luu'%2C%0A%20%20't%E1%BA%A1m%20d%E1%BB%ABng'%2C%0A%20%20'tam%20dung'%2C%0A%20%20'inactive'%2C%0A%20%20'dropped'%2C%0A%20%20'finished'%2C%0A%5D%3B%0Aconst%20M4_ACTIVE_CLASS_STATUSES%20%3D%20%5B'running'%2C%20'%C4%91ang%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng'%2C%20'dang%20hoat%20dong'%2C%20'%C4%91ang%20m%E1%BB%9F'%2C%20'dang%20mo'%2C%20'active'%5D%3B%0Aconst%20M4_INACTIVE_CLASS_STATUSES%20%3D%20%5B%0A%20%20'closed'%2C%0A%20%20'finished'%2C%0A%20%20'%C4%91%C3%A3%20%C4%91%C3%B3ng'%2C%0A%20%20'da%20dong'%2C%0A%20%20'%C4%91%C3%B3ng'%2C%0A%20%20'dong'%2C%0A%20%20'%C4%91%C3%A3%20k%E1%BA%BFt%20th%C3%BAc'%2C%0A%20%20'da%20ket%20thuc'%2C%0A%20%20'%C4%91%C3%A3%20h%E1%BA%BFt%20kh%C3%B3a'%2C%0A%20%20'da%20het%20khoa'%2C%0A%20%20'archived'%2C%0A%5D%3B%0A%0A%2F**%0A%20*%20Parses%20source%20pagination%20notice%20safely.%0A%20*%20Only%20accepts%20clean%20numeric%20patterns%20(start%2C%20end%2C%20total)%3B%20rejects%20search%2Ffilter%20noise.%0A%20*%20Never%20echoes%20raw%20text%20that%20could%20contain%20student%20names%2FIDs.%0A%20*%0A%20*%20%40param%20%7BElement%7Cnull%7D%20infoEl%0A%20*%20%40returns%20%7Bstring%7D%20Safe%20summary%20string%20or%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%0A%20*%2F%0Afunction%20parseSafePaginationNotice(infoEl)%20%7B%0A%20%20if%20(!infoEl)%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%0A%20%20const%20raw%20%3D%20(infoEl.textContent%20%7C%7C%20'').trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20')%3B%0A%20%20if%20(!raw)%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%0A%20%20%2F%2F%20Reject%20noise%20that%20might%20contain%20student%20names%2C%20search%20keywords%2C%20or%20filter%20fragments%0A%20%20if%20(%2Ffiltered%7Cl%E1%BB%8Dc%7Csearch%7Ct%C3%ACm%2Fi.test(raw))%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Strict%20regex%3A%20matches%20only%20standard%20pagination%20statements%0A%20%20%2F%2F%20English%3A%20Showing%201%20to%2025%20of%20120%20entries%0A%20%20%2F%2F%20Vietnamese%3A%20Hi%E1%BB%83n%20th%E1%BB%8B%201%20%C4%91%E1%BA%BFn%2025%20trong%20%5Bt%E1%BB%95ng%20s%E1%BB%91%5D%20120%20b%E1%BA%A3n%20ghi%2Fh%E1%BB%8Dc%20sinh%0A%20%20const%20pattern%20%3D%20%2F%5E(%3F%3AShowing%7CHi%E1%BB%83n%20th%E1%BB%8B)%5Cs%2B(%5Cd%2B)%5Cs%2B(%3F%3Ato%7C%C4%91%E1%BA%BFn)%5Cs%2B(%5Cd%2B)%5Cs%2B(%3F%3Aof%7Ctrong%7Ctr%C3%AAn%7Ctrong%20t%E1%BB%95ng%20s%E1%BB%91)%5Cs%2B(%5Cd%2B)%5Cs*(%3F%3Aentries%7Cb%E1%BA%A3n%20ghi%7Ch%E1%BB%8Dc%20sinh%7Cm%E1%BB%A5c)%3F%5C.%3F%24%2Fi%3B%0A%20%20const%20match%20%3D%20raw.match(pattern)%3B%0A%0A%20%20if%20(!match)%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20const%20startNum%20%3D%20Number(match%5B1%5D)%3B%0A%20%20const%20endNum%20%3D%20Number(match%5B2%5D)%3B%0A%20%20const%20totalNum%20%3D%20Number(match%5B3%5D)%3B%0A%0A%20%20if%20(Number.isNaN(startNum)%20%7C%7C%20Number.isNaN(endNum)%20%7C%7C%20Number.isNaN(totalNum))%20%7B%0A%20%20%20%20return%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%3B%0A%20%20%7D%0A%0A%20%20return%20%60Hi%E1%BB%83n%20th%E1%BB%8B%20%24%7BstartNum%7D%20-%20%24%7BendNum%7D%20tr%C3%AAn%20t%E1%BB%95ng%20s%E1%BB%91%20%24%7BtotalNum%7D%20b%E1%BA%A3n%20ghi%20(DOM%20ngu%E1%BB%93n)%60%3B%0A%7D%0A%0A%2F**%0A%20*%20Inspects%20a%20Document%20and%20Location%20for%20Teaching%20MindX%20student%20roster%20structure.%0A%20*%20Pure%20inspection%20function%3A%20safe%20for%20unit%20testing%20with%20JSDOM%20and%20live%20browser%20execution.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%20-%20DOM%20Document%20object%0A%20*%20%40param%20%7BLocation%7CObject%7D%20loc%20-%20Location%20object%20(%7B%20origin%2C%20pathname%20%7D)%0A%20*%20%40returns%20%7BObject%7D%20Inspection%20result%20summary%20(numbers%20and%20status%20ONLY)%0A%20*%2F%0Afunction%20inspectTeachingDom(doc%2C%20loc)%20%7B%0A%20%20const%20timestamp%20%3D%20new%20Date().toISOString()%3B%0A%0A%20%20%2F%2F%20Guard%201%3A%20Strict%20Origin%20%26%20Exact%20Pathname%20Verification%0A%20%20const%20origin%20%3D%20loc%3F.origin%20%7C%7C%20''%3B%0A%20%20const%20pathname%20%3D%20loc%3F.pathname%20%7C%7C%20''%3B%0A%20%20const%20isExactOrigin%20%3D%20origin%20%3D%3D%3D%20TEACHING_ORIGIN%3B%0A%20%20const%20isExactPath%20%3D%20pathname%20%3D%3D%3D%20TEACHING_PATH%3B%0A%0A%20%20if%20(!isExactOrigin%20%7C%7C%20!isExactPath)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'WRONG_ORIGIN'%2C%0A%20%20%20%20%20%20%2F%2F%20FIXED%20message%3A%20never%20echoes%20arbitrary%20origin%20or%20pathname%20into%20the%20panel%0A%20%20%20%20%20%20message%3A%20%60Sai%20%C4%91%E1%BB%8Ba%20ch%E1%BB%89%20trang.%20Ti%E1%BB%87n%20%C3%ADch%20ch%E1%BB%89%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20tr%C3%AAn%20%24%7BTEACHING_ORIGIN%7D%24%7BTEACHING_PATH%7D%60%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%202%3A%20Login%20Screen%20Detection%20(Checks%20input%20type%20without%20reading%20passwords)%0A%20%20const%20passwordInput%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('input%5Btype%3D%22password%22%5D')%20%3A%20null%3B%0A%20%20const%20loginForm%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('form%5Baction*%3D%22login%22%5D%2C%20form.login-form%2C%20%23login-form')%20%3A%20null%3B%0A%20%20if%20(passwordInput%20%7C%7C%20loginForm)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'LOGIN_REQUIRED'%2C%0A%20%20%20%20%20%20message%3A%20'Ph%C3%A1t%20hi%E1%BB%87n%20m%C3%A0n%20h%C3%ACnh%20%C4%91%C4%83ng%20nh%E1%BA%ADp.%20Vui%20l%C3%B2ng%20%C4%91%C4%83ng%20nh%E1%BA%ADp%20Teaching%20MindX%20tr%C6%B0%E1%BB%9Bc%20khi%20b%E1%BA%A5m%20ti%E1%BB%87n%20%C3%ADch.'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%203%3A%20Locate%20Table%20and%20Validate%20Column%20Structure%0A%20%20const%20tables%20%3D%20doc%3F.querySelectorAll%20%3F%20Array.from(doc.querySelectorAll('table'))%20%3A%20%5B%5D%3B%0A%20%20if%20(tables.length%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'TABLE_NOT_FOUND'%2C%0A%20%20%20%20%20%20message%3A%20'Kh%C3%B4ng%20t%C3%ACm%20th%E1%BA%A5y%20b%E1%BA%A3ng%20d%E1%BB%AF%20li%E1%BB%87u%20h%E1%BB%8Dc%20sinh%20n%C3%A0o%20tr%C3%AAn%20trang.'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20let%20targetTable%20%3D%20null%3B%0A%20%20let%20detectedHeaderCount%20%3D%200%3B%0A%20%20let%20headerMatch%20%3D%20false%3B%0A%0A%20%20for%20(const%20table%20of%20tables)%20%7B%0A%20%20%20%20const%20headerCells%20%3D%20Array.from(table.querySelectorAll('thead%20th%2C%20thead%20td%2C%20tr%3Afirst-child%20th'))%3B%0A%20%20%20%20const%20headers%20%3D%20headerCells.map((th)%20%3D%3E%20(th.textContent%20%7C%7C%20'').trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20'))%3B%0A%20%20%20%20detectedHeaderCount%20%3D%20headers.length%3B%0A%0A%20%20%20%20if%20(headers.length%20%3D%3D%3D%20EXPECTED_COLUMNS.length)%20%7B%0A%20%20%20%20%20%20const%20matchesAll%20%3D%20EXPECTED_COLUMNS.every((expectedCol%2C%20idx)%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20const%20detected%20%3D%20(headers%5Bidx%5D%20%7C%7C%20'').toLowerCase()%3B%0A%20%20%20%20%20%20%20%20return%20detected%20%3D%3D%3D%20expectedCol.toLowerCase()%3B%0A%20%20%20%20%20%20%7D)%3B%0A%0A%20%20%20%20%20%20if%20(matchesAll)%20%7B%0A%20%20%20%20%20%20%20%20targetTable%20%3D%20table%3B%0A%20%20%20%20%20%20%20%20headerMatch%20%3D%20true%3B%0A%20%20%20%20%20%20%20%20break%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20if%20(!headerMatch%20%7C%7C%20!targetTable)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20code%3A%20'INVALID_HEADERS'%2C%0A%20%20%20%20%20%20%2F%2F%20Fixed%20error%20message%3A%20does%20NOT%20echo%20arbitrary%20header%20text%2C%20reports%20only%20column%20count%0A%20%20%20%20%20%20message%3A%20%60C%E1%BA%A5u%20tr%C3%BAc%20b%E1%BA%A3ng%20kh%C3%B4ng%20kh%E1%BB%9Bp%20m%E1%BA%ABu%20%C4%91%E1%BB%91i%20so%C3%A1t%20ng%C3%A0y%2014%2F10%2F2026%20(y%C3%AAu%20c%E1%BA%A7u%20%C4%91%C3%BAng%208%20c%E1%BB%99t%3A%20STT%2C%20T%C3%AAn%20h%E1%BB%8Dc%20sinh%2C%20M%C3%A3%20l%E1%BB%9Bp%2C%20Tr%E1%BA%A1ng%20th%C3%A1i%20h%E1%BB%8Dc%20sinh%2C%20GV%20ch%C3%ADnh%2C%20Tr%E1%BB%A3%20gi%E1%BA%A3ng%2C%20Tr%E1%BA%A1ng%20th%C3%A1i%20l%E1%BB%9Bp%2C%20Thao%20t%C3%A1c).%20Ph%C3%A1t%20hi%E1%BB%87n%20b%E1%BA%A3ng%20c%C3%B3%20%24%7BdetectedHeaderCount%7D%20c%E1%BB%99t%20kh%C3%B4ng%20h%E1%BB%A3p%20l%E1%BB%87.%60%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20detectedColumns%3A%20%5B%5D%2C%20%2F%2F%20Do%20NOT%20return%20unvalidated%20header%20text%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%204%3A%20Inspect%20Rows%20%26%20Count%20Visible%20Rows%20Safely%0A%20%20%2F%2F%20Get%20body%20rows%2C%20excluding%20header%20row%0A%20%20let%20rowElements%20%3D%20%5B%5D%3B%0A%20%20const%20tbody%20%3D%20targetTable.querySelector('tbody')%3B%0A%20%20if%20(tbody)%20%7B%0A%20%20%20%20rowElements%20%3D%20Array.from(tbody.querySelectorAll('tr'))%3B%0A%20%20%7D%20else%20%7B%0A%20%20%20%20const%20allTrs%20%3D%20Array.from(targetTable.querySelectorAll('tr'))%3B%0A%20%20%20%20rowElements%20%3D%20allTrs.slice(1)%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Check%20empty%20table%20condition%20(0%20rows)%0A%20%20if%20(rowElements.length%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20return%20%7B%0A%20%20%20%20%20%20success%3A%20true%2C%0A%20%20%20%20%20%20code%3A%20'EMPTY_TABLE'%2C%0A%20%20%20%20%20%20message%3A%20'B%E1%BA%A3ng%20h%E1%BB%8Dc%20sinh%20hi%E1%BB%87n%20t%E1%BA%A1i%20r%E1%BB%97ng%20(0%20d%C3%B2ng%20d%E1%BB%AF%20li%E1%BB%87u).'%2C%0A%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20isPlaceholder%3A%20true%2C%0A%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%7D%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Check%20single%20row%20placeholder%20ONLY%20via%20structural%20classes%20and%20attributes%0A%20%20%2F%2F%20CRITICAL%3A%20NEVER%20read%20singleRow.textContent%20or%20cell.textContent%20(prevents%20reading%20personal%20data%20of%20a%20single%20student)%0A%20%20if%20(rowElements.length%20%3D%3D%3D%201)%20%7B%0A%20%20%20%20const%20singleRow%20%3D%20rowElements%5B0%5D%3B%0A%20%20%20%20const%20isEmptyClass%20%3D%20singleRow.querySelector('.dataTables_empty')%20!%3D%3D%20null%3B%0A%20%20%20%20const%20singleRowCells%20%3D%20Array.from(singleRow.querySelectorAll('td%2C%20th'))%3B%0A%0A%20%20%20%20const%20isColspanPlaceholder%20%3D%20singleRowCells.length%20%3D%3D%3D%201%20%26%26%20(%0A%20%20%20%20%20%20(singleRowCells%5B0%5D.colSpan%20%26%26%20singleRowCells%5B0%5D.colSpan%20%3E%3D%208)%20%7C%7C%0A%20%20%20%20%20%20singleRowCells%5B0%5D.getAttribute('colspan')%20%3D%3D%3D%20'8'%0A%20%20%20%20)%3B%0A%0A%20%20%20%20if%20(isEmptyClass%20%7C%7C%20isColspanPlaceholder)%20%7B%0A%20%20%20%20%20%20return%20%7B%0A%20%20%20%20%20%20%20%20success%3A%20true%2C%0A%20%20%20%20%20%20%20%20code%3A%20'EMPTY_TABLE'%2C%0A%20%20%20%20%20%20%20%20message%3A%20'B%E1%BA%A3ng%20hi%E1%BB%83n%20th%E1%BB%8B%20tr%E1%BA%A1ng%20th%C3%A1i%20placeholder%3A%20Kh%C3%B4ng%20c%C3%B3%20d%E1%BB%AF%20li%E1%BB%87u.'%2C%0A%20%20%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20%20%20totalRowsCount%3A%200%2C%0A%20%20%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20%20%20isPlaceholder%3A%20true%2C%0A%20%20%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20%2F%2F%20Validate%20each%20row%20structure%20and%20count%20visible%20rows%0A%20%20%2F%2F%20NEVER%20read%20textContent%20of%20data%20rows%20or%20individual%20cells!%0A%20%20let%20totalRowsCount%20%3D%200%3B%0A%20%20let%20visibleCount%20%3D%200%3B%0A%0A%20%20for%20(const%20row%20of%20rowElements)%20%7B%0A%20%20%20%20const%20cells%20%3D%20Array.from(row.querySelectorAll('td%2C%20th'))%3B%0A%0A%20%20%20%20%2F%2F%20Structure%20integrity%20check%3A%20each%20row%20MUST%20have%20exactly%208%20cells%0A%20%20%20%20if%20(cells.length%20!%3D%3D%20EXPECTED_COLUMNS.length)%20%7B%0A%20%20%20%20%20%20return%20%7B%0A%20%20%20%20%20%20%20%20success%3A%20false%2C%0A%20%20%20%20%20%20%20%20code%3A%20'INVALID_ROW_STRUCTURE'%2C%0A%20%20%20%20%20%20%20%20message%3A%20%60H%C3%A0ng%20d%E1%BB%AF%20li%E1%BB%87u%20th%E1%BB%A9%20%24%7BtotalRowsCount%20%2B%201%7D%20c%C3%B3%20s%E1%BB%91%20c%E1%BB%99t%20kh%C3%B4ng%20kh%E1%BB%9Bp%20(%24%7Bcells.length%7D%20thay%20v%C3%AC%208%20c%E1%BB%99t).%20C%E1%BA%A5u%20tr%C3%BAc%20b%E1%BA%A3ng%20ngu%E1%BB%93n%20%C4%91%C3%A3%20thay%20%C4%91%E1%BB%95i.%60%2C%0A%20%20%20%20%20%20%20%20visibleCount%3A%200%2C%0A%20%20%20%20%20%20%20%20totalRowsCount%2C%0A%20%20%20%20%20%20%20%20sourceTotalNotice%3A%20'Ch%C6%B0a%20x%C3%A1c%20%C4%91%E1%BB%8Bnh'%2C%0A%20%20%20%20%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20%20%20%20%20timestamp%2C%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Determine%20visibility%20safely%20without%20reading%20textContent%20or%20personal%20data%0A%20%20%20%20let%20isRowVisible%20%3D%20true%3B%0A%20%20%20%20if%20(row.style%20%26%26%20row.style.display%20%3D%3D%3D%20'none')%20%7B%0A%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%7D%20else%20if%20(row.hidden%20%7C%7C%20(typeof%20row.hasAttribute%20%3D%3D%3D%20'function'%20%26%26%20row.hasAttribute('hidden')))%20%7B%0A%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%7D%20else%20if%20(typeof%20doc.defaultView%3F.getComputedStyle%20%3D%3D%3D%20'function')%20%7B%0A%20%20%20%20%20%20try%20%7B%0A%20%20%20%20%20%20%20%20const%20computed%20%3D%20doc.defaultView.getComputedStyle(row)%3B%0A%20%20%20%20%20%20%20%20if%20(computed%20%26%26%20(computed.display%20%3D%3D%3D%20'none'%20%7C%7C%20computed.visibility%20%3D%3D%3D%20'hidden'))%20%7B%0A%20%20%20%20%20%20%20%20%20%20isRowVisible%20%3D%20false%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%20catch%20%7B%0A%20%20%20%20%20%20%20%20%2F%2F%20Fallback%20to%20inline%20display%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20totalRowsCount%2B%2B%3B%0A%20%20%20%20if%20(isRowVisible)%20%7B%0A%20%20%20%20%20%20visibleCount%2B%2B%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20%2F%2F%20Guard%205%3A%20Safe%20Pagination%20Notice%20Parsing%20(Strict%20template%20with%20numbers%20only)%0A%20%20const%20infoEl%20%3D%20doc.querySelector('.dataTables_info%2C%20%5Brole%3D%22status%22%5D.table-info%2C%20.pagination-info')%3B%0A%20%20const%20sourceTotalNotice%20%3D%20parseSafePaginationNotice(infoEl)%3B%0A%0A%20%20return%20%7B%0A%20%20%20%20success%3A%20true%2C%0A%20%20%20%20code%3A%20'OK'%2C%0A%20%20%20%20message%3A%20%60%C4%90%C3%A3%20%C4%91%E1%BB%91i%20so%C3%A1t%20%C4%91%C3%BAng%20c%E1%BA%A5u%20tr%C3%BAc%208%20c%E1%BB%99t.%20%C4%90%E1%BB%8Dc%20th%C3%A0nh%20c%C3%B4ng%20%24%7BvisibleCount%7D%20h%C3%A0ng%20hi%E1%BB%83n%20th%E1%BB%8B%20tr%C3%AAn%20trang%20hi%E1%BB%87n%20t%E1%BA%A1i.%60%2C%0A%20%20%20%20visibleCount%2C%0A%20%20%20%20totalRowsCount%2C%0A%20%20%20%20sourceTotalNotice%2C%0A%20%20%20%20isPlaceholder%3A%20false%2C%0A%20%20%20%20detectedColumns%3A%20EXPECTED_COLUMNS%2C%0A%20%20%20%20timestamp%2C%0A%20%20%7D%3B%0A%7D%0A%0A%2F**%0A%20*%20M%E1%BB%91c%204%20%E2%80%94%20Reads%20all%20DataTables%20pages%20sequentially%20(%60start%20%3D%200%2C%20length%2C%202*length...%60)%0A%20*%20until%20%60start%20%3E%3D%20recordsFiltered%60%20and%20returns%20ONLY%20aggregate%20counts%20(zero%20PII).%0A%20*%0A%20*%20Atomic%20abort%3A%20If%20any%20page%20fails%2C%20session%20expires%2C%20%60draw%60%20mismatches%2C%20%60recordsFiltered%60%0A%20*%20changes%20between%20pages%2C%20last%20page%20row%20count%20mismatches%2C%20or%20duplicate%2Fmissing%20ID%20is%0A%20*%20detected%2C%20aborts%20immediately%20and%20discards%20all%20partial%20counts.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%20-%20DOM%20Document%20object%0A%20*%20%40param%20%7BLocation%7CObject%7D%20loc%20-%20Location%20object%20(%7B%20origin%2C%20pathname%20%7D)%0A%20*%20%40param%20%7BObject%7D%20%5Boptions%5D%20-%20%60%7B%20fetchPage%3F%3A%20Function%2C%20pageLength%3F%3A%20number%2C%20maxPages%3F%3A%20number%20%7D%60%0A%20*%20%40returns%20%7BPromise%3CObject%3E%7D%20Aggregate-only%20preview%20report%20(numbers%20and%20static%20status%20ONLY)%0A%20*%2F%0Aasync%20function%20inspectTeachingDataTablesAllPages(doc%2C%20loc%2C%20options%20%3D%20%7B%7D)%20%7B%0A%20%20const%20timestamp%20%3D%20new%20Date().toISOString()%3B%0A%20%20const%20pageLength%20%3D%0A%20%20%20%20typeof%20options.pageLength%20%3D%3D%3D%20'number'%20%26%26%20Number.isInteger(options.pageLength)%20%26%26%20options.pageLength%20%3E%200%0A%20%20%20%20%20%20%3F%20options.pageLength%0A%20%20%20%20%20%20%3A%20TEACHING_DEFAULT_PAGE_LENGTH%3B%0A%20%20const%20maxPages%20%3D%0A%20%20%20%20typeof%20options.maxPages%20%3D%3D%3D%20'number'%20%26%26%20Number.isInteger(options.maxPages)%20%26%26%20options.maxPages%20%3E%200%0A%20%20%20%20%20%20%3F%20options.maxPages%0A%20%20%20%20%20%20%3A%20TEACHING_MAX_SAFE_PAGES%3B%0A%0A%20%20const%20makeAbort%20%3D%20(code%2C%20message%2C%20failedAtPage%2C%20pagesRead)%20%3D%3E%20(%7B%0A%20%20%20%20success%3A%20false%2C%0A%20%20%20%20aborted%3A%20true%2C%0A%20%20%20%20partialApplied%3A%20false%2C%0A%20%20%20%20mode%3A%20'M4_DATATABLES_AGGREGATE_PREVIEW'%2C%0A%20%20%20%20code%2C%0A%20%20%20%20message%2C%0A%20%20%20%20failedAtPage%2C%0A%20%20%20%20pagesRead%2C%0A%20%20%20%20pageLength%2C%0A%20%20%20%20recordsTotal%3A%200%2C%0A%20%20%20%20recordsFiltered%3A%200%2C%0A%20%20%20%20totalRowsVerified%3A%200%2C%0A%20%20%20%20uniqueIdCount%3A%200%2C%0A%20%20%20%20robClassRowCount%3A%200%2C%0A%20%20%20%20nonRobClassRowCount%3A%200%2C%0A%20%20%20%20eligibleActiveRobCount%3A%200%2C%0A%20%20%20%20inactiveStatusRowCount%3A%200%2C%0A%20%20%20%20unknownStatusRowCount%3A%200%2C%0A%20%20%20%20sameNameDifferentIdCount%3A%200%2C%0A%20%20%20%20consistencyVerified%3A%20false%2C%0A%20%20%20%20snapshotConsistent%3A%20false%2C%0A%20%20%20%20snapshotVersion%3A%20null%2C%0A%20%20%20%20piiStoredOrSent%3A%20false%2C%0A%20%20%20%20timestamp%2C%0A%20%20%7D)%3B%0A%0A%20%20const%20extractPageSnapshotVersion%20%3D%20(resp%2C%20body)%20%3D%3E%20%7B%0A%20%20%20%20const%20candidates%20%3D%20%5B%0A%20%20%20%20%20%20body%3F.snapshotVersion%2C%0A%20%20%20%20%20%20body%3F.datasetVersion%2C%0A%20%20%20%20%20%20body%3F.revision%2C%0A%20%20%20%20%20%20body%3F.etag%2C%0A%20%20%20%20%20%20body%3F.version%2C%0A%20%20%20%20%20%20resp%3F.snapshotVersion%2C%0A%20%20%20%20%20%20resp%3F.etag%2C%0A%20%20%20%20%5D%3B%0A%20%20%20%20for%20(const%20c%20of%20candidates)%20%7B%0A%20%20%20%20%20%20if%20(typeof%20c%20%3D%3D%3D%20'string'%20%26%26%20c.trim())%20return%20c.trim()%3B%0A%20%20%20%20%20%20if%20(typeof%20c%20%3D%3D%3D%20'number'%20%26%26%20Number.isFinite(c))%20return%20String(c)%3B%0A%20%20%20%20%7D%0A%20%20%20%20return%20null%3B%0A%20%20%7D%3B%0A%0A%20%20%2F%2F%201.%20Strict%20Origin%20%26%20Path%20Guard%0A%20%20const%20origin%20%3D%20loc%3F.origin%20%7C%7C%20''%3B%0A%20%20const%20pathname%20%3D%20loc%3F.pathname%20%7C%7C%20''%3B%0A%20%20if%20(origin%20!%3D%3D%20TEACHING_ORIGIN%20%7C%7C%20pathname%20!%3D%3D%20TEACHING_PATH)%20%7B%0A%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20'WRONG_ORIGIN'%2C%0A%20%20%20%20%20%20%60Sai%20%C4%91%E1%BB%8Ba%20ch%E1%BB%89%20trang.%20Ti%E1%BB%87n%20%C3%ADch%20ch%E1%BB%89%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20tr%C3%AAn%20%24%7BTEACHING_ORIGIN%7D%24%7BTEACHING_PATH%7D%60%2C%0A%20%20%20%20%20%201%2C%0A%20%20%20%20%20%200%0A%20%20%20%20)%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%202.%20Login%20Form%20Guard%0A%20%20const%20passwordInput%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('input%5Btype%3D%22password%22%5D')%20%3A%20null%3B%0A%20%20const%20loginForm%20%3D%20doc%3F.querySelector%20%3F%20doc.querySelector('form%5Baction*%3D%22login%22%5D%2C%20form.login-form%2C%20%23login-form')%20%3A%20null%3B%0A%20%20if%20(passwordInput%20%7C%7C%20loginForm)%20%7B%0A%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20'LOGIN_REQUIRED'%2C%0A%20%20%20%20%20%20'Ph%C3%A1t%20hi%E1%BB%87n%20m%C3%A0n%20h%C3%ACnh%20%C4%91%C4%83ng%20nh%E1%BA%ADp.%20Phi%C3%AAn%20l%C3%A0m%20vi%E1%BB%87c%20ch%C6%B0a%20m%E1%BB%9F%20ho%E1%BA%B7c%20%C4%91%C3%A3%20h%E1%BA%BFt%20h%E1%BA%A1n%3B%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.'%2C%0A%20%20%20%20%20%201%2C%0A%20%20%20%20%20%200%0A%20%20%20%20)%3B%0A%20%20%7D%0A%0A%20%20%2F%2F%20Default%20same-origin%20page%20fetcher%20when%20running%20inside%20https%3A%2F%2Fteachingmindx.top%2Fhocsinh.php%0A%20%20const%20defaultSameOriginFetcher%20%3D%20async%20(%7B%20draw%2C%20start%2C%20length%20%7D)%20%3D%3E%20%7B%0A%20%20%20%20const%20winFetch%20%3D%20doc%3F.defaultView%3F.fetch%20%7C%7C%20(typeof%20fetch%20%3D%3D%3D%20'function'%20%3F%20fetch%20%3A%20null)%3B%0A%20%20%20%20if%20(typeof%20winFetch%20!%3D%3D%20'function')%20%7B%0A%20%20%20%20%20%20return%20%7B%20ok%3A%20false%2C%20status%3A%200%2C%20errorCode%3A%20'FETCH_UNAVAILABLE'%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%20%20const%20url%20%3D%20%60%24%7BTEACHING_ORIGIN%7D%24%7BTEACHING_DATATABLES_ENDPOINT%7D%26draw%3D%24%7Bdraw%7D%26start%3D%24%7Bstart%7D%26length%3D%24%7Blength%7D%60%3B%0A%20%20%20%20const%20res%20%3D%20await%20winFetch(url%2C%20%7B%0A%20%20%20%20%20%20method%3A%20'GET'%2C%0A%20%20%20%20%20%20credentials%3A%20'same-origin'%2C%0A%20%20%20%20%20%20headers%3A%20%7B%20Accept%3A%20'application%2Fjson%2C%20text%2Fplain%2C%20*%2F*'%20%7D%2C%0A%20%20%20%20%7D)%3B%0A%20%20%20%20if%20(res.redirected%20%26%26%20%2Flogin%2Fi.test(String(res.url%20%7C%7C%20'')))%20%7B%0A%20%20%20%20%20%20return%20%7B%20ok%3A%20false%2C%20status%3A%20401%2C%20redirectedToLogin%3A%20true%2C%20errorCode%3A%20'SESSION_EXPIRED'%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%20%20if%20(res.status%20%3D%3D%3D%20401%20%7C%7C%20res.status%20%3D%3D%3D%20403)%20%7B%0A%20%20%20%20%20%20return%20%7B%20ok%3A%20false%2C%20status%3A%20res.status%2C%20redirectedToLogin%3A%20true%2C%20errorCode%3A%20'SESSION_EXPIRED'%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%20%20if%20(!res.ok)%20%7B%0A%20%20%20%20%20%20return%20%7B%20ok%3A%20false%2C%20status%3A%20res.status%2C%20errorCode%3A%20'PAGE_FETCH_ERROR'%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%20%20const%20headerVersion%20%3D%0A%20%20%20%20%20%20res.headers%20%26%26%20typeof%20res.headers.get%20%3D%3D%3D%20'function'%0A%20%20%20%20%20%20%20%20%3F%20res.headers.get('x-snapshot-version')%20%7C%7C%20res.headers.get('etag')%20%7C%7C%20res.headers.get('last-modified')%20%7C%7C%20null%0A%20%20%20%20%20%20%20%20%3A%20null%3B%0A%20%20%20%20const%20text%20%3D%20await%20res.text()%3B%0A%20%20%20%20try%20%7B%0A%20%20%20%20%20%20const%20parsed%20%3D%20JSON.parse(text)%3B%0A%20%20%20%20%20%20return%20%7B%20ok%3A%20true%2C%20status%3A%20200%2C%20etag%3A%20headerVersion%2C%20payload%3A%20parsed%20%7D%3B%0A%20%20%20%20%7D%20catch%20%7B%0A%20%20%20%20%20%20return%20%7B%20ok%3A%20true%2C%20status%3A%20200%2C%20etag%3A%20headerVersion%2C%20payload%3A%20text%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%7D%3B%0A%0A%20%20const%20fetchPage%20%3D%20typeof%20options.fetchPage%20%3D%3D%3D%20'function'%20%3F%20options.fetchPage%20%3A%20defaultSameOriginFetcher%3B%0A%0A%20%20const%20seenIds%20%3D%20new%20Set()%3B%0A%20%20const%20idsByNormalizedName%20%3D%20new%20Map()%3B%0A%0A%20%20let%20expectedRecordsTotal%20%3D%20null%3B%0A%20%20let%20expectedRecordsFiltered%20%3D%20null%3B%0A%20%20let%20expectedSnapshotVersion%20%3D%20null%3B%0A%20%20let%20pageIndex%20%3D%200%3B%0A%20%20let%20start%20%3D%200%3B%0A%0A%20%20let%20totalRowsVerified%20%3D%200%3B%0A%20%20let%20robClassRowCount%20%3D%200%3B%0A%20%20let%20nonRobClassRowCount%20%3D%200%3B%0A%20%20let%20eligibleActiveRobCount%20%3D%200%3B%0A%20%20let%20inactiveStatusRowCount%20%3D%200%3B%0A%20%20let%20unknownStatusRowCount%20%3D%200%3B%0A%0A%20%20while%20(pageIndex%20%3C%20maxPages)%20%7B%0A%20%20%20%20const%20pageNumber%20%3D%20pageIndex%20%2B%201%3B%0A%20%20%20%20const%20requestedDraw%20%3D%20pageNumber%3B%0A%0A%20%20%20%20let%20response%3B%0A%20%20%20%20try%20%7B%0A%20%20%20%20%20%20response%20%3D%20await%20fetchPage(%7B%0A%20%20%20%20%20%20%20%20draw%3A%20requestedDraw%2C%0A%20%20%20%20%20%20%20%20start%2C%0A%20%20%20%20%20%20%20%20length%3A%20pageLength%2C%0A%20%20%20%20%20%20%20%20pageIndex%2C%0A%20%20%20%20%20%20%7D)%3B%0A%20%20%20%20%7D%20catch%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'PAGE_FETCH_ERROR'%2C%0A%20%20%20%20%20%20%20%20%60L%E1%BB%97i%20k%E1%BA%BFt%20n%E1%BB%91i%20ho%E1%BA%B7c%20tr%C3%ACnh%20duy%E1%BB%87t%20ch%E1%BA%B7n%20y%C3%AAu%20c%E1%BA%A7u%20%E1%BB%9F%20trang%20%24%7BpageNumber%7D.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc%2C%20kh%C3%B4ng%20%C3%A1p%20d%E1%BB%A5ng%20m%E1%BB%99t%20ph%E1%BA%A7n%20d%E1%BB%AF%20li%E1%BB%87u.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20if%20(!response%20%7C%7C%20typeof%20response%20!%3D%3D%20'object')%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'MALFORMED_DATATABLES_PAYLOAD'%2C%0A%20%20%20%20%20%20%20%20%60Ph%E1%BA%A3n%20h%E1%BB%93i%20trang%20%24%7BpageNumber%7D%20kh%C3%B4ng%20h%E1%BB%A3p%20l%E1%BB%87.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20if%20(%0A%20%20%20%20%20%20response.errorCode%20%3D%3D%3D%20'SESSION_EXPIRED'%20%7C%7C%0A%20%20%20%20%20%20response.redirectedToLogin%20%7C%7C%0A%20%20%20%20%20%20response.status%20%3D%3D%3D%20401%20%7C%7C%0A%20%20%20%20%20%20response.status%20%3D%3D%3D%20403%0A%20%20%20%20)%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'SESSION_EXPIRED'%2C%0A%20%20%20%20%20%20%20%20%60Phi%C3%AAn%20%C4%91%C4%83ng%20nh%E1%BA%ADp%20Teaching%20%C4%91%C3%A3%20h%E1%BA%BFt%20h%E1%BA%A1n%20%E1%BB%9F%20trang%20%24%7BpageNumber%7D%20(401%2FRedirect%20Login).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc%2C%20kh%C3%B4ng%20%C3%A1p%20d%E1%BB%A5ng%20m%E1%BB%99t%20ph%E1%BA%A7n%20d%E1%BB%AF%20li%E1%BB%87u.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20if%20(!response.ok%20%7C%7C%20(typeof%20response.status%20%3D%3D%3D%20'number'%20%26%26%20response.status%20%3E%3D%20400))%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20response.errorCode%20%7C%7C%20'PAGE_FETCH_ERROR'%2C%0A%20%20%20%20%20%20%20%20%60Trang%20%24%7BpageNumber%7D%20tr%E1%BA%A3%20v%E1%BB%81%20l%E1%BB%97i%20m%E1%BA%A1ng%2FHTTP%20(%24%7Bresponse.status%20%7C%7C%20'l%E1%BB%97i'%7D).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20const%20payload%20%3D%20response.payload%20!%3D%3D%20undefined%20%3F%20response.payload%20%3A%20response%3B%0A%0A%20%20%20%20if%20(typeof%20payload%20%3D%3D%3D%20'string')%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20if%20(%2Flogin%7Cpassword%7C%C4%91%C4%83ng%20nh%E1%BA%ADp%2Fi.test(payload))%20%7B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'SESSION_EXPIRED'%2C%0A%20%20%20%20%20%20%20%20%20%20%60Trang%20%24%7BpageNumber%7D%20tr%E1%BA%A3%20v%E1%BB%81%20HTML%20%C4%91%C4%83ng%20nh%E1%BA%ADp%20thay%20v%C3%AC%20JSON%20DataTables.%20Phi%C3%AAn%20%C4%91%C3%A3%20h%E1%BA%BFt%20h%E1%BA%A1n%3B%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'MALFORMED_DATATABLES_PAYLOAD'%2C%0A%20%20%20%20%20%20%20%20%60Trang%20%24%7BpageNumber%7D%20kh%C3%B4ng%20ph%E1%BA%A3i%20JSON%20DataTables%20h%E1%BB%A3p%20l%E1%BB%87.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20if%20(!payload%20%7C%7C%20typeof%20payload%20!%3D%3D%20'object'%20%7C%7C%20Array.isArray(payload))%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'MALFORMED_DATATABLES_PAYLOAD'%2C%0A%20%20%20%20%20%20%20%20%60C%E1%BA%A5u%20tr%C3%BAc%20ph%E1%BA%A3n%20h%E1%BB%93i%20DataTables%20%E1%BB%9F%20trang%20%24%7BpageNumber%7D%20b%E1%BB%8B%20sai%20l%E1%BB%87ch.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20const%20%7B%20draw%2C%20recordsTotal%2C%20recordsFiltered%2C%20data%20%7D%20%3D%20payload%3B%0A%0A%20%20%20%20if%20(%0A%20%20%20%20%20%20typeof%20draw%20!%3D%3D%20'number'%20%7C%7C%0A%20%20%20%20%20%20!Number.isInteger(draw)%20%7C%7C%0A%20%20%20%20%20%20typeof%20recordsTotal%20!%3D%3D%20'number'%20%7C%7C%0A%20%20%20%20%20%20!Number.isInteger(recordsTotal)%20%7C%7C%0A%20%20%20%20%20%20recordsTotal%20%3C%200%20%7C%7C%0A%20%20%20%20%20%20typeof%20recordsFiltered%20!%3D%3D%20'number'%20%7C%7C%0A%20%20%20%20%20%20!Number.isInteger(recordsFiltered)%20%7C%7C%0A%20%20%20%20%20%20recordsFiltered%20%3C%200%20%7C%7C%0A%20%20%20%20%20%20!Array.isArray(data)%0A%20%20%20%20)%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'MALFORMED_DATATABLES_PAYLOAD'%2C%0A%20%20%20%20%20%20%20%20%60Trang%20%24%7BpageNumber%7D%20thi%E1%BA%BFu%20c%C3%A1c%20tr%C6%B0%E1%BB%9Dng%20b%E1%BA%AFt%20bu%E1%BB%99c%20draw%2C%20recordsTotal%2C%20recordsFiltered%20ho%E1%BA%B7c%20data.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20if%20(draw%20!%3D%3D%20requestedDraw)%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'DRAW_MISMATCH'%2C%0A%20%20%20%20%20%20%20%20%60Tham%20s%E1%BB%91%20draw%20%E1%BB%9F%20trang%20%24%7BpageNumber%7D%20kh%C3%B4ng%20kh%E1%BB%9Bp%20(y%C3%AAu%20c%E1%BA%A7u%20%24%7BrequestedDraw%7D%2C%20nh%E1%BA%ADn%20%24%7Bdraw%7D).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20if%20(recordsTotal%20!%3D%3D%20recordsFiltered)%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'UNEXPECTED_SOURCE_FILTER'%2C%0A%20%20%20%20%20%20%20%20%60Ngu%E1%BB%93n%20DataTables%20%E1%BB%9F%20trang%20%24%7BpageNumber%7D%20%C4%91ang%20c%C3%B3%20b%E1%BB%99%20l%E1%BB%8Dc%20(recordsTotal%3D%24%7BrecordsTotal%7D%20kh%C3%A1c%20recordsFiltered%3D%24%7BrecordsFiltered%7D).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20const%20pageSnapshotVersion%20%3D%20extractPageSnapshotVersion(response%2C%20payload)%3B%0A%20%20%20%20if%20(pageIndex%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20%20%20expectedRecordsTotal%20%3D%20recordsTotal%3B%0A%20%20%20%20%20%20expectedRecordsFiltered%20%3D%20recordsFiltered%3B%0A%20%20%20%20%20%20expectedSnapshotVersion%20%3D%20pageSnapshotVersion%3B%0A%20%20%20%20%7D%20else%20if%20(recordsTotal%20!%3D%3D%20expectedRecordsTotal%20%7C%7C%20recordsFiltered%20!%3D%3D%20expectedRecordsFiltered)%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'TOTAL_CHANGED_BETWEEN_PAGES'%2C%0A%20%20%20%20%20%20%20%20%60T%E1%BB%95ng%20s%E1%BB%91%20b%E1%BA%A3n%20ghi%20thay%20%C4%91%E1%BB%95i%20gi%E1%BB%AFa%20c%C3%A1c%20trang%20(trang%201%3A%20%24%7BexpectedRecordsFiltered%7D%2C%20trang%20%24%7BpageNumber%7D%3A%20%24%7BrecordsFiltered%7D).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc%2C%20kh%C3%B4ng%20%C3%A1p%20d%E1%BB%A5ng%20m%E1%BB%99t%20ph%E1%BA%A7n.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%20else%20if%20(%0A%20%20%20%20%20%20(expectedSnapshotVersion%20!%3D%3D%20null%20%7C%7C%20pageSnapshotVersion%20!%3D%3D%20null)%20%26%26%0A%20%20%20%20%20%20pageSnapshotVersion%20!%3D%3D%20expectedSnapshotVersion%0A%20%20%20%20)%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20'SNAPSHOT_VERSION_CHANGED_BETWEEN_PAGES'%2C%0A%20%20%20%20%20%20%20%20%60Phi%C3%AAn%20b%E1%BA%A3n%20d%E1%BB%AF%20li%E1%BB%87u%20ngu%E1%BB%93n%20thay%20%C4%91%E1%BB%95i%20gi%E1%BB%AFa%20c%C3%A1c%20trang%20(trang%201%20kh%C3%A1c%20trang%20%24%7BpageNumber%7D).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc%2C%20kh%C3%B4ng%20%C3%A1p%20d%E1%BB%A5ng%20m%E1%BB%99t%20ph%E1%BA%A7n.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20if%20(expectedRecordsFiltered%20%3D%3D%3D%200)%20%7B%0A%20%20%20%20%20%20if%20(data.length%20!%3D%3D%200)%20%7B%0A%20%20%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'PAGE_ROW_COUNT_MISMATCH'%2C%0A%20%20%20%20%20%20%20%20%20%20%60Trang%201%20b%C3%A1o%200%20b%E1%BA%A3n%20ghi%20nh%C6%B0ng%20tr%E1%BA%A3%20v%E1%BB%81%20%24%7Bdata.length%7D%20d%C3%B2ng.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20pageIndex%2B%2B%3B%0A%20%20%20%20%20%20break%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20const%20remainingRows%20%3D%20expectedRecordsFiltered%20-%20start%3B%0A%20%20%20%20const%20expectedPageRows%20%3D%20Math.min(pageLength%2C%20remainingRows)%3B%0A%20%20%20%20const%20isLastPage%20%3D%20start%20%2B%20expectedPageRows%20%3E%3D%20expectedRecordsFiltered%3B%0A%0A%20%20%20%20if%20(data.length%20!%3D%3D%20expectedPageRows)%20%7B%0A%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20isLastPage%20%3F%20'LAST_PAGE_ROW_COUNT_MISMATCH'%20%3A%20'PAGE_ROW_COUNT_MISMATCH'%2C%0A%20%20%20%20%20%20%20%20isLastPage%0A%20%20%20%20%20%20%20%20%20%20%3F%20%60S%E1%BB%91%20d%C3%B2ng%20%E1%BB%9F%20trang%20cu%E1%BB%91i%20(trang%20%24%7BpageNumber%7D)%20kh%C3%B4ng%20kh%E1%BB%9Bp%20(k%E1%BB%B3%20v%E1%BB%8Dng%20%24%7BexpectedPageRows%7D%20d%C3%B2ng%2C%20nh%E1%BA%ADn%20%24%7Bdata.length%7D%20d%C3%B2ng).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%0A%20%20%20%20%20%20%20%20%20%20%3A%20%60S%E1%BB%91%20d%C3%B2ng%20%E1%BB%9F%20trang%20%24%7BpageNumber%7D%20kh%C3%B4ng%20kh%E1%BB%9Bp%20(k%E1%BB%B3%20v%E1%BB%8Dng%20%24%7BexpectedPageRows%7D%20d%C3%B2ng%2C%20nh%E1%BA%ADn%20%24%7Bdata.length%7D%20d%C3%B2ng).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20for%20(let%20rowIdx%20%3D%200%3B%20rowIdx%20%3C%20data.length%3B%20rowIdx%2B%2B)%20%7B%0A%20%20%20%20%20%20const%20row%20%3D%20data%5BrowIdx%5D%3B%0A%20%20%20%20%20%20const%20globalRowNumber%20%3D%20start%20%2B%20rowIdx%20%2B%201%3B%0A%0A%20%20%20%20%20%20if%20(!row%20%7C%7C%20typeof%20row%20!%3D%3D%20'object'%20%7C%7C%20Array.isArray(row))%20%7B%0A%20%20%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'MALFORMED_ROW_STRUCTURE'%2C%0A%20%20%20%20%20%20%20%20%20%20%60B%E1%BA%A3n%20ghi%20th%E1%BB%A9%20%24%7BglobalRowNumber%7D%20(trang%20%24%7BpageNumber%7D)%20sai%20c%E1%BA%A5u%20tr%C3%BAc%20%C4%91%E1%BB%91i%20t%C6%B0%E1%BB%A3ng.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20if%20(row.id%20%3D%3D%3D%20undefined%20%7C%7C%20row.id%20%3D%3D%3D%20null)%20%7B%0A%20%20%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'MISSING_STUDENT_ID'%2C%0A%20%20%20%20%20%20%20%20%20%20%60B%E1%BA%A3n%20ghi%20th%E1%BB%A9%20%24%7BglobalRowNumber%7D%20(trang%20%24%7BpageNumber%7D)%20thi%E1%BA%BFu%20tr%C6%B0%E1%BB%9Dng%20%C4%91%E1%BB%8Bnh%20danh%20id.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20if%20(%0A%20%20%20%20%20%20%20%20(typeof%20row.id%20!%3D%3D%20'string'%20%26%26%20typeof%20row.id%20!%3D%3D%20'number')%20%7C%7C%0A%20%20%20%20%20%20%20%20(typeof%20row.id%20%3D%3D%3D%20'number'%20%26%26%20!Number.isFinite(row.id))%0A%20%20%20%20%20%20)%20%7B%0A%20%20%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'MALFORMED_ROW_STRUCTURE'%2C%0A%20%20%20%20%20%20%20%20%20%20%60B%E1%BA%A3n%20ghi%20th%E1%BB%A9%20%24%7BglobalRowNumber%7D%20(trang%20%24%7BpageNumber%7D)%20c%C3%B3%20tr%C6%B0%E1%BB%9Dng%20%C4%91%E1%BB%8Bnh%20danh%20id%20sai%20ki%E1%BB%83u%20d%E1%BB%AF%20li%E1%BB%87u.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20const%20rawId%20%3D%20String(row.id).trim()%3B%0A%20%20%20%20%20%20if%20(!rawId)%20%7B%0A%20%20%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'MISSING_STUDENT_ID'%2C%0A%20%20%20%20%20%20%20%20%20%20%60B%E1%BA%A3n%20ghi%20th%E1%BB%A9%20%24%7BglobalRowNumber%7D%20(trang%20%24%7BpageNumber%7D)%20thi%E1%BA%BFu%20tr%C6%B0%E1%BB%9Dng%20%C4%91%E1%BB%8Bnh%20danh%20id.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20if%20(%0A%20%20%20%20%20%20%20%20typeof%20row.student_name%20!%3D%3D%20'string'%20%7C%7C%0A%20%20%20%20%20%20%20%20!row.student_name.trim()%20%7C%7C%0A%20%20%20%20%20%20%20%20typeof%20row.class_code%20!%3D%3D%20'string'%20%7C%7C%0A%20%20%20%20%20%20%20%20!row.class_code.trim()%20%7C%7C%0A%20%20%20%20%20%20%20%20typeof%20row.status%20!%3D%3D%20'string'%20%7C%7C%0A%20%20%20%20%20%20%20%20!row.status.trim()%20%7C%7C%0A%20%20%20%20%20%20%20%20typeof%20row.class_status%20!%3D%3D%20'string'%20%7C%7C%0A%20%20%20%20%20%20%20%20!row.class_status.trim()%0A%20%20%20%20%20%20)%20%7B%0A%20%20%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'MALFORMED_ROW_STRUCTURE'%2C%0A%20%20%20%20%20%20%20%20%20%20%60B%E1%BA%A3n%20ghi%20th%E1%BB%A9%20%24%7BglobalRowNumber%7D%20(trang%20%24%7BpageNumber%7D)%20thi%E1%BA%BFu%20tr%C6%B0%E1%BB%9Dng%20b%E1%BA%AFt%20bu%E1%BB%99c%20(student_name%2C%20class_code%2C%20status%2C%20class_status).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20const%20normId%20%3D%20rawId.toUpperCase()%3B%0A%20%20%20%20%20%20if%20(seenIds.has(normId))%20%7B%0A%20%20%20%20%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20%20%20%20%20'DUPLICATE_STUDENT_ID'%2C%0A%20%20%20%20%20%20%20%20%20%20%60Ph%C3%A1t%20hi%E1%BB%87n%20m%C3%A3%20id%20tr%C3%B9ng%20l%E1%BA%B7p%20t%E1%BA%A1i%20b%E1%BA%A3n%20ghi%20th%E1%BB%A9%20%24%7BglobalRowNumber%7D%20(trang%20%24%7BpageNumber%7D).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20%20%20%20%20pageNumber%2C%0A%20%20%20%20%20%20%20%20%20%20pageIndex%0A%20%20%20%20%20%20%20%20)%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20seenIds.add(normId)%3B%0A%20%20%20%20%20%20totalRowsVerified%2B%2B%3B%0A%0A%20%20%20%20%20%20const%20hasRob%20%3D%20%2Frob%2Fi.test(row.class_code)%3B%0A%20%20%20%20%20%20if%20(hasRob)%20%7B%0A%20%20%20%20%20%20%20%20robClassRowCount%2B%2B%3B%0A%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20nonRobClassRowCount%2B%2B%3B%0A%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20const%20normStuStatus%20%3D%20row.status.trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20').toLowerCase()%3B%0A%20%20%20%20%20%20const%20normClsStatus%20%3D%20row.class_status.trim().replace(%2F%5Cs%2B%2Fg%2C%20'%20').toLowerCase()%3B%0A%0A%20%20%20%20%20%20const%20stuActive%20%3D%20M4_ACTIVE_STUDENT_STATUSES.includes(normStuStatus)%3B%0A%20%20%20%20%20%20const%20stuInactive%20%3D%20M4_INACTIVE_STUDENT_STATUSES.includes(normStuStatus)%3B%0A%20%20%20%20%20%20const%20clsActive%20%3D%20M4_ACTIVE_CLASS_STATUSES.includes(normClsStatus)%3B%0A%20%20%20%20%20%20const%20clsInactive%20%3D%20M4_INACTIVE_CLASS_STATUSES.includes(normClsStatus)%3B%0A%0A%20%20%20%20%20%20if%20((!stuActive%20%26%26%20!stuInactive)%20%7C%7C%20!clsActive%20%26%26%20!clsInactive)%20%7B%0A%20%20%20%20%20%20%20%20unknownStatusRowCount%2B%2B%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(stuInactive%20%7C%7C%20clsInactive)%20%7B%0A%20%20%20%20%20%20%20%20inactiveStatusRowCount%2B%2B%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(hasRob%20%26%26%20stuActive%20%26%26%20clsActive)%20%7B%0A%20%20%20%20%20%20%20%20eligibleActiveRobCount%2B%2B%3B%0A%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20const%20normName%20%3D%20row.student_name%0A%20%20%20%20%20%20%20%20.replace(%2F%5C(%5B%5E)%5D*%5C)%2Fg%2C%20'%20')%0A%20%20%20%20%20%20%20%20.trim()%0A%20%20%20%20%20%20%20%20.replace(%2F%5Cs%2B%2Fg%2C%20'%20')%0A%20%20%20%20%20%20%20%20.toLowerCase()%3B%0A%20%20%20%20%20%20if%20(normName)%20%7B%0A%20%20%20%20%20%20%20%20if%20(!idsByNormalizedName.has(normName))%20%7B%0A%20%20%20%20%20%20%20%20%20%20idsByNormalizedName.set(normName%2C%20new%20Set())%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20idsByNormalizedName.get(normName).add(normId)%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20pageIndex%2B%2B%3B%0A%20%20%20%20start%20%2B%3D%20data.length%3B%0A%20%20%20%20if%20(start%20%3E%3D%20expectedRecordsFiltered)%20%7B%0A%20%20%20%20%20%20break%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20if%20(expectedRecordsFiltered%20!%3D%3D%20null%20%26%26%20start%20%3C%20expectedRecordsFiltered)%20%7B%0A%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20'MAX_PAGES_EXCEEDED'%2C%0A%20%20%20%20%20%20%60V%C6%B0%E1%BB%A3t%20ng%C6%B0%E1%BB%A1ng%20an%20to%C3%A0n%20s%E1%BB%91%20trang%20t%E1%BB%91i%20%C4%91a%20(%24%7BmaxPages%7D%20trang)%20tr%C6%B0%E1%BB%9Bc%20khi%20%C4%91%E1%BB%8Dc%20%C4%91%E1%BB%A7%20%24%7BexpectedRecordsFiltered%7D%20b%E1%BA%A3n%20ghi.%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20pageIndex%2C%0A%20%20%20%20%20%20pageIndex%0A%20%20%20%20)%3B%0A%20%20%7D%0A%0A%20%20if%20(totalRowsVerified%20!%3D%3D%20(expectedRecordsFiltered%20%3F%3F%200))%20%7B%0A%20%20%20%20seenIds.clear()%3B%0A%20%20%20%20idsByNormalizedName.clear()%3B%0A%20%20%20%20return%20makeAbort(%0A%20%20%20%20%20%20'TOTAL_ROW_COUNT_MISMATCH'%2C%0A%20%20%20%20%20%20%60T%E1%BB%95ng%20s%E1%BB%91%20d%C3%B2ng%20thu%20th%E1%BA%ADp%20(%24%7BtotalRowsVerified%7D)%20kh%C3%B4ng%20kh%E1%BB%9Bp%20recordsFiltered%20(%24%7BexpectedRecordsFiltered%7D).%20%C4%90%C3%A3%20h%E1%BB%A7y%20to%C3%A0n%20b%E1%BB%99%20l%C6%B0%E1%BB%A3t%20%C4%91%E1%BB%8Dc.%60%2C%0A%20%20%20%20%20%20pageIndex%2C%0A%20%20%20%20%20%20pageIndex%0A%20%20%20%20)%3B%0A%20%20%7D%0A%0A%20%20let%20sameNameDifferentIdCount%20%3D%200%3B%0A%20%20for%20(const%20idSet%20of%20idsByNormalizedName.values())%20%7B%0A%20%20%20%20if%20(idSet.size%20%3E%201)%20%7B%0A%20%20%20%20%20%20sameNameDifferentIdCount%20%2B%3D%20idSet.size%3B%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20const%20uniqueIdCount%20%3D%20seenIds.size%3B%0A%20%20const%20consistencyVerified%20%3D%20pageIndex%20%3C%3D%201%20%7C%7C%20expectedSnapshotVersion%20!%3D%3D%20null%3B%0A%20%20%2F%2F%20Explicitly%20clear%20temporary%20sets%20so%20no%20student%20names%20or%20IDs%20remain%20referenced%0A%20%20seenIds.clear()%3B%0A%20%20idsByNormalizedName.clear()%3B%0A%0A%20%20return%20%7B%0A%20%20%20%20success%3A%20true%2C%0A%20%20%20%20aborted%3A%20false%2C%0A%20%20%20%20partialApplied%3A%20false%2C%0A%20%20%20%20mode%3A%20'M4_DATATABLES_AGGREGATE_PREVIEW'%2C%0A%20%20%20%20code%3A%20'OK'%2C%0A%20%20%20%20message%3A%20consistencyVerified%0A%20%20%20%20%20%20%3F%20%60%C4%90%C3%A3%20%C4%91%E1%BB%8Dc%20v%C3%A0%20%C4%91%E1%BB%91i%20chi%E1%BA%BFu%20nh%E1%BA%A5t%20qu%C3%A1n%20to%C3%A0n%20b%E1%BB%99%20%24%7BpageIndex%7D%20trang%20DataTables%20(%24%7BtotalRowsVerified%7D%2F%24%7BexpectedRecordsFiltered%20%3F%3F%200%7D%20b%E1%BA%A3n%20ghi).%20Ch%E1%BB%89%20hi%E1%BB%83n%20th%E1%BB%8B%20s%E1%BB%91%20l%C6%B0%E1%BB%A3ng%20t%E1%BB%95ng%20h%E1%BB%A3p%2C%20kh%C3%B4ng%20l%C6%B0u%20t%C3%AAn%20hay%20m%C3%A3%20h%E1%BB%8Dc%20sinh%20th%E1%BA%ADt.%60%0A%20%20%20%20%20%20%3A%20%60%C4%90%C3%A3%20%C4%91%E1%BB%8Dc%20%24%7BpageIndex%7D%20trang%20DataTables%20(%24%7BtotalRowsVerified%7D%2F%24%7BexpectedRecordsFiltered%20%3F%3F%200%7D%20b%E1%BA%A3n%20ghi)%2C%20nh%C6%B0ng%20ngu%E1%BB%93n%20kh%C3%B4ng%20cung%20c%E1%BA%A5p%20m%C3%A3%20phi%C3%AAn%20b%E1%BA%A3n%20d%E1%BB%AF%20li%E1%BB%87u%20n%C3%AAn%20ch%C6%B0a%20x%C3%A1c%20minh%20t%C3%ADnh%20nh%E1%BA%A5t%20qu%C3%A1n%20gi%E1%BB%AFa%20c%C3%A1c%20trang.%60%2C%0A%20%20%20%20pagesRead%3A%20pageIndex%2C%0A%20%20%20%20pageLength%2C%0A%20%20%20%20recordsTotal%3A%20expectedRecordsTotal%20%3F%3F%200%2C%0A%20%20%20%20recordsFiltered%3A%20expectedRecordsFiltered%20%3F%3F%200%2C%0A%20%20%20%20lastPageRowCount%3A%0A%20%20%20%20%20%20pageIndex%20%3D%3D%3D%200%20%7C%7C%20(expectedRecordsFiltered%20%3F%3F%200)%20%3D%3D%3D%200%0A%20%20%20%20%20%20%20%20%3F%200%0A%20%20%20%20%20%20%20%20%3A%20(expectedRecordsFiltered%20%3F%3F%200)%20-%20(pageIndex%20-%201)%20*%20pageLength%2C%0A%20%20%20%20totalRowsVerified%2C%0A%20%20%20%20uniqueIdCount%2C%0A%20%20%20%20robClassRowCount%2C%0A%20%20%20%20nonRobClassRowCount%2C%0A%20%20%20%20eligibleActiveRobCount%2C%0A%20%20%20%20inactiveStatusRowCount%2C%0A%20%20%20%20unknownStatusRowCount%2C%0A%20%20%20%20sameNameDifferentIdCount%2C%0A%20%20%20%20consistencyVerified%2C%0A%20%20%20%20snapshotConsistent%3A%20consistencyVerified%2C%0A%20%20%20%20snapshotVersion%3A%20expectedSnapshotVersion%2C%0A%20%20%20%20piiStoredOrSent%3A%20false%2C%0A%20%20%20%20timestamp%2C%0A%20%20%7D%3B%0A%7D%0A%0A%2F**%0A%20*%20Renders%20the%20M%E1%BB%91c%204%20aggregate%20pagination%20preview%20results%20inside%20the%20floating%20panel%0A%20*%20using%20%60document.createElement%60%20and%20%60textContent%60%20ONLY.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%0A%20*%20%40param%20%7BHTMLElement%7D%20containerEl%0A%20*%20%40param%20%7BObject%7D%20m4Result%20-%20Result%20from%20%60inspectTeachingDataTablesAllPages%60%0A%20*%2F%0Afunction%20renderTeachingM4AggregateSection(doc%2C%20containerEl%2C%20m4Result)%20%7B%0A%20%20while%20(containerEl.firstChild)%20%7B%0A%20%20%20%20containerEl.removeChild(containerEl.firstChild)%3B%0A%20%20%7D%0A%0A%20%20const%20box%20%3D%20doc.createElement('div')%3B%0A%20%20box.style.marginTop%20%3D%20'8px'%3B%0A%20%20box.style.padding%20%3D%20'10px%2012px'%3B%0A%20%20box.style.borderRadius%20%3D%20'8px'%3B%0A%20%20box.style.fontSize%20%3D%20'11.5px'%3B%0A%20%20box.style.border%20%3D%20m4Result.success%20%3F%20'1px%20solid%20%2386efac'%20%3A%20'1px%20solid%20%23fecdd3'%3B%0A%20%20box.style.backgroundColor%20%3D%20m4Result.success%20%3F%20'%23f0fdf4'%20%3A%20'%23fff1f2'%3B%0A%20%20box.style.color%20%3D%20m4Result.success%20%3F%20'%23166534'%20%3A%20'%239f1239'%3B%0A%0A%20%20const%20header%20%3D%20doc.createElement('div')%3B%0A%20%20header.style.fontWeight%20%3D%20'800'%3B%0A%20%20header.style.marginBottom%20%3D%20'4px'%3B%0A%20%20header.textContent%20%3D%20m4Result.success%0A%20%20%20%20%3F%20m4Result.consistencyVerified%0A%20%20%20%20%20%20%3F%20%60%E2%9C%93%20K%E1%BA%BET%20QU%E1%BA%A2%20XEM%20TR%C6%AF%E1%BB%9AC%20T%E1%BB%94NG%20H%E1%BB%A2P%20M%E1%BB%90C%204%20(%24%7Bm4Result.pagesRead%7D%20TRANG%20%E2%80%94%20%C4%90%C3%83%20X%C3%81C%20MINH%20NH%E1%BA%A4T%20QU%C3%81N)%60%0A%20%20%20%20%20%20%3A%20%60%E2%9A%A0%20K%E1%BA%BET%20QU%E1%BA%A2%20XEM%20TR%C6%AF%E1%BB%9AC%20T%E1%BB%94NG%20H%E1%BB%A2P%20M%E1%BB%90C%204%20(%24%7Bm4Result.pagesRead%7D%20TRANG%20%E2%80%94%20CH%C6%AFA%20X%C3%81C%20MINH%20PHI%C3%8AN%20B%E1%BA%A2N%20NGU%E1%BB%92N)%60%0A%20%20%20%20%3A%20%60%E2%9C%95%20H%E1%BB%A6Y%20TO%C3%80N%20L%C6%AF%E1%BB%A2T%20%C4%90%E1%BB%8CC%20M%E1%BB%90C%204%20(%24%7Bm4Result.code%7D)%20%E2%80%94%20KH%C3%94NG%20%C3%81P%20D%E1%BB%A4NG%20M%E1%BB%98T%20PH%E1%BA%A6N%60%3B%0A%20%20box.appendChild(header)%3B%0A%0A%20%20const%20msg%20%3D%20doc.createElement('div')%3B%0A%20%20msg.style.marginBottom%20%3D%20'8px'%3B%0A%20%20msg.textContent%20%3D%20m4Result.message%3B%0A%20%20box.appendChild(msg)%3B%0A%0A%20%20if%20(m4Result.success)%20%7B%0A%20%20%20%20const%20grid%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20grid.style.display%20%3D%20'grid'%3B%0A%20%20%20%20grid.style.gridTemplateColumns%20%3D%20'1fr%201fr'%3B%0A%20%20%20%20grid.style.gap%20%3D%20'6px'%3B%0A%0A%20%20%20%20const%20items%20%3D%20%5B%0A%20%20%20%20%20%20%5B'S%E1%BB%91%20trang%20%C4%91%C3%A3%20%C4%91%E1%BB%8Dc%20h%E1%BA%BFt%3A'%2C%20%60%24%7Bm4Result.pagesRead%7D%20trang%20(c%E1%BB%A1%20%24%7Bm4Result.pageLength%7D)%60%5D%2C%0A%20%20%20%20%20%20%5B'T%E1%BB%95ng%20kh%E1%BB%9Bp%20(Total%2FFiltered)%3A'%2C%20%60%24%7Bm4Result.recordsTotal%7D%20%2F%20%24%7Bm4Result.recordsFiltered%7D%60%5D%2C%0A%20%20%20%20%20%20%5B'S%E1%BB%91%20d%C3%B2ng%20trang%20cu%E1%BB%91i%3A'%2C%20%60%24%7Bm4Result.lastPageRowCount%7D%20d%C3%B2ng%60%5D%2C%0A%20%20%20%20%20%20%5B'M%C3%A3%20ID%20duy%20nh%E1%BA%A5t%20h%E1%BB%A3p%20l%E1%BB%87%3A'%2C%20%60%24%7Bm4Result.uniqueIdCount%7D%20m%C3%A3%60%5D%2C%0A%20%20%20%20%20%20%5B'D%C3%B2ng%20l%E1%BB%9Bp%20ROB%20%2F%20Ngo%C3%A0i%20ROB%3A'%2C%20%60%24%7Bm4Result.robClassRowCount%7D%20%2F%20%24%7Bm4Result.nonRobClassRowCount%7D%60%5D%2C%0A%20%20%20%20%20%20%5B'H%E1%BB%A3p%20l%E1%BB%87%20(ROB%20%2B%20%C4%90ang%20h%E1%BB%8Dc)%3A'%2C%20%60%24%7Bm4Result.eligibleActiveRobCount%7D%20h%E1%BB%8Dc%20sinh%60%5D%2C%0A%20%20%20%20%20%20%5B'B%E1%BB%8F%20qua%20(Ngh%E1%BB%89%20%2F%20%C4%90%C3%B3ng%20l%E1%BB%9Bp)%3A'%2C%20%60%24%7Bm4Result.inactiveStatusRowCount%7D%20d%C3%B2ng%60%5D%2C%0A%20%20%20%20%20%20%5B'C%E1%BA%A7n%20xem%20x%C3%A9t%20(TT%20l%E1%BA%A1%20%2F%20Tr%C3%B9ng%20t%C3%AAn)%3A'%2C%20%60%24%7Bm4Result.unknownStatusRowCount%20%2B%20m4Result.sameNameDifferentIdCount%7D%20d%C3%B2ng%60%5D%2C%0A%20%20%20%20%5D%3B%0A%0A%20%20%20%20for%20(const%20%5Blabel%2C%20val%5D%20of%20items)%20%7B%0A%20%20%20%20%20%20const%20cell%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20%20%20cell.style.padding%20%3D%20'5px%207px'%3B%0A%20%20%20%20%20%20cell.style.backgroundColor%20%3D%20'%23ffffff'%3B%0A%20%20%20%20%20%20cell.style.border%20%3D%20'1px%20solid%20%23bbf7d0'%3B%0A%20%20%20%20%20%20cell.style.borderRadius%20%3D%20'6px'%3B%0A%0A%20%20%20%20%20%20const%20lEl%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20%20%20lEl.style.fontSize%20%3D%20'10px'%3B%0A%20%20%20%20%20%20lEl.style.color%20%3D%20'%23475569'%3B%0A%20%20%20%20%20%20lEl.textContent%20%3D%20label%3B%0A%0A%20%20%20%20%20%20const%20vEl%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20%20%20vEl.style.fontSize%20%3D%20'12px'%3B%0A%20%20%20%20%20%20vEl.style.fontWeight%20%3D%20'800'%3B%0A%20%20%20%20%20%20vEl.style.color%20%3D%20'%230f172a'%3B%0A%20%20%20%20%20%20vEl.textContent%20%3D%20val%3B%0A%0A%20%20%20%20%20%20cell.appendChild(lEl)%3B%0A%20%20%20%20%20%20cell.appendChild(vEl)%3B%0A%20%20%20%20%20%20grid.appendChild(cell)%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20box.appendChild(grid)%3B%0A%20%20%7D%0A%0A%20%20containerEl.appendChild(box)%3B%0A%7D%0A%0A%2F**%0A%20*%20Creates%20and%20renders%20the%20in-place%20floating%20panel%20on%20the%20DOM%20using%20textContent%20%26%20createElement%20ONLY.%0A%20*%20Removes%20any%20previous%20panel%20to%20prevent%20stale%20caching.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20doc%20-%20DOM%20Document%20object%0A%20*%20%40param%20%7BObject%7D%20result%20-%20Result%20from%20inspectTeachingDom%0A%20*%20%40param%20%7BLocation%7CObject%7D%20%5Bloc%5D%20-%20Optional%20location%20object%20for%20M4%20action%20button%0A%20*%20%40returns%20%7BHTMLElement%7D%20The%20created%20panel%20element%0A%20*%2F%0Afunction%20renderTeachingPanel(doc%2C%20result%2C%20loc%20%3D%20null)%20%7B%0A%20%20const%20PANEL_ID%20%3D%20'teaching-readonly-spike-panel'%3B%0A%0A%20%20%2F%2F%20Fresh%20run%3A%20remove%20old%20panel%20if%20present%0A%20%20const%20existing%20%3D%20doc.getElementById(PANEL_ID)%3B%0A%20%20if%20(existing%20%26%26%20typeof%20existing.remove%20%3D%3D%3D%20'function')%20%7B%0A%20%20%20%20existing.remove()%3B%0A%20%20%7D%0A%0A%20%20const%20panel%20%3D%20doc.createElement('div')%3B%0A%20%20panel.id%20%3D%20PANEL_ID%3B%0A%20%20panel.setAttribute('role'%2C%20'dialog')%3B%0A%20%20panel.setAttribute('aria-label'%2C%20'B%E1%BA%A3ng%20th%C3%B4ng%20b%C3%A1o%20ti%E1%BB%87n%20%C3%ADch%20%C4%91%E1%BB%8Dc%20Teaching%20c%E1%BB%A5c%20b%E1%BB%99')%3B%0A%0A%20%20%2F%2F%20Strict%20inline%20styling%20for%20clean%20floating%20overlay%0A%20%20panel.style.position%20%3D%20'fixed'%3B%0A%20%20panel.style.top%20%3D%20'16px'%3B%0A%20%20panel.style.right%20%3D%20'16px'%3B%0A%20%20panel.style.width%20%3D%20'410px'%3B%0A%20%20panel.style.maxWidth%20%3D%20'calc(100vw%20-%2032px)'%3B%0A%20%20panel.style.maxHeight%20%3D%20'calc(100vh%20-%2032px)'%3B%0A%20%20panel.style.overflowY%20%3D%20'auto'%3B%0A%20%20panel.style.backgroundColor%20%3D%20'%23ffffff'%3B%0A%20%20panel.style.color%20%3D%20'%230f172a'%3B%0A%20%20panel.style.border%20%3D%20result.success%20%3F%20'2px%20solid%20%232563eb'%20%3A%20'2px%20solid%20%23e11d48'%3B%0A%20%20panel.style.borderRadius%20%3D%20'12px'%3B%0A%20%20panel.style.boxShadow%20%3D%20'0%2020px%2025px%20-5px%20rgba(0%2C%200%2C%200%2C%200.25)%2C%200%208px%2010px%20-6px%20rgba(0%2C%200%2C%200%2C%200.2)'%3B%0A%20%20panel.style.zIndex%20%3D%20'2147483647'%3B%0A%20%20panel.style.fontFamily%20%3D%20'system-ui%2C%20-apple-system%2C%20BlinkMacSystemFont%2C%20%22Segoe%20UI%22%2C%20Roboto%2C%20sans-serif'%3B%0A%20%20panel.style.fontSize%20%3D%20'13px'%3B%0A%20%20panel.style.lineHeight%20%3D%20'1.45'%3B%0A%20%20panel.style.padding%20%3D%20'16px'%3B%0A%20%20panel.style.boxSizing%20%3D%20'border-box'%3B%0A%0A%20%20%2F%2F%201.%20Header%20Container%0A%20%20const%20header%20%3D%20doc.createElement('div')%3B%0A%20%20header.style.display%20%3D%20'flex'%3B%0A%20%20header.style.alignItems%20%3D%20'flex-start'%3B%0A%20%20header.style.justifyContent%20%3D%20'space-between'%3B%0A%20%20header.style.gap%20%3D%20'8px'%3B%0A%20%20header.style.paddingBottom%20%3D%20'10px'%3B%0A%20%20header.style.borderBottom%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%0A%20%20const%20titleGroup%20%3D%20doc.createElement('div')%3B%0A%0A%20%20const%20badge%20%3D%20doc.createElement('div')%3B%0A%20%20badge.textContent%20%3D%20'M%E1%BB%90C%201%20%26%20M%E1%BB%90C%204%20%E2%80%94%20TI%E1%BB%86N%20%C3%8DCH%20C%E1%BB%A4C%20B%E1%BB%98%20CH%E1%BB%88%20%C4%90%E1%BB%8CC'%3B%0A%20%20badge.style.fontSize%20%3D%20'10px'%3B%0A%20%20badge.style.fontWeight%20%3D%20'700'%3B%0A%20%20badge.style.letterSpacing%20%3D%20'0.5px'%3B%0A%20%20badge.style.color%20%3D%20result.success%20%3F%20'%231d4ed8'%20%3A%20'%23be123c'%3B%0A%20%20badge.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20const%20title%20%3D%20doc.createElement('div')%3B%0A%20%20title.textContent%20%3D%20'Ti%E1%BB%87n%20%C3%ADch%20%C4%90%E1%BA%BFm%20%26%20Xem%20tr%C6%B0%E1%BB%9Bc%20Teaching'%3B%0A%20%20title.style.fontSize%20%3D%20'15px'%3B%0A%20%20title.style.fontWeight%20%3D%20'800'%3B%0A%20%20title.style.color%20%3D%20'%230f172a'%3B%0A%0A%20%20titleGroup.appendChild(badge)%3B%0A%20%20titleGroup.appendChild(title)%3B%0A%0A%20%20%2F%2F%20Close%20button%20MUST%20remain%20the%20first%20%3Cbutton%3E%20inside%20the%20panel%20for%20M1%20tests%0A%20%20const%20closeBtn%20%3D%20doc.createElement('button')%3B%0A%20%20closeBtn.type%20%3D%20'button'%3B%0A%20%20closeBtn.textContent%20%3D%20'%E2%9C%95%20%C4%90%C3%B3ng'%3B%0A%20%20closeBtn.style.background%20%3D%20'%23f1f5f9'%3B%0A%20%20closeBtn.style.color%20%3D%20'%23475569'%3B%0A%20%20closeBtn.style.border%20%3D%20'1px%20solid%20%23cbd5e1'%3B%0A%20%20closeBtn.style.borderRadius%20%3D%20'6px'%3B%0A%20%20closeBtn.style.padding%20%3D%20'4px%208px'%3B%0A%20%20closeBtn.style.fontSize%20%3D%20'11px'%3B%0A%20%20closeBtn.style.fontWeight%20%3D%20'600'%3B%0A%20%20closeBtn.style.cursor%20%3D%20'pointer'%3B%0A%20%20closeBtn.onclick%20%3D%20()%20%3D%3E%20%7B%0A%20%20%20%20panel.remove()%3B%0A%20%20%7D%3B%0A%0A%20%20header.appendChild(titleGroup)%3B%0A%20%20header.appendChild(closeBtn)%3B%0A%20%20panel.appendChild(header)%3B%0A%0A%20%20%2F%2F%202.%20Mandatory%20Warning%20Badges%0A%20%20const%20badgesRow%20%3D%20doc.createElement('div')%3B%0A%20%20badgesRow.style.display%20%3D%20'flex'%3B%0A%20%20badgesRow.style.flexWrap%20%3D%20'wrap'%3B%0A%20%20badgesRow.style.gap%20%3D%20'6px'%3B%0A%20%20badgesRow.style.marginTop%20%3D%20'10px'%3B%0A%0A%20%20const%20labels%20%3D%20%5BREQUIRED_LABELS.SAMPLE%2C%20REQUIRED_LABELS.NOT_FULL%2C%20REQUIRED_LABELS.READONLY%5D%3B%0A%20%20for%20(const%20labelText%20of%20labels)%20%7B%0A%20%20%20%20const%20lbl%20%3D%20doc.createElement('span')%3B%0A%20%20%20%20lbl.textContent%20%3D%20labelText%3B%0A%20%20%20%20lbl.style.display%20%3D%20'inline-block'%3B%0A%20%20%20%20lbl.style.padding%20%3D%20'2px%206px'%3B%0A%20%20%20%20lbl.style.fontSize%20%3D%20'10.5px'%3B%0A%20%20%20%20lbl.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20lbl.style.borderRadius%20%3D%20'4px'%3B%0A%20%20%20%20lbl.style.backgroundColor%20%3D%20'%23eff6ff'%3B%0A%20%20%20%20lbl.style.color%20%3D%20'%231e40af'%3B%0A%20%20%20%20lbl.style.border%20%3D%20'1px%20solid%20%23bfdbfe'%3B%0A%20%20%20%20badgesRow.appendChild(lbl)%3B%0A%20%20%7D%0A%20%20panel.appendChild(badgesRow)%3B%0A%0A%20%20%2F%2F%203.%20Status%20Alert%20Box%0A%20%20const%20statusBox%20%3D%20doc.createElement('div')%3B%0A%20%20statusBox.style.marginTop%20%3D%20'12px'%3B%0A%20%20statusBox.style.padding%20%3D%20'10px%2012px'%3B%0A%20%20statusBox.style.borderRadius%20%3D%20'8px'%3B%0A%20%20statusBox.style.fontSize%20%3D%20'12px'%3B%0A%20%20statusBox.style.fontWeight%20%3D%20'500'%3B%0A%0A%20%20if%20(result.success)%20%7B%0A%20%20%20%20statusBox.style.backgroundColor%20%3D%20'%23f0fdf4'%3B%0A%20%20%20%20statusBox.style.border%20%3D%20'1px%20solid%20%2386efac'%3B%0A%20%20%20%20statusBox.style.color%20%3D%20'%23166534'%3B%0A%0A%20%20%20%20const%20statusTitle%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusTitle.textContent%20%3D%20result.isPlaceholder%0A%20%20%20%20%20%20%3F%20'%E2%84%B9%20TH%C3%94NG%20B%C3%81O%3A%20B%E1%BA%A2NG%20KH%C3%94NG%20C%C3%93%20H%C3%80NG%20D%E1%BB%AE%20LI%E1%BB%86U'%0A%20%20%20%20%20%20%3A%20'%E2%9C%93%20%C4%90%C3%83%20NH%E1%BA%ACN%20DI%E1%BB%86N%20%C4%90%C3%9ANG%20B%E1%BA%A2NG%20H%E1%BB%8CC%20SINH%20(8%20C%E1%BB%98T)'%3B%0A%20%20%20%20statusTitle.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20statusTitle.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20%20%20const%20statusDesc%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusDesc.textContent%20%3D%20result.message%3B%0A%0A%20%20%20%20statusBox.appendChild(statusTitle)%3B%0A%20%20%20%20statusBox.appendChild(statusDesc)%3B%0A%20%20%7D%20else%20%7B%0A%20%20%20%20statusBox.style.backgroundColor%20%3D%20'%23fff1f2'%3B%0A%20%20%20%20statusBox.style.border%20%3D%20'1px%20solid%20%23fecdd3'%3B%0A%20%20%20%20statusBox.style.color%20%3D%20'%239f1239'%3B%0A%0A%20%20%20%20const%20statusTitle%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusTitle.textContent%20%3D%20%60%E2%9C%95%20D%E1%BB%AANG%20L%C6%AF%E1%BB%A2T%20%C4%90%E1%BB%8CC%20(%24%7Bresult.code%7D)%60%3B%0A%20%20%20%20statusTitle.style.fontWeight%20%3D%20'700'%3B%0A%20%20%20%20statusTitle.style.marginBottom%20%3D%20'2px'%3B%0A%0A%20%20%20%20const%20statusDesc%20%3D%20doc.createElement('div')%3B%0A%20%20%20%20statusDesc.textContent%20%3D%20result.message%3B%0A%0A%20%20%20%20statusBox.appendChild(statusTitle)%3B%0A%20%20%20%20statusBox.appendChild(statusDesc)%3B%0A%20%20%7D%0A%20%20panel.appendChild(statusBox)%3B%0A%0A%20%20%2F%2F%204.%20Metrics%20Grid%20(Visible%20Count%2C%20DOM%20Rows)%0A%20%20const%20metricsGrid%20%3D%20doc.createElement('div')%3B%0A%20%20metricsGrid.style.marginTop%20%3D%20'12px'%3B%0A%20%20metricsGrid.style.display%20%3D%20'grid'%3B%0A%20%20metricsGrid.style.gridTemplateColumns%20%3D%20'1fr%201fr'%3B%0A%20%20metricsGrid.style.gap%20%3D%20'8px'%3B%0A%0A%20%20%2F%2F%20Visible%20Count%20Card%0A%20%20const%20visibleCard%20%3D%20doc.createElement('div')%3B%0A%20%20visibleCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20visibleCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20visibleCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20visibleCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20visibleTitle%20%3D%20doc.createElement('div')%3B%0A%20%20visibleTitle.textContent%20%3D%20'S%E1%BB%91%20h%C3%A0ng%20nh%C3%ACn%20th%E1%BA%A5y%3A'%3B%0A%20%20visibleTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20visibleTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20visibleValue%20%3D%20doc.createElement('div')%3B%0A%20%20visibleValue.textContent%20%3D%20%60%24%7Bresult.visibleCount%7D%20h%C3%A0ng%60%3B%0A%20%20visibleValue.style.fontSize%20%3D%20'18px'%3B%0A%20%20visibleValue.style.fontWeight%20%3D%20'800'%3B%0A%20%20visibleValue.style.color%20%3D%20result.success%20%3F%20'%2315803d'%20%3A%20'%2394a3b8'%3B%0A%0A%20%20visibleCard.appendChild(visibleTitle)%3B%0A%20%20visibleCard.appendChild(visibleValue)%3B%0A%0A%20%20%2F%2F%20Total%20DOM%20Rows%20Card%0A%20%20const%20totalCard%20%3D%20doc.createElement('div')%3B%0A%20%20totalCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20totalCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20totalCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20totalCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20totalTitle%20%3D%20doc.createElement('div')%3B%0A%20%20totalTitle.textContent%20%3D%20'T%E1%BB%95ng%20h%C3%A0ng%20trong%20DOM%3A'%3B%0A%20%20totalTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20totalTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20totalValue%20%3D%20doc.createElement('div')%3B%0A%20%20totalValue.textContent%20%3D%20%60%24%7Bresult.totalRowsCount%7D%20h%C3%A0ng%60%3B%0A%20%20totalValue.style.fontSize%20%3D%20'18px'%3B%0A%20%20totalValue.style.fontWeight%20%3D%20'800'%3B%0A%20%20totalValue.style.color%20%3D%20'%23334155'%3B%0A%0A%20%20totalCard.appendChild(totalTitle)%3B%0A%20%20totalCard.appendChild(totalValue)%3B%0A%0A%20%20metricsGrid.appendChild(visibleCard)%3B%0A%20%20metricsGrid.appendChild(totalCard)%3B%0A%20%20panel.appendChild(metricsGrid)%3B%0A%0A%20%20%2F%2F%205.%20Source%20Pagination%20%2F%20Total%20Notice%20Card%0A%20%20const%20paginationCard%20%3D%20doc.createElement('div')%3B%0A%20%20paginationCard.style.marginTop%20%3D%20'8px'%3B%0A%20%20paginationCard.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20paginationCard.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20paginationCard.style.border%20%3D%20'1px%20solid%20%23e2e8f0'%3B%0A%20%20paginationCard.style.borderRadius%20%3D%20'8px'%3B%0A%0A%20%20const%20paginationTitle%20%3D%20doc.createElement('div')%3B%0A%20%20paginationTitle.textContent%20%3D%20'Th%C3%B4ng%20b%C3%A1o%20ph%C3%A2n%20trang%20ngu%E1%BB%93n%20(DOM)%3A'%3B%0A%20%20paginationTitle.style.fontSize%20%3D%20'11px'%3B%0A%20%20paginationTitle.style.color%20%3D%20'%2364748b'%3B%0A%0A%20%20const%20paginationVal%20%3D%20doc.createElement('div')%3B%0A%20%20paginationVal.textContent%20%3D%20result.sourceTotalNotice%3B%0A%20%20paginationVal.style.fontSize%20%3D%20'12px'%3B%0A%20%20paginationVal.style.fontWeight%20%3D%20'600'%3B%0A%20%20paginationVal.style.color%20%3D%20'%231e293b'%3B%0A%20%20paginationVal.style.marginTop%20%3D%20'2px'%3B%0A%0A%20%20paginationCard.appendChild(paginationTitle)%3B%0A%20%20paginationCard.appendChild(paginationVal)%3B%0A%20%20panel.appendChild(paginationCard)%3B%0A%0A%20%20%2F%2F%205b.%20M%E1%BB%91c%204%20Multi-Page%20DataTables%20Aggregate%20Preview%20Action%20(only%20runs%20on%20explicit%20click)%0A%20%20const%20m4Section%20%3D%20doc.createElement('div')%3B%0A%20%20m4Section.id%20%3D%20'teaching-m4-preview-section'%3B%0A%20%20m4Section.style.marginTop%20%3D%20'10px'%3B%0A%20%20m4Section.style.paddingTop%20%3D%20'10px'%3B%0A%20%20m4Section.style.borderTop%20%3D%20'1px%20dashed%20%23cbd5e1'%3B%0A%0A%20%20const%20m4Btn%20%3D%20doc.createElement('button')%3B%0A%20%20m4Btn.type%20%3D%20'button'%3B%0A%20%20m4Btn.id%20%3D%20'teaching-m4-run-pagination-btn'%3B%0A%20%20m4Btn.textContent%20%3D%20'%F0%9F%93%8A%20Xem%20tr%C6%B0%E1%BB%9Bc%20to%C3%A0n%20b%E1%BB%99%20ph%C3%A2n%20trang%20DataTables%20(M%E1%BB%91c%204%20%E2%80%94%20T%E1%BB%95ng%20h%E1%BB%A3p)'%3B%0A%20%20m4Btn.style.width%20%3D%20'100%25'%3B%0A%20%20m4Btn.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20m4Btn.style.backgroundColor%20%3D%20'%231d4ed8'%3B%0A%20%20m4Btn.style.color%20%3D%20'%23ffffff'%3B%0A%20%20m4Btn.style.border%20%3D%20'none'%3B%0A%20%20m4Btn.style.borderRadius%20%3D%20'8px'%3B%0A%20%20m4Btn.style.fontSize%20%3D%20'11.5px'%3B%0A%20%20m4Btn.style.fontWeight%20%3D%20'700'%3B%0A%20%20m4Btn.style.cursor%20%3D%20'pointer'%3B%0A%0A%20%20const%20m4Output%20%3D%20doc.createElement('div')%3B%0A%20%20m4Output.id%20%3D%20'teaching-m4-preview-output'%3B%0A%0A%20%20m4Btn.onclick%20%3D%20async%20()%20%3D%3E%20%7B%0A%20%20%20%20m4Btn.disabled%20%3D%20true%3B%0A%20%20%20%20m4Btn.textContent%20%3D%20'%E2%8F%B3%20%C4%90ang%20%C4%91%E1%BB%8Dc%20v%C3%A0%20ki%E1%BB%83m%20tra%20t%E1%BB%ABng%20trang%20DataTables...'%3B%0A%20%20%20%20const%20targetLoc%20%3D%20loc%20%7C%7C%20(typeof%20window%20!%3D%3D%20'undefined'%20%3F%20window.location%20%3A%20%7B%20origin%3A%20TEACHING_ORIGIN%2C%20pathname%3A%20TEACHING_PATH%20%7D)%3B%0A%20%20%20%20const%20m4Res%20%3D%20await%20inspectTeachingDataTablesAllPages(doc%2C%20targetLoc)%3B%0A%20%20%20%20m4Btn.disabled%20%3D%20false%3B%0A%20%20%20%20m4Btn.textContent%20%3D%20'%E2%86%BB%20Ch%E1%BA%A1y%20l%E1%BA%A1i%20Xem%20tr%C6%B0%E1%BB%9Bc%20to%C3%A0n%20b%E1%BB%99%20ph%C3%A2n%20trang%20(M%E1%BB%91c%204)'%3B%0A%20%20%20%20renderTeachingM4AggregateSection(doc%2C%20m4Output%2C%20m4Res)%3B%0A%20%20%7D%3B%0A%0A%20%20m4Section.appendChild(m4Btn)%3B%0A%20%20m4Section.appendChild(m4Output)%3B%0A%20%20panel.appendChild(m4Section)%3B%0A%0A%20%20%2F%2F%206.%20Safety%20Commitments%20Notice%0A%20%20const%20safetyNote%20%3D%20doc.createElement('div')%3B%0A%20%20safetyNote.style.marginTop%20%3D%20'12px'%3B%0A%20%20safetyNote.style.padding%20%3D%20'8px%2010px'%3B%0A%20%20safetyNote.style.backgroundColor%20%3D%20'%23f8fafc'%3B%0A%20%20safetyNote.style.borderRadius%20%3D%20'6px'%3B%0A%20%20safetyNote.style.borderLeft%20%3D%20'3px%20solid%20%233b82f6'%3B%0A%20%20safetyNote.style.fontSize%20%3D%20'11px'%3B%0A%20%20safetyNote.style.color%20%3D%20'%23475569'%3B%0A%20%20safetyNote.textContent%20%3D%0A%20%20%20%20'Cam%20k%E1%BA%BFt%20an%20to%C3%A0n%3A%20Ti%E1%BB%87n%20%C3%ADch%20ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20thu%E1%BA%A7n%20t%C3%BAy%20trong%20tr%C3%ACnh%20duy%E1%BB%87t.%20Kh%C3%B4ng%20%C4%91%E1%BB%8Dc%20m%E1%BA%ADt%20kh%E1%BA%A9u%2Fcookie%2C%20kh%C3%B4ng%20l%C6%B0u%20ho%E1%BA%B7c%20g%E1%BB%ADi%20h%E1%BB%8D%20t%C3%AAn%2FID%20h%E1%BB%8Dc%20sinh%20th%E1%BA%ADt%20v%C3%A0o%20TEST%2C%20t%E1%BB%87p%20hay%20log.'%3B%0A%20%20panel.appendChild(safetyNote)%3B%0A%0A%20%20%2F%2F%207.%20Footer%20timestamp%0A%20%20const%20footer%20%3D%20doc.createElement('div')%3B%0A%20%20footer.style.marginTop%20%3D%20'10px'%3B%0A%20%20footer.style.fontSize%20%3D%20'10px'%3B%0A%20%20footer.style.color%20%3D%20'%2394a3b8'%3B%0A%20%20footer.style.textAlign%20%3D%20'right'%3B%0A%20%20footer.textContent%20%3D%20%60Th%E1%BB%9Di%20%C4%91i%E1%BB%83m%20ki%E1%BB%83m%20tra%3A%20%24%7Bresult.timestamp%7D%60%3B%0A%20%20panel.appendChild(footer)%3B%0A%0A%20%20return%20panel%3B%0A%7D%0A%0A%2F**%0A%20*%20Top-level%20reader%20execution%20function.%0A%20*%20Called%20directly%20in%20the%20browser%20bookmarklet%20context%20or%20in%20QA%20fixture%20pages.%0A%20*%0A%20*%20%40param%20%7BDocument%7D%20%5Bdoc%3Ddocument%5D%20-%20Target%20Document%0A%20*%20%40param%20%7BLocation%7D%20%5Bloc%3Dwindow.location%5D%20-%20Target%20Location%0A%20*%20%40returns%20%7BObject%7D%20Inspection%20result%0A%20*%2F%0Afunction%20runTeachingReader(doc%20%3D%20(typeof%20document%20!%3D%3D%20'undefined'%20%3F%20document%20%3A%20null)%2C%20loc%20%3D%20(typeof%20window%20!%3D%3D%20'undefined'%20%3F%20window.location%20%3A%20null))%20%7B%0A%20%20if%20(!doc)%20%7B%0A%20%20%20%20return%20%7B%20success%3A%20false%2C%20code%3A%20'NO_DOCUMENT'%2C%20message%3A%20'Kh%C3%B4ng%20t%C3%ACm%20th%E1%BA%A5y%20%C4%91%E1%BB%91i%20t%C6%B0%E1%BB%A3ng%20Document.'%20%7D%3B%0A%20%20%7D%0A%20%20const%20result%20%3D%20inspectTeachingDom(doc%2C%20loc)%3B%0A%20%20const%20panel%20%3D%20renderTeachingPanel(doc%2C%20result%2C%20loc)%3B%0A%20%20if%20(doc.body)%20%7B%0A%20%20%20%20doc.body.appendChild(panel)%3B%0A%20%20%7D%0A%20%20return%20result%3B%0A%7D%0A%0A%2F%2F%20Trigger%20reader%20on%20active%20page%0ArunTeachingReader(document%2C%20window.location)%3B%0A%7D)()%3B" class="bookmarklet-btn" title="Kéo nút này vào thanh dấu trang Chrome">
           📑 Thử đọc Teaching
         </a>
         <p style="font-size: 11px; color: #64748b;">
@@ -309,8 +309,9 @@
   <script>
 /**
  * Core reader logic for Teaching MindX read-only DOM spike (Milestone 1 - C2 / E2)
+ * and Milestone 4 multi-page DataTables read-only aggregate preview.
  *
- * SPECIFICATION & SAFETY CONTRACT (M1-E2 Hardened):
+ * SPECIFICATION & SAFETY CONTRACT (M1-E2 & M4 Hardened):
  * 1. STRICT ORIGIN & PATH GUARD:
  *    - Only accepts exact origin 'https://teachingmindx.top' and exact pathname '/hocsinh.php'.
  *    - Rejects variations (/not-hocsinh.php, /hocsinh.php-extra, /admin/hocsinh.php).
@@ -320,17 +321,19 @@
  *      ['STT', 'Tên học sinh', 'Mã lớp', 'Trạng thái học sinh', 'GV chính', 'Trợ giảng', 'Trạng thái lớp', 'Thao tác']
  *    - Error message reports only column count, never echoes unvalidated/arbitrary header text.
  *    - Valid result exposes only static metadata columns.
- * 3. ZERO PERSONAL DATA EXTRACTION (NO TEXTCONTENT ON DATA CELLS):
- *    - Counts valid rows using DOM structure & attributes only.
- *    - Never accesses row.textContent or cell.textContent for data rows.
- *    - Empty placeholder detected strictly via .dataTables_empty or single cell colspan >= 8.
- *    - Single data row with 8 cells is counted as 1 student row without reading any text.
+ * 3. ZERO PERSONAL DATA EXTRACTION (NO TEXTCONTENT ON DATA CELLS IN M1 DOM SPIKE;
+ *    AGGREGATE NUMBERS ONLY IN M4 DATATABLES PAGINATION PREVIEW):
+ *    - Counts valid rows using DOM structure & attributes only in M1 DOM mode.
+ *    - In M4 DataTables multi-page preview mode, reads same-origin DataTables pages
+ *      sequentially until `start >= recordsFiltered`, validates `draw`, `recordsTotal`,
+ *      `recordsFiltered`, row count per page, last page, and ID integrity, and outputs
+ *      ONLY aggregate numbers (zero student names, codes, or payloads stored/logged/rendered).
  * 4. STRUCTURED SOURCE PAGINATION PARSING:
  *    - Parses strictly formatted pagination numbers (start, end, total).
  *    - Re-renders as static Vietnamese text + numbers.
  *    - Rejects any string with filter/search clauses or adverse names/IDs, falling back to 'Chưa xác định'.
- * 5. PURE CLIENT DOM:
- *    - Absolutely NO fetch / XHR / network requests.
+ * 5. PURE CLIENT READ-ONLY:
+ *    - Initial `runTeachingReader` performs 0 fetch / XHR / network requests.
  *    - Absolutely NO localStorage / sessionStorage / cookie / IndexedDB.
  *    - Absolutely NO console output of student data.
  *    - Absolutely NO clipboard or download payload.
@@ -345,6 +348,9 @@
 
 const TEACHING_ORIGIN = 'https://teachingmindx.top';
 const TEACHING_PATH = '/hocsinh.php';
+const TEACHING_DATATABLES_ENDPOINT = '/hocsinh.php?datatable=students';
+const TEACHING_DEFAULT_PAGE_LENGTH = 15;
+const TEACHING_MAX_SAFE_PAGES = 500;
 
 const EXPECTED_COLUMNS = [
   'STT',
@@ -362,6 +368,43 @@ const REQUIRED_LABELS = {
   NOT_FULL: 'Không phải toàn bộ danh sách',
   READONLY: 'Chỉ đọc — không ghi TEST',
 };
+
+const M4_ACTIVE_STUDENT_STATUSES = ['đang học', 'dang hoc', 'active'];
+const M4_INACTIVE_STUDENT_STATUSES = [
+  'nghỉ',
+  'nghi',
+  'nghỉ học',
+  'nghi hoc',
+  'đã nghỉ',
+  'da nghi',
+  'đã nghỉ học',
+  'da nghi hoc',
+  'đã hết khóa',
+  'da het khoa',
+  'hết khóa',
+  'het khoa',
+  'bảo lưu',
+  'bao luu',
+  'tạm dừng',
+  'tam dung',
+  'inactive',
+  'dropped',
+  'finished',
+];
+const M4_ACTIVE_CLASS_STATUSES = ['running', 'đang hoạt động', 'dang hoat dong', 'đang mở', 'dang mo', 'active'];
+const M4_INACTIVE_CLASS_STATUSES = [
+  'closed',
+  'finished',
+  'đã đóng',
+  'da dong',
+  'đóng',
+  'dong',
+  'đã kết thúc',
+  'da ket thuc',
+  'đã hết khóa',
+  'da het khoa',
+  'archived',
+];
 
 /**
  * Parses source pagination notice safely.
@@ -623,14 +666,637 @@ function inspectTeachingDom(doc, loc) {
 }
 
 /**
+ * Mốc 4 — Reads all DataTables pages sequentially (`start = 0, length, 2*length...`)
+ * until `start >= recordsFiltered` and returns ONLY aggregate counts (zero PII).
+ *
+ * Atomic abort: If any page fails, session expires, `draw` mismatches, `recordsFiltered`
+ * changes between pages, last page row count mismatches, or duplicate/missing ID is
+ * detected, aborts immediately and discards all partial counts.
+ *
+ * @param {Document} doc - DOM Document object
+ * @param {Location|Object} loc - Location object ({ origin, pathname })
+ * @param {Object} [options] - `{ fetchPage?: Function, pageLength?: number, maxPages?: number }`
+ * @returns {Promise<Object>} Aggregate-only preview report (numbers and static status ONLY)
+ */
+async function inspectTeachingDataTablesAllPages(doc, loc, options = {}) {
+  const timestamp = new Date().toISOString();
+  const pageLength =
+    typeof options.pageLength === 'number' && Number.isInteger(options.pageLength) && options.pageLength > 0
+      ? options.pageLength
+      : TEACHING_DEFAULT_PAGE_LENGTH;
+  const maxPages =
+    typeof options.maxPages === 'number' && Number.isInteger(options.maxPages) && options.maxPages > 0
+      ? options.maxPages
+      : TEACHING_MAX_SAFE_PAGES;
+
+  const makeAbort = (code, message, failedAtPage, pagesRead) => ({
+    success: false,
+    aborted: true,
+    partialApplied: false,
+    mode: 'M4_DATATABLES_AGGREGATE_PREVIEW',
+    code,
+    message,
+    failedAtPage,
+    pagesRead,
+    pageLength,
+    recordsTotal: 0,
+    recordsFiltered: 0,
+    totalRowsVerified: 0,
+    uniqueIdCount: 0,
+    robClassRowCount: 0,
+    nonRobClassRowCount: 0,
+    eligibleActiveRobCount: 0,
+    inactiveStatusRowCount: 0,
+    unknownStatusRowCount: 0,
+    sameNameDifferentIdCount: 0,
+    consistencyVerified: false,
+    snapshotConsistent: false,
+    snapshotVersion: null,
+    piiStoredOrSent: false,
+    timestamp,
+  });
+
+  const extractPageSnapshotVersion = (resp, body) => {
+    const candidates = [
+      body?.snapshotVersion,
+      body?.datasetVersion,
+      body?.revision,
+      body?.etag,
+      body?.version,
+      resp?.snapshotVersion,
+      resp?.etag,
+    ];
+    for (const c of candidates) {
+      if (typeof c === 'string' && c.trim()) return c.trim();
+      if (typeof c === 'number' && Number.isFinite(c)) return String(c);
+    }
+    return null;
+  };
+
+  // 1. Strict Origin & Path Guard
+  const origin = loc?.origin || '';
+  const pathname = loc?.pathname || '';
+  if (origin !== TEACHING_ORIGIN || pathname !== TEACHING_PATH) {
+    return makeAbort(
+      'WRONG_ORIGIN',
+      `Sai địa chỉ trang. Tiện ích chỉ hoạt động trên ${TEACHING_ORIGIN}${TEACHING_PATH}`,
+      1,
+      0
+    );
+  }
+
+  // 2. Login Form Guard
+  const passwordInput = doc?.querySelector ? doc.querySelector('input[type="password"]') : null;
+  const loginForm = doc?.querySelector ? doc.querySelector('form[action*="login"], form.login-form, #login-form') : null;
+  if (passwordInput || loginForm) {
+    return makeAbort(
+      'LOGIN_REQUIRED',
+      'Phát hiện màn hình đăng nhập. Phiên làm việc chưa mở hoặc đã hết hạn; hủy toàn bộ lượt đọc.',
+      1,
+      0
+    );
+  }
+
+  // Default same-origin page fetcher when running inside https://teachingmindx.top/hocsinh.php
+  const defaultSameOriginFetcher = async ({ draw, start, length }) => {
+    const winFetch = doc?.defaultView?.fetch || (typeof fetch === 'function' ? fetch : null);
+    if (typeof winFetch !== 'function') {
+      return { ok: false, status: 0, errorCode: 'FETCH_UNAVAILABLE' };
+    }
+    const url = `${TEACHING_ORIGIN}${TEACHING_DATATABLES_ENDPOINT}&draw=${draw}&start=${start}&length=${length}`;
+    const res = await winFetch(url, {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json, text/plain, */*' },
+    });
+    if (res.redirected && /login/i.test(String(res.url || ''))) {
+      return { ok: false, status: 401, redirectedToLogin: true, errorCode: 'SESSION_EXPIRED' };
+    }
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, status: res.status, redirectedToLogin: true, errorCode: 'SESSION_EXPIRED' };
+    }
+    if (!res.ok) {
+      return { ok: false, status: res.status, errorCode: 'PAGE_FETCH_ERROR' };
+    }
+    const headerVersion =
+      res.headers && typeof res.headers.get === 'function'
+        ? res.headers.get('x-snapshot-version') || res.headers.get('etag') || res.headers.get('last-modified') || null
+        : null;
+    const text = await res.text();
+    try {
+      const parsed = JSON.parse(text);
+      return { ok: true, status: 200, etag: headerVersion, payload: parsed };
+    } catch {
+      return { ok: true, status: 200, etag: headerVersion, payload: text };
+    }
+  };
+
+  const fetchPage = typeof options.fetchPage === 'function' ? options.fetchPage : defaultSameOriginFetcher;
+
+  const seenIds = new Set();
+  const idsByNormalizedName = new Map();
+
+  let expectedRecordsTotal = null;
+  let expectedRecordsFiltered = null;
+  let expectedSnapshotVersion = null;
+  let pageIndex = 0;
+  let start = 0;
+
+  let totalRowsVerified = 0;
+  let robClassRowCount = 0;
+  let nonRobClassRowCount = 0;
+  let eligibleActiveRobCount = 0;
+  let inactiveStatusRowCount = 0;
+  let unknownStatusRowCount = 0;
+
+  while (pageIndex < maxPages) {
+    const pageNumber = pageIndex + 1;
+    const requestedDraw = pageNumber;
+
+    let response;
+    try {
+      response = await fetchPage({
+        draw: requestedDraw,
+        start,
+        length: pageLength,
+        pageIndex,
+      });
+    } catch {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'PAGE_FETCH_ERROR',
+        `Lỗi kết nối hoặc trình duyệt chặn yêu cầu ở trang ${pageNumber}. Đã hủy toàn bộ lượt đọc, không áp dụng một phần dữ liệu.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    if (!response || typeof response !== 'object') {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'MALFORMED_DATATABLES_PAYLOAD',
+        `Phản hồi trang ${pageNumber} không hợp lệ. Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    if (
+      response.errorCode === 'SESSION_EXPIRED' ||
+      response.redirectedToLogin ||
+      response.status === 401 ||
+      response.status === 403
+    ) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'SESSION_EXPIRED',
+        `Phiên đăng nhập Teaching đã hết hạn ở trang ${pageNumber} (401/Redirect Login). Đã hủy toàn bộ lượt đọc, không áp dụng một phần dữ liệu.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    if (!response.ok || (typeof response.status === 'number' && response.status >= 400)) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        response.errorCode || 'PAGE_FETCH_ERROR',
+        `Trang ${pageNumber} trả về lỗi mạng/HTTP (${response.status || 'lỗi'}). Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    const payload = response.payload !== undefined ? response.payload : response;
+
+    if (typeof payload === 'string') {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      if (/login|password|đăng nhập/i.test(payload)) {
+        return makeAbort(
+          'SESSION_EXPIRED',
+          `Trang ${pageNumber} trả về HTML đăng nhập thay vì JSON DataTables. Phiên đã hết hạn; hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+      return makeAbort(
+        'MALFORMED_DATATABLES_PAYLOAD',
+        `Trang ${pageNumber} không phải JSON DataTables hợp lệ. Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'MALFORMED_DATATABLES_PAYLOAD',
+        `Cấu trúc phản hồi DataTables ở trang ${pageNumber} bị sai lệch. Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    const { draw, recordsTotal, recordsFiltered, data } = payload;
+
+    if (
+      typeof draw !== 'number' ||
+      !Number.isInteger(draw) ||
+      typeof recordsTotal !== 'number' ||
+      !Number.isInteger(recordsTotal) ||
+      recordsTotal < 0 ||
+      typeof recordsFiltered !== 'number' ||
+      !Number.isInteger(recordsFiltered) ||
+      recordsFiltered < 0 ||
+      !Array.isArray(data)
+    ) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'MALFORMED_DATATABLES_PAYLOAD',
+        `Trang ${pageNumber} thiếu các trường bắt buộc draw, recordsTotal, recordsFiltered hoặc data. Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    if (draw !== requestedDraw) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'DRAW_MISMATCH',
+        `Tham số draw ở trang ${pageNumber} không khớp (yêu cầu ${requestedDraw}, nhận ${draw}). Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    if (recordsTotal !== recordsFiltered) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'UNEXPECTED_SOURCE_FILTER',
+        `Nguồn DataTables ở trang ${pageNumber} đang có bộ lọc (recordsTotal=${recordsTotal} khác recordsFiltered=${recordsFiltered}). Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    const pageSnapshotVersion = extractPageSnapshotVersion(response, payload);
+    if (pageIndex === 0) {
+      expectedRecordsTotal = recordsTotal;
+      expectedRecordsFiltered = recordsFiltered;
+      expectedSnapshotVersion = pageSnapshotVersion;
+    } else if (recordsTotal !== expectedRecordsTotal || recordsFiltered !== expectedRecordsFiltered) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'TOTAL_CHANGED_BETWEEN_PAGES',
+        `Tổng số bản ghi thay đổi giữa các trang (trang 1: ${expectedRecordsFiltered}, trang ${pageNumber}: ${recordsFiltered}). Đã hủy toàn bộ lượt đọc, không áp dụng một phần.`,
+        pageNumber,
+        pageIndex
+      );
+    } else if (
+      (expectedSnapshotVersion !== null || pageSnapshotVersion !== null) &&
+      pageSnapshotVersion !== expectedSnapshotVersion
+    ) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        'SNAPSHOT_VERSION_CHANGED_BETWEEN_PAGES',
+        `Phiên bản dữ liệu nguồn thay đổi giữa các trang (trang 1 khác trang ${pageNumber}). Đã hủy toàn bộ lượt đọc, không áp dụng một phần.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    if (expectedRecordsFiltered === 0) {
+      if (data.length !== 0) {
+        seenIds.clear();
+        idsByNormalizedName.clear();
+        return makeAbort(
+          'PAGE_ROW_COUNT_MISMATCH',
+          `Trang 1 báo 0 bản ghi nhưng trả về ${data.length} dòng. Đã hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+      pageIndex++;
+      break;
+    }
+
+    const remainingRows = expectedRecordsFiltered - start;
+    const expectedPageRows = Math.min(pageLength, remainingRows);
+    const isLastPage = start + expectedPageRows >= expectedRecordsFiltered;
+
+    if (data.length !== expectedPageRows) {
+      seenIds.clear();
+      idsByNormalizedName.clear();
+      return makeAbort(
+        isLastPage ? 'LAST_PAGE_ROW_COUNT_MISMATCH' : 'PAGE_ROW_COUNT_MISMATCH',
+        isLastPage
+          ? `Số dòng ở trang cuối (trang ${pageNumber}) không khớp (kỳ vọng ${expectedPageRows} dòng, nhận ${data.length} dòng). Đã hủy toàn bộ lượt đọc.`
+          : `Số dòng ở trang ${pageNumber} không khớp (kỳ vọng ${expectedPageRows} dòng, nhận ${data.length} dòng). Đã hủy toàn bộ lượt đọc.`,
+        pageNumber,
+        pageIndex
+      );
+    }
+
+    for (let rowIdx = 0; rowIdx < data.length; rowIdx++) {
+      const row = data[rowIdx];
+      const globalRowNumber = start + rowIdx + 1;
+
+      if (!row || typeof row !== 'object' || Array.isArray(row)) {
+        seenIds.clear();
+        idsByNormalizedName.clear();
+        return makeAbort(
+          'MALFORMED_ROW_STRUCTURE',
+          `Bản ghi thứ ${globalRowNumber} (trang ${pageNumber}) sai cấu trúc đối tượng. Đã hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+
+      if (row.id === undefined || row.id === null) {
+        seenIds.clear();
+        idsByNormalizedName.clear();
+        return makeAbort(
+          'MISSING_STUDENT_ID',
+          `Bản ghi thứ ${globalRowNumber} (trang ${pageNumber}) thiếu trường định danh id. Đã hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+
+      if (
+        (typeof row.id !== 'string' && typeof row.id !== 'number') ||
+        (typeof row.id === 'number' && !Number.isFinite(row.id))
+      ) {
+        seenIds.clear();
+        idsByNormalizedName.clear();
+        return makeAbort(
+          'MALFORMED_ROW_STRUCTURE',
+          `Bản ghi thứ ${globalRowNumber} (trang ${pageNumber}) có trường định danh id sai kiểu dữ liệu. Đã hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+
+      const rawId = String(row.id).trim();
+      if (!rawId) {
+        seenIds.clear();
+        idsByNormalizedName.clear();
+        return makeAbort(
+          'MISSING_STUDENT_ID',
+          `Bản ghi thứ ${globalRowNumber} (trang ${pageNumber}) thiếu trường định danh id. Đã hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+
+      if (
+        typeof row.student_name !== 'string' ||
+        !row.student_name.trim() ||
+        typeof row.class_code !== 'string' ||
+        !row.class_code.trim() ||
+        typeof row.status !== 'string' ||
+        !row.status.trim() ||
+        typeof row.class_status !== 'string' ||
+        !row.class_status.trim()
+      ) {
+        seenIds.clear();
+        idsByNormalizedName.clear();
+        return makeAbort(
+          'MALFORMED_ROW_STRUCTURE',
+          `Bản ghi thứ ${globalRowNumber} (trang ${pageNumber}) thiếu trường bắt buộc (student_name, class_code, status, class_status). Đã hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+
+      const normId = rawId.toUpperCase();
+      if (seenIds.has(normId)) {
+        seenIds.clear();
+        idsByNormalizedName.clear();
+        return makeAbort(
+          'DUPLICATE_STUDENT_ID',
+          `Phát hiện mã id trùng lặp tại bản ghi thứ ${globalRowNumber} (trang ${pageNumber}). Đã hủy toàn bộ lượt đọc.`,
+          pageNumber,
+          pageIndex
+        );
+      }
+      seenIds.add(normId);
+      totalRowsVerified++;
+
+      const hasRob = /rob/i.test(row.class_code);
+      if (hasRob) {
+        robClassRowCount++;
+      } else {
+        nonRobClassRowCount++;
+      }
+
+      const normStuStatus = row.status.trim().replace(/\s+/g, ' ').toLowerCase();
+      const normClsStatus = row.class_status.trim().replace(/\s+/g, ' ').toLowerCase();
+
+      const stuActive = M4_ACTIVE_STUDENT_STATUSES.includes(normStuStatus);
+      const stuInactive = M4_INACTIVE_STUDENT_STATUSES.includes(normStuStatus);
+      const clsActive = M4_ACTIVE_CLASS_STATUSES.includes(normClsStatus);
+      const clsInactive = M4_INACTIVE_CLASS_STATUSES.includes(normClsStatus);
+
+      if ((!stuActive && !stuInactive) || !clsActive && !clsInactive) {
+        unknownStatusRowCount++;
+      } else if (stuInactive || clsInactive) {
+        inactiveStatusRowCount++;
+      } else if (hasRob && stuActive && clsActive) {
+        eligibleActiveRobCount++;
+      }
+
+      const normName = row.student_name
+        .replace(/\([^)]*\)/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ')
+        .toLowerCase();
+      if (normName) {
+        if (!idsByNormalizedName.has(normName)) {
+          idsByNormalizedName.set(normName, new Set());
+        }
+        idsByNormalizedName.get(normName).add(normId);
+      }
+    }
+
+    pageIndex++;
+    start += data.length;
+    if (start >= expectedRecordsFiltered) {
+      break;
+    }
+  }
+
+  if (expectedRecordsFiltered !== null && start < expectedRecordsFiltered) {
+    seenIds.clear();
+    idsByNormalizedName.clear();
+    return makeAbort(
+      'MAX_PAGES_EXCEEDED',
+      `Vượt ngưỡng an toàn số trang tối đa (${maxPages} trang) trước khi đọc đủ ${expectedRecordsFiltered} bản ghi. Đã hủy toàn bộ lượt đọc.`,
+      pageIndex,
+      pageIndex
+    );
+  }
+
+  if (totalRowsVerified !== (expectedRecordsFiltered ?? 0)) {
+    seenIds.clear();
+    idsByNormalizedName.clear();
+    return makeAbort(
+      'TOTAL_ROW_COUNT_MISMATCH',
+      `Tổng số dòng thu thập (${totalRowsVerified}) không khớp recordsFiltered (${expectedRecordsFiltered}). Đã hủy toàn bộ lượt đọc.`,
+      pageIndex,
+      pageIndex
+    );
+  }
+
+  let sameNameDifferentIdCount = 0;
+  for (const idSet of idsByNormalizedName.values()) {
+    if (idSet.size > 1) {
+      sameNameDifferentIdCount += idSet.size;
+    }
+  }
+
+  const uniqueIdCount = seenIds.size;
+  const consistencyVerified = pageIndex <= 1 || expectedSnapshotVersion !== null;
+  // Explicitly clear temporary sets so no student names or IDs remain referenced
+  seenIds.clear();
+  idsByNormalizedName.clear();
+
+  return {
+    success: true,
+    aborted: false,
+    partialApplied: false,
+    mode: 'M4_DATATABLES_AGGREGATE_PREVIEW',
+    code: 'OK',
+    message: consistencyVerified
+      ? `Đã đọc và đối chiếu nhất quán toàn bộ ${pageIndex} trang DataTables (${totalRowsVerified}/${expectedRecordsFiltered ?? 0} bản ghi). Chỉ hiển thị số lượng tổng hợp, không lưu tên hay mã học sinh thật.`
+      : `Đã đọc ${pageIndex} trang DataTables (${totalRowsVerified}/${expectedRecordsFiltered ?? 0} bản ghi), nhưng nguồn không cung cấp mã phiên bản dữ liệu nên chưa xác minh tính nhất quán giữa các trang.`,
+    pagesRead: pageIndex,
+    pageLength,
+    recordsTotal: expectedRecordsTotal ?? 0,
+    recordsFiltered: expectedRecordsFiltered ?? 0,
+    lastPageRowCount:
+      pageIndex === 0 || (expectedRecordsFiltered ?? 0) === 0
+        ? 0
+        : (expectedRecordsFiltered ?? 0) - (pageIndex - 1) * pageLength,
+    totalRowsVerified,
+    uniqueIdCount,
+    robClassRowCount,
+    nonRobClassRowCount,
+    eligibleActiveRobCount,
+    inactiveStatusRowCount,
+    unknownStatusRowCount,
+    sameNameDifferentIdCount,
+    consistencyVerified,
+    snapshotConsistent: consistencyVerified,
+    snapshotVersion: expectedSnapshotVersion,
+    piiStoredOrSent: false,
+    timestamp,
+  };
+}
+
+/**
+ * Renders the Mốc 4 aggregate pagination preview results inside the floating panel
+ * using `document.createElement` and `textContent` ONLY.
+ *
+ * @param {Document} doc
+ * @param {HTMLElement} containerEl
+ * @param {Object} m4Result - Result from `inspectTeachingDataTablesAllPages`
+ */
+function renderTeachingM4AggregateSection(doc, containerEl, m4Result) {
+  while (containerEl.firstChild) {
+    containerEl.removeChild(containerEl.firstChild);
+  }
+
+  const box = doc.createElement('div');
+  box.style.marginTop = '8px';
+  box.style.padding = '10px 12px';
+  box.style.borderRadius = '8px';
+  box.style.fontSize = '11.5px';
+  box.style.border = m4Result.success ? '1px solid #86efac' : '1px solid #fecdd3';
+  box.style.backgroundColor = m4Result.success ? '#f0fdf4' : '#fff1f2';
+  box.style.color = m4Result.success ? '#166534' : '#9f1239';
+
+  const header = doc.createElement('div');
+  header.style.fontWeight = '800';
+  header.style.marginBottom = '4px';
+  header.textContent = m4Result.success
+    ? m4Result.consistencyVerified
+      ? `✓ KẾT QUẢ XEM TRƯỚC TỔNG HỢP MỐC 4 (${m4Result.pagesRead} TRANG — ĐÃ XÁC MINH NHẤT QUÁN)`
+      : `⚠ KẾT QUẢ XEM TRƯỚC TỔNG HỢP MỐC 4 (${m4Result.pagesRead} TRANG — CHƯA XÁC MINH PHIÊN BẢN NGUỒN)`
+    : `✕ HỦY TOÀN LƯỢT ĐỌC MỐC 4 (${m4Result.code}) — KHÔNG ÁP DỤNG MỘT PHẦN`;
+  box.appendChild(header);
+
+  const msg = doc.createElement('div');
+  msg.style.marginBottom = '8px';
+  msg.textContent = m4Result.message;
+  box.appendChild(msg);
+
+  if (m4Result.success) {
+    const grid = doc.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = '1fr 1fr';
+    grid.style.gap = '6px';
+
+    const items = [
+      ['Số trang đã đọc hết:', `${m4Result.pagesRead} trang (cỡ ${m4Result.pageLength})`],
+      ['Tổng khớp (Total/Filtered):', `${m4Result.recordsTotal} / ${m4Result.recordsFiltered}`],
+      ['Số dòng trang cuối:', `${m4Result.lastPageRowCount} dòng`],
+      ['Mã ID duy nhất hợp lệ:', `${m4Result.uniqueIdCount} mã`],
+      ['Dòng lớp ROB / Ngoài ROB:', `${m4Result.robClassRowCount} / ${m4Result.nonRobClassRowCount}`],
+      ['Hợp lệ (ROB + Đang học):', `${m4Result.eligibleActiveRobCount} học sinh`],
+      ['Bỏ qua (Nghỉ / Đóng lớp):', `${m4Result.inactiveStatusRowCount} dòng`],
+      ['Cần xem xét (TT lạ / Trùng tên):', `${m4Result.unknownStatusRowCount + m4Result.sameNameDifferentIdCount} dòng`],
+    ];
+
+    for (const [label, val] of items) {
+      const cell = doc.createElement('div');
+      cell.style.padding = '5px 7px';
+      cell.style.backgroundColor = '#ffffff';
+      cell.style.border = '1px solid #bbf7d0';
+      cell.style.borderRadius = '6px';
+
+      const lEl = doc.createElement('div');
+      lEl.style.fontSize = '10px';
+      lEl.style.color = '#475569';
+      lEl.textContent = label;
+
+      const vEl = doc.createElement('div');
+      vEl.style.fontSize = '12px';
+      vEl.style.fontWeight = '800';
+      vEl.style.color = '#0f172a';
+      vEl.textContent = val;
+
+      cell.appendChild(lEl);
+      cell.appendChild(vEl);
+      grid.appendChild(cell);
+    }
+
+    box.appendChild(grid);
+  }
+
+  containerEl.appendChild(box);
+}
+
+/**
  * Creates and renders the in-place floating panel on the DOM using textContent & createElement ONLY.
  * Removes any previous panel to prevent stale caching.
  *
  * @param {Document} doc - DOM Document object
  * @param {Object} result - Result from inspectTeachingDom
+ * @param {Location|Object} [loc] - Optional location object for M4 action button
  * @returns {HTMLElement} The created panel element
  */
-function renderTeachingPanel(doc, result) {
+function renderTeachingPanel(doc, result, loc = null) {
   const PANEL_ID = 'teaching-readonly-spike-panel';
 
   // Fresh run: remove old panel if present
@@ -648,8 +1314,10 @@ function renderTeachingPanel(doc, result) {
   panel.style.position = 'fixed';
   panel.style.top = '16px';
   panel.style.right = '16px';
-  panel.style.width = '390px';
+  panel.style.width = '410px';
   panel.style.maxWidth = 'calc(100vw - 32px)';
+  panel.style.maxHeight = 'calc(100vh - 32px)';
+  panel.style.overflowY = 'auto';
   panel.style.backgroundColor = '#ffffff';
   panel.style.color = '#0f172a';
   panel.style.border = result.success ? '2px solid #2563eb' : '2px solid #e11d48';
@@ -674,7 +1342,7 @@ function renderTeachingPanel(doc, result) {
   const titleGroup = doc.createElement('div');
 
   const badge = doc.createElement('div');
-  badge.textContent = 'MỐC 1 — SPIKE CỤC BỘ CHỈ ĐỌC';
+  badge.textContent = 'MỐC 1 & MỐC 4 — TIỆN ÍCH CỤC BỘ CHỈ ĐỌC';
   badge.style.fontSize = '10px';
   badge.style.fontWeight = '700';
   badge.style.letterSpacing = '0.5px';
@@ -682,7 +1350,7 @@ function renderTeachingPanel(doc, result) {
   badge.style.marginBottom = '2px';
 
   const title = doc.createElement('div');
-  title.textContent = 'Tiện ích Đếm Học Sinh Teaching';
+  title.textContent = 'Tiện ích Đếm & Xem trước Teaching';
   title.style.fontSize = '15px';
   title.style.fontWeight = '800';
   title.style.color = '#0f172a';
@@ -690,7 +1358,7 @@ function renderTeachingPanel(doc, result) {
   titleGroup.appendChild(badge);
   titleGroup.appendChild(title);
 
-  // Close button
+  // Close button MUST remain the first <button> inside the panel for M1 tests
   const closeBtn = doc.createElement('button');
   closeBtn.type = 'button';
   closeBtn.textContent = '✕ Đóng';
@@ -853,6 +1521,44 @@ function renderTeachingPanel(doc, result) {
   paginationCard.appendChild(paginationVal);
   panel.appendChild(paginationCard);
 
+  // 5b. Mốc 4 Multi-Page DataTables Aggregate Preview Action (only runs on explicit click)
+  const m4Section = doc.createElement('div');
+  m4Section.id = 'teaching-m4-preview-section';
+  m4Section.style.marginTop = '10px';
+  m4Section.style.paddingTop = '10px';
+  m4Section.style.borderTop = '1px dashed #cbd5e1';
+
+  const m4Btn = doc.createElement('button');
+  m4Btn.type = 'button';
+  m4Btn.id = 'teaching-m4-run-pagination-btn';
+  m4Btn.textContent = '📊 Xem trước toàn bộ phân trang DataTables (Mốc 4 — Tổng hợp)';
+  m4Btn.style.width = '100%';
+  m4Btn.style.padding = '8px 10px';
+  m4Btn.style.backgroundColor = '#1d4ed8';
+  m4Btn.style.color = '#ffffff';
+  m4Btn.style.border = 'none';
+  m4Btn.style.borderRadius = '8px';
+  m4Btn.style.fontSize = '11.5px';
+  m4Btn.style.fontWeight = '700';
+  m4Btn.style.cursor = 'pointer';
+
+  const m4Output = doc.createElement('div');
+  m4Output.id = 'teaching-m4-preview-output';
+
+  m4Btn.onclick = async () => {
+    m4Btn.disabled = true;
+    m4Btn.textContent = '⏳ Đang đọc và kiểm tra từng trang DataTables...';
+    const targetLoc = loc || (typeof window !== 'undefined' ? window.location : { origin: TEACHING_ORIGIN, pathname: TEACHING_PATH });
+    const m4Res = await inspectTeachingDataTablesAllPages(doc, targetLoc);
+    m4Btn.disabled = false;
+    m4Btn.textContent = '↻ Chạy lại Xem trước toàn bộ phân trang (Mốc 4)';
+    renderTeachingM4AggregateSection(doc, m4Output, m4Res);
+  };
+
+  m4Section.appendChild(m4Btn);
+  m4Section.appendChild(m4Output);
+  panel.appendChild(m4Section);
+
   // 6. Safety Commitments Notice
   const safetyNote = doc.createElement('div');
   safetyNote.style.marginTop = '12px';
@@ -863,7 +1569,7 @@ function renderTeachingPanel(doc, result) {
   safetyNote.style.fontSize = '11px';
   safetyNote.style.color = '#475569';
   safetyNote.textContent =
-    'Cam kết an toàn: Tiện ích hoạt động thuần túy trong trình duyệt. Không đọc mật khẩu/cookie, không trích xuất họ tên/ID học sinh, không gửi dữ liệu ra mạng.';
+    'Cam kết an toàn: Tiện ích hoạt động thuần túy trong trình duyệt. Không đọc mật khẩu/cookie, không lưu hoặc gửi họ tên/ID học sinh thật vào TEST, tệp hay log.';
   panel.appendChild(safetyNote);
 
   // 7. Footer timestamp
@@ -891,7 +1597,7 @@ function runTeachingReader(doc = (typeof document !== 'undefined' ? document : n
     return { success: false, code: 'NO_DOCUMENT', message: 'Không tìm thấy đối tượng Document.' };
   }
   const result = inspectTeachingDom(doc, loc);
-  const panel = renderTeachingPanel(doc, result);
+  const panel = renderTeachingPanel(doc, result, loc);
   if (doc.body) {
     doc.body.appendChild(panel);
   }

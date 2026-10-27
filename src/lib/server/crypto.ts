@@ -37,10 +37,17 @@ export const SESSION_COOKIE_NAME: string = impl.SESSION_COOKIE_NAME;
 export const RECOVERY_COOKIE_NAME: string = impl.RECOVERY_COOKIE_NAME;
 export const DEFAULT_SESSION_MAX_AGE_SEC: number = impl.DEFAULT_SESSION_MAX_AGE_SEC;
 export const RECOVERY_MAX_AGE_SEC: number = impl.RECOVERY_MAX_AGE_SEC;
+export const TEST_SUPABASE_PROJECT_REF: string = impl.TEST_SUPABASE_PROJECT_REF;
+export const DEFAULT_TEST_SUPABASE_URL: string = impl.DEFAULT_TEST_SUPABASE_URL;
+export const DEFAULT_TEST_SITE_URL: string = impl.DEFAULT_TEST_SITE_URL;
 export const ALLOWED_BFF_ACTIONS: readonly string[] = impl.ALLOWED_BFF_ACTIONS;
 export const BLOCKED_BFF_ACTIONS: readonly string[] = impl.BLOCKED_BFF_ACTIONS;
 
 // Typed delegates to implementation in crypto.mjs
+export const isProductionEnvironment: (env?: NodeJS.ProcessEnv | Record<string, string | undefined>) => boolean = impl.isProductionEnvironment;
+export const resolveSupabaseUrl: (env?: NodeJS.ProcessEnv | Record<string, string | undefined>) => string = impl.resolveSupabaseUrl;
+export const resolveTrustedSiteUrl: (env?: NodeJS.ProcessEnv | Record<string, string | undefined>, isDev?: boolean) => string = impl.resolveTrustedSiteUrl;
+export const assertRuntimeEnvironmentGuard: (env?: NodeJS.ProcessEnv | Record<string, string | undefined>) => void = impl.assertRuntimeEnvironmentGuard;
 export const normalizeKey32: (rawKey: string | Buffer) => Buffer = impl.normalizeKey32;
 export const isValidSessionKey: (rawKey: unknown) => boolean = (rawKey: unknown): boolean => impl.isValidSessionKey(rawKey);
 export const assertServerConfiguration: (env?: NodeJS.ProcessEnv) => void = impl.assertServerConfiguration;

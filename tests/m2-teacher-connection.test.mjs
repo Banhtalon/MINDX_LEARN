@@ -235,6 +235,9 @@ function createMockAdminClient(options = {}) {
         select: () => queryBuilder,
         eq: () => queryBuilder,
         maybeSingle: async () => {
+          if (table === 'm5_storage_quota_config') {
+            return { data: { environment_mode: 'test' }, error: null };
+          }
           if (table === 'profiles' && options.existingProfile) {
             return { data: options.existingProfile, error: null };
           }

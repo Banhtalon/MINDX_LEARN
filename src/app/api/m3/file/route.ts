@@ -22,6 +22,8 @@ import {
   verifySameOrigin,
   resolveTrustedIp,
   isLocalDevEnvironment,
+  isProductionEnvironment,
+  resolveSupabaseUrl,
   ValidatedSessionUser,
 } from '@/lib/server/crypto';
 import { callEdgeBackend } from '@/lib/server/edge-client';
@@ -102,12 +104,16 @@ async function getVerifiedActorSession(request: NextRequest): Promise<{
 }
 
 function getUserClient(accessToken: string) {
-  const supabaseUrl = process.env.MINDX_SUPABASE_URL || 'https://eythjapspkoyqdxlxtcd.supabase.co';
-  const anonKey =
+  const supabaseUrl = resolveSupabaseUrl(process.env);
+  const configuredAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     process.env.MINDX_SUPABASE_ANON_KEY ||
-    accessToken;
+    '';
+  if (isProductionEnvironment(process.env) && !configuredAnonKey.trim()) {
+    throw new Error('SUPABASE_ANON_KEY bắt buộc phải được cấu hình tường minh trên môi trường Production.');
+  }
+  const anonKey = configuredAnonKey || accessToken;
 
   const baseUrl = supabaseUrl.replace(/\/+$/, '');
   const commonHeaders: Record<string, string> = {
@@ -392,7 +398,12 @@ export async function POST(request: NextRequest) {
   const canonicalMime = validation.canonicalMime;
 
   // 6. Verify Student, Active Class, and Lesson Accessibility & Mode under RLS
-  const userClient = getUserClient(accessToken);
+  let userClient: ReturnType<typeof getUserClient>;
+  try {
+    userClient = getUserClient(accessToken);
+  } catch (err: any) {
+    return errorResponse(err?.message || 'Cấu hình máy chủ lưu trữ không hợp lệ.', 500, 'CONFIG_ERROR');
+  }
 
   try {
     const { data: studentRow, error: stErr } = await userClient
@@ -523,7 +534,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 7. Atomic Upload Reservation (DB-derived verified scope, advisory lock, finite pending cap)
+  // 7. Atomic Upload Reservation (DB-derived verified scope, advisory lock, finite pending cap & storage quota)
   let reservationId: string | undefined;
   let reservedPath: string | undefined;
 
@@ -532,14 +543,34 @@ export async function POST(request: NextRequest) {
       p_student_id: verifiedUser.id,
       p_lesson_id: lessonId,
       p_file_extension: validation.extension,
+      p_file_size_bytes: actualSizeBytes,
     });
 
     if (resErr || !resData || resData.length === 0) {
       const msg = resErr?.message || 'Không thể đặt trước vị trí tải tệp.';
-      const status = msg.includes('FORBIDDEN') ? 403 : (msg.includes('PENDING_UPLOAD_CAP_EXCEEDED') ? 429 : 400);
-      const code = msg.includes('PENDING_UPLOAD_CAP_EXCEEDED')
-        ? 'PENDING_UPLOAD_CAP_EXCEEDED'
-        : (msg.includes('CANNOT_RESUBMIT_APPROVED') ? 'CANNOT_RESUBMIT_APPROVED' : 'RESERVATION_FAILED');
+      let status = 400;
+      let code = 'RESERVATION_FAILED';
+
+      if (msg.includes('STORAGE_QUOTA_EXCEEDED')) {
+        status = 507; // Insufficient Storage
+        code = 'STORAGE_QUOTA_EXCEEDED';
+      } else if (msg.includes('STORAGE_BASELINE_UNVERIFIED')) {
+        status = 507;
+        code = 'STORAGE_BASELINE_UNVERIFIED';
+      } else if (msg.includes('CLASS_CLOSE_IN_PROGRESS')) {
+        status = 409; // Conflict
+        code = 'CLASS_CLOSE_IN_PROGRESS';
+      } else if (msg.includes('PENDING_UPLOAD_CAP_EXCEEDED')) {
+        status = 429;
+        code = 'PENDING_UPLOAD_CAP_EXCEEDED';
+      } else if (msg.includes('FORBIDDEN')) {
+        status = 403;
+        code = 'FORBIDDEN';
+      } else if (msg.includes('CANNOT_RESUBMIT_APPROVED')) {
+        status = 403;
+        code = 'CANNOT_RESUBMIT_APPROVED';
+      }
+
       return errorResponse(msg, status, code);
     }
 
@@ -581,6 +612,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let quotaWarning: string | undefined;
+    try {
+      // R9-02: Học sinh chỉ nhận cờ cảnh báo, không gọi trực tiếp m5_get_storage_quota_status (chỉ Admin/service_role)
+      const { data: qData } = await userClient.rpc('m5_get_storage_upload_warning', {});
+      if (Array.isArray(qData) && qData[0]?.is_warning && qData[0]?.message) {
+        quotaWarning = qData[0].message;
+      }
+    } catch {}
+
     return NextResponse.json(
       {
         success: true,
@@ -589,8 +629,15 @@ export async function POST(request: NextRequest) {
         fileSize: actualSizeBytes,
         mimeType: canonicalMime,
         message: 'Tải tệp bài thực hành lên thành công.',
+        ...(quotaWarning ? { quotaWarning } : {}),
       },
-      { status: 200, headers: NO_STORE_HEADERS }
+      {
+        status: 200,
+        headers: {
+          ...NO_STORE_HEADERS,
+          ...(quotaWarning ? { 'X-Storage-Quota-Warning': '1' } : {}),
+        },
+      }
     );
   } catch (err: any) {
     // Idempotent retry cleanup on unexpected exception: attempt Storage remove, then release via authoritative DB check
@@ -645,7 +692,12 @@ export async function GET(request: NextRequest) {
   }
 
   // 2. Authorization & Exact Current Submission Object Verification under RLS
-  const userClient = getUserClient(accessToken);
+  let userClient: ReturnType<typeof getUserClient>;
+  try {
+    userClient = getUserClient(accessToken);
+  } catch (err: any) {
+    return errorResponse(err?.message || 'Cấu hình máy chủ lưu trữ không hợp lệ.', 500, 'CONFIG_ERROR');
+  }
 
   try {
     const { data: subRow, error: subErr } = await userClient

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { StudentProfile, ClassItem } from '@/lib/types';
@@ -45,9 +45,18 @@ function ClassesManagementContent() {
     restoreStudent,
     issueInitialPinsForClass,
     reissuePinForSingleStudent,
+    storageQuota,
+    storageQuotaError,
+    fetchStorageQuota,
+    setStorageQuotaBaseline,
+    seedM5CourseCloseFixture,
     generateCourseClosePreview,
+    fetchCourseClosePreview,
+    setConfirmed14SessionsForClass,
     exportCourseCloseCsv,
     verifyAndExecuteCourseClose,
+    csvVerifications,
+    courseCloseOperations,
     getStudentProgress,
   } = useStore();
 
@@ -118,10 +127,59 @@ function ClassesManagementContent() {
   const [singlePinModalOpen, setSinglePinModalOpen] = useState(false);
   const [targetStudentForPin, setTargetStudentForPin] = useState<StudentProfile | null>(null);
 
-  // Course Close Section State
+  // Course Close Section State (Mốc 5)
   const [confirmed14Sessions, setConfirmed14Sessions] = useState(false);
   const [closeConfirmModalOpen, setCloseConfirmModalOpen] = useState(false);
   const [closeResultNotice, setCloseResultNotice] = useState<string | null>(null);
+  const [csvVerificationResult, setCsvVerificationResult] = useState<any | null>(null);
+  const [nextCourseId, setNextCourseId] = useState<string>('');
+  const [simulateFailureStage, setSimulateFailureStage] = useState<string>('none');
+  const [isSeedingFixture, setIsSeedingFixture] = useState(false);
+  // R4-06 (hoàn tất R3-07): Quản lý trạng thái bận theo Record<string, boolean> cho từng lớp
+  const [exportingByClassId, setExportingByClassId] = useState<Record<string, boolean>>({});
+  const [closingByClassId, setClosingByClassId] = useState<Record<string, boolean>>({});
+  // Tương thích ngược R3-07
+  const [exportingClassId, setExportingClassId] = useState<string | null>(null);
+  const [closingClassId, setClosingClassId] = useState<string | null>(null);
+  const isExportingCsv = Boolean(selectedClass && (exportingByClassId[selectedClass.id] || exportingClassId === selectedClass.id));
+  const isClosingCourse = Boolean(selectedClass && (closingByClassId[selectedClass.id] || closingClassId === selectedClass.id));
+
+  // R8-03: Lưu mã hash SHA-256 của tệp CSV mà Admin đã tải, mở và kiểm tra cho từng lớp
+  const [confirmedCsvOpenedByClass, setConfirmedCsvOpenedByClass] = useState<Record<string, string>>({});
+
+  // M5-08: Only fetch quota once on mount in live mode
+  useEffect(() => {
+    // R9-02: Chỉ Admin được xem tổng dung lượng toàn tổ chức
+    if (isLiveMode && isAdmin) {
+      fetchStorageQuota().catch(() => {});
+    }
+  }, [isLiveMode, isAdmin, fetchStorageQuota]);
+
+  // M5-09 / R6-03: Dùng ref giữ tham chiếu mới nhất của fetchCourseClosePreview tránh re-render loop
+  const selectedClassIdRef = useRef(selectedClassId);
+  const fetchCourseClosePreviewRef = useRef(fetchCourseClosePreview);
+  fetchCourseClosePreviewRef.current = fetchCourseClosePreview;
+
+  // M5-09 / R6-03 / R8-03: Chỉ reset trạng thái và gọi preview khi đổi lớp (selectedClassId) hoặc chế độ (isLiveMode)
+  useEffect(() => {
+    selectedClassIdRef.current = selectedClassId;
+    setConfirmed14Sessions(Boolean(selectedClass?.is14SessionsConfirmed));
+    setCsvVerificationResult(null);
+    setCloseResultNotice(null);
+    if (selectedClassId) {
+      setConfirmedCsvOpenedByClass((prev) => ({ ...prev, [selectedClassId]: '' }));
+    }
+    if (isLiveMode && selectedClassId) {
+      fetchCourseClosePreviewRef.current(selectedClassId).catch(() => {});
+    }
+  }, [selectedClassId, isLiveMode]);
+
+  // Đồng bộ cờ xác nhận 14 buổi từ dữ liệu lớp mà không xóa kết quả CSV hay gọi lại API
+  useEffect(() => {
+    if (selectedClass) {
+      setConfirmed14Sessions(Boolean(selectedClass.is14SessionsConfirmed));
+    }
+  }, [selectedClass?.id, selectedClass?.is14SessionsConfirmed]);
 
   // Students in selected class:
   // Active roster
@@ -147,7 +205,6 @@ function ClassesManagementContent() {
   const [isArchivingStudent, setIsArchivingStudent] = useState(false);
   const [isCreatingClass, setIsCreatingClass] = useState(false);
   const [createClassError, setCreateClassError] = useState<string | null>(null);
-  const [isClosingCourse, setIsClosingCourse] = useState(false);
 
   // Handler: Issue initial PINs (Mode 1 - Admin only)
   const handleIssueInitialPins = async () => {
@@ -206,54 +263,195 @@ function ClassesManagementContent() {
     document.body.removeChild(link);
   };
 
-  // Handler: Export 14-session CSV
-  const handleExportCloseCsv = async () => {
-    if (!selectedClass) return;
-    const res = await exportCourseCloseCsv(selectedClass.id);
-    if (res.success && res.csvContent) {
-      downloadCsvFile(`TongKet_14Buoi_${selectedClass.code}.csv`, res.csvContent);
-      setAlertNotice({
-        text: `${res.message} [Đã tải tệp TongKet_14Buoi_${selectedClass.code}.csv]`,
-        isError: false,
-      });
-    } else {
-      setAlertNotice({ text: res.message, isError: true });
-    }
-  };
-
-  // Handler: Execute course close
-  const handleExecuteClose = async () => {
-    if (!selectedClass || isClosingCourse) return;
-    setIsClosingCourse(true);
-    await new Promise((r) => setTimeout(r, 400));
-    const res = await verifyAndExecuteCourseClose(selectedClass.id, confirmed14Sessions);
-    setIsClosingCourse(false);
-    setCloseConfirmModalOpen(false);
+  // Handler: Seed or Reset M5 Fixture Class
+  const handleSeedFixture = async (resetOnly = false) => {
+    setIsSeedingFixture(true);
+    const res = await seedM5CourseCloseFixture(resetOnly);
+    setIsSeedingFixture(false);
     if (res.success) {
-      setCloseResultNotice(res.message);
+      // R23-01: Xóa kết quả CSV/thông báo đóng khóa cục bộ và xác nhận mở CSV của lớp mẫu,
+      // kể cả khi Admin đang đứng sẵn ở lớp mẫu (selectedClassId không đổi nên useEffect không tự chạy lại).
+      // Chỉ xóa trạng thái của riêng lớp mẫu; giữ nguyên trạng thái của lớp khác khi "Dọn mẫu" (resetOnly).
+      const fixtureIdsToClear = new Set<string>([
+        '00000000-0000-0000-0000-000000050001',
+        'cls_rob_m5_01',
+        ...(res.fixtureClassId ? [res.fixtureClassId] : []),
+      ]);
+      const isSelectedFixture = Boolean(selectedClassId && fixtureIdsToClear.has(selectedClassId));
+      setCsvVerificationResult((prev: any) =>
+        prev && (!prev.classId || fixtureIdsToClear.has(prev.classId)) ? null : prev
+      );
+      if (isSelectedFixture || Boolean(res.fixtureClassId)) {
+        setCloseResultNotice(null);
+      }
+      setConfirmedCsvOpenedByClass((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const fid of fixtureIdsToClear) {
+          if (fid in next) {
+            next[fid] = '';
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+      if (res.fixtureClassId) {
+        setSelectedClassId(res.fixtureClassId);
+        if (isLiveMode) {
+          await fetchCourseClosePreview(res.fixtureClassId).catch(() => null);
+        }
+      }
       setAlertNotice({ text: res.message, isError: false });
     } else {
       setAlertNotice({ text: res.message, isError: true });
     }
   };
 
+  // Handler: Set Quota Baseline for Testing
+  const handleSetQuotaBaseline = async (bytes: number) => {
+    const res = await setStorageQuotaBaseline(bytes);
+    if (res.success) {
+      setAlertNotice({ text: res.message, isError: false });
+    } else {
+      setAlertNotice({ text: res.message, isError: true });
+    }
+  };
+
+  // Handler: Export 14-session CSV (R4-06, R8-03)
+  const handleExportCloseCsv = async () => {
+    if (!selectedClass) return;
+    const requestClassId = selectedClass.id;
+    // R20-02: chụp khóa học Admin đang xác nhận lúc bấm nút để máy chủ từ chối nếu lớp đã sang khóa khác
+    const requestCourseId = selectedClass.courseId || undefined;
+    if (exportingByClassId[requestClassId]) return;
+    setExportingByClassId((prev) => ({ ...prev, [requestClassId]: true }));
+    setExportingClassId(requestClassId);
+    // R8-03: Khi xuất CSV mới, xóa xác nhận mở CSV cũ của lớp này
+    setConfirmedCsvOpenedByClass((prev) => ({ ...prev, [requestClassId]: '' }));
+    try {
+      const res = await exportCourseCloseCsv(requestClassId, confirmed14Sessions, requestCourseId);
+      // P2-01: Nếu người dùng đã đổi lớp trong lúc đang gọi bất đồng bộ thì không cập nhật
+      if (selectedClassIdRef.current !== requestClassId) {
+        return;
+      }
+      if (res.verification) {
+        setCsvVerificationResult({
+          ...res.verification,
+          classId: requestClassId,
+        });
+      }
+      if (res.success && res.csvContent) {
+        downloadCsvFile(`TongKet_14Buoi_${selectedClass.code}.csv`, res.csvContent);
+        setAlertNotice({
+          text: `${res.message} [Đã tải tệp TongKet_14Buoi_${selectedClass.code}.csv]`,
+          isError: false,
+        });
+      } else {
+        setAlertNotice({ text: res.message, isError: true });
+      }
+    } finally {
+      // R4-06 / R3-07: Luôn giải phóng đúng lớp vừa chạy xong bất kể người dùng chuyển sang lớp nào
+      setExportingByClassId((prev) => ({ ...prev, [requestClassId]: false }));
+      setExportingClassId((prev) => (prev === requestClassId ? null : prev));
+    }
+  };
+
+  // Handler: Execute course close (R4-04, R4-06, R8-03)
+  const handleExecuteClose = async (isResume = false) => {
+    if (!selectedClass || isClosingCourse) return;
+    const requestClassId = selectedClass.id;
+    // R20-02: chụp khóa học Admin đang xác nhận lúc bấm nút (Resume dùng khóa của tác vụ dở dang trong store)
+    const requestCourseId = selectedClass.courseId || undefined;
+    if (closingByClassId[requestClassId]) return;
+
+    // R8-03: Chặn nếu chưa mở và kiểm tra CSV mới nhất
+    if (!isResume && !isLatestCsvOpenedConfirmed) {
+      setAlertNotice({
+        text: 'Vui lòng tải, mở tệp CSV mới nhất và đánh dấu xác nhận đã kiểm tra đúng lớp/khóa trước khi xóa.',
+        isError: true,
+      });
+      return;
+    }
+
+    setClosingByClassId((prev) => ({ ...prev, [requestClassId]: true }));
+    setClosingClassId(requestClassId);
+    try {
+      await new Promise((r) => setTimeout(r, 400));
+      const res = await verifyAndExecuteCourseClose(requestClassId, confirmed14Sessions, {
+        courseId: requestCourseId,
+        nextCourseId: nextCourseId || undefined,
+        simulateFailureStage: simulateFailureStage !== 'none' ? simulateFailureStage : undefined,
+        isResume,
+        confirmedCsvOpened: isResume ? true : isLatestCsvOpenedConfirmed,
+        confirmedCsvSha256: csvVerificationResult?.sha256 || undefined,
+      });
+      // P2-01: Nếu người dùng đã đổi lớp trong lúc đang gọi bất đồng bộ thì không cập nhật
+      if (res.success) {
+        // R17-03: Đóng khóa thành công (lớp đã sang khóa kế tiếp) -> xóa xác nhận mở CSV của khóa cũ
+        setConfirmedCsvOpenedByClass((prev) => ({ ...prev, [requestClassId]: '' }));
+      }
+      if (selectedClassIdRef.current !== requestClassId) {
+        return;
+      }
+      setCloseConfirmModalOpen(false);
+      if (res.success) {
+        // R17-03: Đặt lại xác nhận 14 buổi của khóa cũ để không áp sang khóa mới
+        setConfirmed14Sessions(false);
+      }
+      // R5-06: Đồng bộ ngay trạng thái preview/operation từ máy chủ để hiển thị khung incomplete / nút Resume
+      if (isLiveMode) {
+        // R17-03: Chỉ đọc trạng thái từ máy chủ (không truyền xác nhận 14 buổi của khóa cũ)
+        await fetchCourseClosePreview(requestClassId);
+        // R13-05: Người dùng có thể đã đổi lớp trong lúc chờ phản hồi mạng, không hiện thông báo của lớp cũ đè lên lớp mới
+        if (selectedClassIdRef.current !== requestClassId) {
+          return;
+        }
+      }
+      if (res.success) {
+        setCloseResultNotice(res.message);
+        setAlertNotice({ text: res.message, isError: false });
+        setCsvVerificationResult(null);
+      } else {
+        setAlertNotice({ text: res.message, isError: true });
+      }
+    } finally {
+      // R4-06 / R3-07: Luôn giải phóng đúng lớp vừa chạy xong bất kể người dùng chuyển sang lớp nào
+      setClosingByClassId((prev) => ({ ...prev, [requestClassId]: false }));
+      setClosingClassId((prev) => (prev === requestClassId ? null : prev));
+    }
+  };
+
   // Course close preview details
-  const closePreview = selectedClass ? generateCourseClosePreview(selectedClass.id) : null;
+  const closePreview = selectedClass
+    ? generateCourseClosePreview(selectedClass.id, { isSchedule14Confirmed: confirmed14Sessions })
+    : null;
+  const currentCloseOp = selectedClass ? courseCloseOperations[selectedClass.id] : null;
+
+  // R8-03: Kiểm tra Admin đã mở và xác nhận đúng bản CSV mới nhất của lớp hiện tại
+  const isLatestCsvOpenedConfirmed = Boolean(
+    selectedClass &&
+    csvVerificationResult &&
+    csvVerificationResult.classId === selectedClass.id &&
+    csvVerificationResult.valid &&
+    csvVerificationResult.sha256 &&
+    confirmedCsvOpenedByClass[selectedClass.id] === csvVerificationResult.sha256
+  );
+
+  const isIncomplete = Boolean(currentCloseOp?.status && ['incomplete', 'deleting_storage', 'deleting_db'].includes(currentCloseOp.status));
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800">
-              {isAdmin ? 'Quản trị viên (Admin)' : 'Giáo viên'}
-            </span>
+      {/* Header Card */}
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_14px_40px_rgba(8,112,184,0.06)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#1d63ed] border border-blue-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
+            <span>{isAdmin ? 'Quản trị viên (Admin)' : 'Giáo viên'}</span>
           </div>
-          <h1 className="text-xl font-extrabold text-slate-900 mt-1">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
             Quản lý Lớp học, Danh sách học sinh & Cấp mã PIN
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
             Dùng chung cho Admin và Giáo viên theo phân quyền. Admin quản lý cấp phát PIN và kết thúc khóa;
             Giáo viên theo dõi tiến độ và học sinh.
           </p>
@@ -269,7 +467,7 @@ function ClassesManagementContent() {
               setNewClassTeacherId('');
               setCreateClassModalOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1d63ed] hover:bg-[#154ec2] text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all self-start sm:self-auto shrink-0 cursor-pointer"
           >
             <IconPlus className="w-4 h-4" />
             <span>Tạo lớp học mới</span>
@@ -280,7 +478,7 @@ function ClassesManagementContent() {
       {/* Alert Notice */}
       {alertNotice && (
         <div
-          className={`p-3.5 rounded-xl text-xs flex items-start gap-2.5 animate-in fade-in ${
+          className={`p-4 rounded-2xl text-xs flex items-start gap-2.5 animate-in fade-in ${
             alertNotice.isError
               ? 'bg-rose-50 border border-rose-200 text-rose-800'
               : 'bg-emerald-50 border border-emerald-200 text-emerald-800'
@@ -291,45 +489,47 @@ function ClassesManagementContent() {
           ) : (
             <IconCheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
           )}
-          <span className="font-medium flex-1">{alertNotice.text}</span>
-          <button onClick={() => setAlertNotice(null)} className="text-slate-400 hover:text-slate-600">
+          <span className="font-semibold flex-1">{alertNotice.text}</span>
+          <button onClick={() => setAlertNotice(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
             <IconX className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* Class Selector Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl border border-slate-100 p-4 sm:px-6 shadow-[0_14px_40px_rgba(8,112,184,0.05)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">
             Chọn lớp học:
           </span>
-          {visibleClasses.length > 0 ? (
-            visibleClasses.map((cls) => {
-              const isSelected = cls.id === selectedClass?.id;
-              return (
-                <button
-                  key={cls.id}
-                  onClick={() => setSelectedClassId(cls.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                    isSelected
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  {cls.code}
-                </button>
-              );
-            })
-          ) : (
-            <span className="text-xs text-slate-400 italic">Không có lớp học nào thuộc quyền quản lý</span>
-          )}
+          <div className="inline-flex flex-wrap items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/70">
+            {visibleClasses.length > 0 ? (
+              visibleClasses.map((cls) => {
+                const isSelected = cls.id === selectedClass?.id;
+                return (
+                  <button
+                    key={cls.id}
+                    onClick={() => setSelectedClassId(cls.id)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#1d63ed] text-white shadow-sm shadow-blue-600/20'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    }`}
+                  >
+                    {cls.code}
+                  </button>
+                );
+              })
+            ) : (
+              <span className="text-xs text-slate-400 italic px-2">Không có lớp học nào thuộc quyền quản lý</span>
+            )}
+          </div>
         </div>
 
         {selectedClass && (
-          <div className="text-xs text-slate-500 font-mono">
+          <div className="text-xs text-slate-500 font-mono bg-[#f8fafc] px-3.5 py-2 rounded-xl border border-slate-200/70">
             Khóa hiện tại:{' '}
-            <span className="font-bold text-slate-800">
+            <span className="font-bold text-slate-900">
               {selectedCourse ? selectedCourse.title : 'Chưa gán khóa học'}
             </span>
           </div>
@@ -338,7 +538,7 @@ function ClassesManagementContent() {
 
       {/* Empty / Unassigned State for Teacher or Empty System */}
       {!selectedClass && (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-500 text-sm">
+        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center text-slate-500 text-sm shadow-[0_14px_40px_rgba(8,112,184,0.06)]">
           <IconAlertCircle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-800 mb-1">
             {isTeacher ? 'Chưa được phân công phụ trách lớp học' : 'Chưa chọn lớp học'}
@@ -353,26 +553,26 @@ function ClassesManagementContent() {
 
       {/* Active Class Info & PIN Actions */}
       {selectedClass && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_14px_40px_rgba(8,112,184,0.06)] space-y-5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-extrabold text-slate-900">{selectedClass.name}</h2>
-                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">{selectedClass.name}</h2>
+                <span className="px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold bg-blue-50 text-[#1d63ed] border border-blue-100">
                   {selectedClass.code}
                 </span>
                 {selectedClass.status === 'archived' && (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-300">
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-300">
                     Lớp đã lưu trữ
                   </span>
                 )}
                 {selectedClass.status === 'completed' && (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                     Đã kết thúc khóa 14 buổi
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                 Sĩ số lớp: <span className="font-bold text-slate-800">{classStudents.length} học sinh</span> |
                 Tổng học sinh từng tham gia đợt:{' '}
                 <span className="font-bold text-slate-800">{batchStudents.length} học sinh</span> (gồm cả đã
@@ -386,7 +586,7 @@ function ClassesManagementContent() {
 
             {/* Class Actions (Admin only can edit class / assign teacher; PIN Actions Admin only) */}
             {isAdmin ? (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => {
@@ -396,7 +596,7 @@ function ClassesManagementContent() {
                     setUpdateClassError(null);
                     setEditClassModalOpen(true);
                   }}
-                  className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-[#1d63ed] border border-blue-100 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                   title="Sửa mã lớp, tên lớp và phân công giáo viên phụ trách"
                 >
                   <IconFileText className="w-4 h-4" />
@@ -407,7 +607,7 @@ function ClassesManagementContent() {
                   type="button"
                   disabled={isIssuingPins}
                   onClick={handleIssueInitialPins}
-                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="px-4 py-2.5 bg-[#1d63ed] hover:bg-[#154ec2] disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
                   title="Chỉ tạo PIN cho các học sinh trong lớp chưa có mã PIN"
                 >
                   {isIssuingPins ? (
@@ -424,16 +624,16 @@ function ClassesManagementContent() {
                 </button>
               </div>
             ) : (
-              <div className="text-xs text-slate-400 italic bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
+              <div className="text-xs text-slate-400 italic bg-[#f8fafc] px-3.5 py-2 rounded-xl border border-slate-200/80">
                 (Quy tắc bảo mật: Giáo viên không có quyền cấp mã PIN, sửa lớp hoặc xem lại CSV mã PIN)
               </div>
             )}
           </div>
 
           {/* Search Bar */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center justify-between gap-3">
             <div className="relative flex-1 max-w-sm">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                 <IconSearch className="w-4 h-4" />
               </span>
               <input
@@ -441,32 +641,32 @@ function ClassesManagementContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm theo tên hoặc mã học sinh..."
-                className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 transition-all"
               />
             </div>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs font-semibold text-slate-500">
               Hiển thị {filteredStudents.length}/{classStudents.length} học sinh
             </span>
           </div>
 
           {/* Student Roster Table */}
-          <div className="border border-slate-200 rounded-lg overflow-x-auto">
+          <div className="border border-slate-200/80 rounded-2xl overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
+              <thead className="bg-[#f8fafc] text-slate-500 font-bold border-b border-slate-200/80 uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="px-4 py-3">Mã định danh nội bộ</th>
-                  <th className="px-4 py-3">Mã học sinh</th>
-                  <th className="px-4 py-3">Họ và tên</th>
-                  <th className="px-4 py-3">Trạng thái PIN</th>
-                  <th className="px-4 py-3">Tiến độ 14 buổi</th>
-                  <th className="px-4 py-3">Trạng thái hồ sơ</th>
-                  <th className="px-4 py-3 text-right">Chi tiết</th>
+                  <th className="px-4 py-3.5">Mã định danh nội bộ</th>
+                  <th className="px-4 py-3.5">Mã học sinh</th>
+                  <th className="px-4 py-3.5">Họ và tên</th>
+                  <th className="px-4 py-3.5">Trạng thái PIN</th>
+                  <th className="px-4 py-3.5">Tiến độ 14 buổi</th>
+                  <th className="px-4 py-3.5">Trạng thái hồ sơ</th>
+                  <th className="px-4 py-3.5 text-right">Chi tiết</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
+                    <td colSpan={7} className="px-4 py-10 text-center text-slate-400">
                       Không có học sinh nào phù hợp với bộ lọc.
                     </td>
                   </tr>
@@ -476,26 +676,26 @@ function ClassesManagementContent() {
                     const hasPin = Boolean(st.hasPin ?? st.pinHash);
 
                     return (
-                      <tr key={st.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-4 py-3 font-mono text-[11px] text-slate-500">
+                      <tr key={st.id} className="hover:bg-blue-50/30 transition-colors">
+                        <td className="px-4 py-3.5 font-mono text-[11px] text-slate-500">
                           {st.participantId}
                         </td>
-                        <td className="px-4 py-3 font-mono font-bold text-blue-600">{st.studentCode}</td>
-                        <td className="px-4 py-3 font-semibold text-slate-900">{st.fullName}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3.5 font-mono font-bold text-[#1d63ed]">{st.studentCode}</td>
+                        <td className="px-4 py-3.5 font-bold text-slate-900">{st.fullName}</td>
+                        <td className="px-4 py-3.5">
                           {hasPin ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                               <IconCheckCircle className="w-3 h-3" />
                               <span>Đã cấp PIN 8 số</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                               <IconAlertTriangle className="w-3 h-3" />
                               <span>Chưa có PIN</span>
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3.5">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-slate-800">
                               {progress.completedSessionsCount}/14 buổi
@@ -503,28 +703,28 @@ function ClassesManagementContent() {
                             <span className="text-[11px] text-slate-400">({progress.percentage}%)</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3.5">
                           {st.status === 'active' ? (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                               Đang học
                             </span>
                           ) : st.status === 'transferred' ? (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                               Đã chuyển lớp
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                               Đã lưu trữ
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-4 py-3.5 text-right">
                           <button
                             onClick={() => {
                               setSelectedStudent(st);
                               setDrawerOpen(true);
                             }}
-                            className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 text-xs transition-colors"
+                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#1d63ed] hover:text-white font-bold text-slate-700 text-xs transition-all cursor-pointer"
                           >
                             Mở hồ sơ
                           </button>
@@ -539,139 +739,518 @@ function ClassesManagementContent() {
         </div>
       )}
 
-      {/* Course Close Section: ADMIN ONLY (Mục 6 - Kế hoạch v3) */}
+      {/* Course Close Section: ADMIN ONLY (Mốc 5 — Mục 6 Kế hoạch v3) */}
       {isAdmin && selectedClass && (
-        isLiveMode ? (
-          <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 shadow-sm space-y-2 opacity-80">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-200 text-slate-700">
-                Mốc 5
-              </span>
-              <h3 className="text-base font-extrabold text-slate-800">
-                Khu vực Kết thúc khóa 14 buổi, Xuất CSV & Xóa dữ liệu cũ
-              </h3>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Theo quy trình Mục 6 trong Kế hoạch v3: Tính năng xuất CSV tổng kết 14 buổi và xóa vĩnh viễn dữ liệu cũ thuộc phạm vi Mốc 5. Chức năng này được tạm khóa trong phiên bản Mốc 2 trực tiếp.
-            </p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl border border-rose-200 p-6 shadow-sm space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2.5 rounded-xl bg-rose-100 text-rose-700 shrink-0">
-                <IconAlertTriangle className="w-6 h-6" />
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_14px_40px_rgba(8,112,184,0.06)] space-y-6">
+          {/* Header Khu vực Mốc 5 */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-100 gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-3 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 shrink-0">
+                <IconAlertTriangle className="w-6 h-6 text-rose-600" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    Khu vực Kết thúc khóa 14 buổi, Xuất CSV & Xóa dữ liệu cũ
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1d63ed] text-white">
+                    Đóng khóa 14 buổi
+                  </span>
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                    Kết thúc đợt 14 buổi, Xuất CSV tổng kết & Xóa vĩnh viễn dữ liệu cũ
                   </h3>
-                  <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-xs">
+                  <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-bold text-xs">
                     Chỉ Admin
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Theo quy trình Mục 6 trong Kế hoạch v3: Chỉ Admin được bắt đầu đóng đợt sau khi xác nhận lớp
-                  đã học đủ 14 buổi theo lịch. CSV tổng kết phải bao gồm toàn bộ học sinh từng tham gia đợt (kể
-                  cả em đã chuyển lớp/lưu trữ) với đúng 14 dòng/em.
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                  Chỉ Admin được bắt đầu đóng đợt sau khi xác nhận lớp đã học đủ 14 buổi theo lịch. CSV tổng kết gồm toàn bộ học sinh từng tham gia đợt (kể cả em đã chuyển lớp/lưu trữ) với đúng 14 dòng/em.
                 </p>
               </div>
             </div>
 
-            {/* Schedule Confirmation Checkbox */}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={confirmed14Sessions}
-                  onChange={(e) => setConfirmed14Sessions(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                />
-                <div className="text-xs">
-                  <span className="font-bold text-slate-900 block">
-                    Admin xác nhận lớp {selectedClass.code} đã hoàn thành đủ 14 buổi theo lịch trình thực tế
+            {/* Nút chuẩn bị/khôi phục Lớp mẫu 14 buổi Mốc 5 */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                disabled={isSeedingFixture}
+                onClick={() => handleSeedFixture(false)}
+                className="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-[#1d63ed] border border-blue-100 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <IconRefreshCw className={`w-3.5 h-3.5 ${isSeedingFixture ? 'animate-spin' : ''}`} />
+                <span>Chuẩn bị Lớp mẫu 14 buổi Mốc 5 (ROB-K14-M5-01)</span>
+              </button>
+              <button
+                type="button"
+                disabled={isSeedingFixture}
+                onClick={() => handleSeedFixture(true)}
+                className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                title="Dọn sạch dữ liệu lớp mẫu Mốc 5"
+              >
+                Dọn sạch
+              </button>
+            </div>
+          </div>
+
+          {/* 1. Thẻ Giám sát Dung lượng Storage (700 MB Cảnh báo / 800 MB Chặn tải tệp) */}
+          <div className={`p-5 rounded-2xl border transition-colors ${
+            storageQuota?.isExceeded
+              ? 'bg-rose-50/90 border-rose-200'
+              : storageQuota?.isWarning
+              ? 'bg-amber-50/90 border-amber-200'
+              : 'bg-[#f8fafc] border-slate-200/80'
+          }`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-xs text-slate-900">
+                  Giám sát Dung lượng Storage Tổ chức (Cổng 700 MB Cảnh báo / 800 MB Chặn tải tệp)
+                </span>
+                {(isLiveMode && (storageQuotaError || storageQuota?.code === 'STORAGE_QUOTA_STATUS_UNKNOWN' || (storageQuota as any)?.statusUnknown)) ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-600 text-white flex items-center gap-1">
+                    <IconAlertCircle className="w-3.5 h-3.5" />
+                    LỖI KẾT NỐI HẠN MỨC STORAGE
                   </span>
-                  <span className="text-slate-500">
-                    (Điều kiện tiên quyết trước khi mở quy trình kiểm tra CSV và xóa dữ liệu cũ. Không suy ra từ
-                    tỷ lệ nộp bài của học sinh.)
+                ) : storageQuota?.isExceeded ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-600 text-white">
+                    ĐÃ CHẠM HẠN MỨC — CHẶN TẢI TỆP MỚI
                   </span>
+                ) : storageQuota?.isWarning ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-600 text-white">
+                    CẢNH BÁO DUNG LƯỢNG (≥ 700 MB)
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Dung lượng an toàn
+                  </span>
+                )}
+              </div>
+
+              {/* Nút thử kịch bản dung lượng TEST */}
+              {!isLiveMode ? (
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="text-slate-500 text-[11px]">Thử kịch bản:</span>
+                  <button
+                    type="button"
+                    onClick={() => handleSetQuotaBaseline(0)}
+                    className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 text-[11px] font-semibold"
+                  >
+                    0 MB
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSetQuotaBaseline(720 * 1024 * 1024)}
+                    className="px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-200 text-amber-800 hover:bg-amber-200 text-[11px] font-semibold"
+                  >
+                    720 MB (Cảnh báo)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSetQuotaBaseline(810 * 1024 * 1024)}
+                    className="px-2.5 py-1 rounded-lg bg-rose-100 border border-rose-200 text-rose-800 hover:bg-rose-200 text-[11px] font-semibold"
+                  >
+                    810 MB (Chặn tải)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fetchStorageQuota(0).catch(() => {})}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-300 text-slate-800 hover:bg-slate-200 text-[11px] font-semibold"
+                  >
+                    Làm mới
+                  </button>
                 </div>
-              </label>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => fetchStorageQuota(0).catch(() => {})}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-bold shadow-2xs cursor-pointer"
+                  >
+                    Kiểm tra lại hạn mức
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Close Preview Card */}
-            {closePreview && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 block mb-0.5">Tổng số học sinh đợt học:</span>
-                  <span className="text-base font-black text-slate-900">
+            {/* Thanh tiến trình dung lượng */}
+            <div className="space-y-2 text-xs">
+              <div className="w-full bg-slate-200/80 rounded-full h-3 overflow-hidden flex p-0.5">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    storageQuota?.isExceeded
+                      ? 'bg-rose-600'
+                      : storageQuota?.isWarning
+                      ? 'bg-amber-500'
+                      : 'bg-[#1d63ed]'
+                  }`}
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      ((storageQuota?.anticipatedTotalBytes || 0) / (800 * 1024 * 1024)) * 100
+                    )}%`,
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-600 gap-2">
+                <div>
+                  Đang dùng: <strong>{(((storageQuota?.usedStorageBytes || 0) + (storageQuota?.orgBaselineBytes || 0)) / (1024 * 1024)).toFixed(1)} MB</strong>
+                  {storageQuota?.activeReservedBytes ? (
+                    <span> + Giữ chỗ đồng thời: <strong>{((storageQuota.activeReservedBytes) / (1024 * 1024)).toFixed(1)} MB</strong></span>
+                  ) : null}
+                  {' '}= Tổng dự kiến: <strong className={storageQuota?.isExceeded ? 'text-rose-600' : storageQuota?.isWarning ? 'text-amber-700' : 'text-slate-900'}>
+                    {((storageQuota?.anticipatedTotalBytes || 0) / (1024 * 1024)).toFixed(1)} MB
+                  </strong> / 800 MB
+                </div>
+                <div className="text-slate-500">
+                  Ngưỡng cảnh báo: 700 MB | Ngưỡng chặn: 800 MB (Nộp bằng liên kết link luôn mở)
+                </div>
+              </div>
+
+              {isLiveMode && (storageQuotaError || storageQuota?.code === 'STORAGE_QUOTA_STATUS_UNKNOWN' || (storageQuota as any)?.statusUnknown) && (
+                <div className="p-3 bg-rose-100 border border-rose-300 rounded-xl text-rose-900 text-xs font-semibold flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <IconAlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>
+                      {storageQuotaError || 'Chưa xác định được trạng thái dung lượng Storage từ máy chủ. Vui lòng bấm Kiểm tra lại hạn mức.'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fetchStorageQuota(0).catch(() => {})}
+                    className="px-3 py-1.5 bg-rose-700 text-white text-xs font-bold rounded-lg hover:bg-rose-800 shrink-0"
+                  >
+                    Kiểm tra lại hạn mức
+                  </button>
+                </div>
+              )}
+
+              {storageQuota?.isExceeded && !storageQuotaError && (
+                <div className="p-3 bg-rose-100 border border-rose-300 rounded-xl text-rose-900 text-xs font-semibold flex items-center gap-2">
+                  <IconAlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>
+                    Chốt chặn dung lượng: Hệ thống đã chặn bắt đầu các lượt tải tệp mới để tránh vượt hạn mức tổ chức. Học sinh vẫn có thể nộp bài tập bằng liên kết (link) bình thường.
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 2. Bảng Xem trước Phạm vi & Tác động Đóng khóa */}
+          {closePreview && (
+            <div className="space-y-3">
+              <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide">
+                Xem trước phạm vi đợt học & Dữ liệu sẽ bị xóa vĩnh viễn:
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
+                <div className="p-4 bg-[#f8fafc] rounded-2xl border border-slate-200/80">
+                  <span className="text-slate-500 block mb-1">Tổng số học sinh đợt:</span>
+                  <span className="text-lg font-black text-slate-900">
                     {closePreview.totalParticipants} học sinh
                   </span>
-                  <span className="block text-[11px] text-slate-500 mt-0.5">
-                    (Bao gồm cả học sinh đã chuyển/lưu trữ)
+                  <span className="block text-[11px] text-slate-500 mt-1">
+                    ({closePreview.activeParticipantsCount || 0} đang học, {closePreview.transferredCount || 0} chuyển lớp, {closePreview.archivedCount || 0} lưu trữ)
                   </span>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 block mb-0.5">Số dòng CSV dự kiến:</span>
-                  <span className="text-base font-black text-blue-600">
+
+                <div className="p-4 bg-[#f8fafc] rounded-2xl border border-slate-200/80">
+                  <span className="text-slate-500 block mb-1">Số dòng CSV 14 buổi:</span>
+                  <span className="text-lg font-black text-[#1d63ed]">
                     {closePreview.totalParticipants * 14} dòng
                   </span>
-                  <span className="block text-[11px] text-slate-500 mt-0.5">
-                    ({closePreview.totalParticipants} học sinh x 14 buổi chuẩn)
+                  <span className="block text-[11px] text-slate-500 mt-1">
+                    ({closePreview.totalParticipants} HS x 14 buổi chuẩn cố định)
                   </span>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 block mb-0.5">Kết quả & Bài nộp sẽ xóa:</span>
-                  <span className="text-base font-black text-rose-600">
+
+                <div className="p-4 bg-[#f8fafc] rounded-2xl border border-slate-200/80">
+                  <span className="text-slate-500 block mb-1">Hoàn tất 14/14 buổi:</span>
+                  <span className="text-lg font-black text-emerald-600">
+                    {closePreview.completedAll14Count || 0} / {closePreview.totalParticipants} HS
+                  </span>
+                  <span className="block text-[11px] text-slate-500 mt-1">
+                    Chưa xong: {closePreview.incompleteStudentsCount || 0} HS ({closePreview.unsubmittedStudentsCount || 0} chưa nộp bài nào)
+                  </span>
+                </div>
+
+                <div className="p-4 bg-[#f8fafc] rounded-2xl border border-slate-200/80">
+                  <span className="text-slate-500 block mb-1">Dữ liệu sẽ xóa vĩnh viễn:</span>
+                  <span className="text-lg font-black text-rose-600">
                     {closePreview.quizResultsCount} quiz / {closePreview.submissionsCount} bài nộp
                   </span>
-                  <span className="block text-[11px] text-slate-500 mt-0.5">Xóa vĩnh viễn không hoàn tác</span>
+                  <span className="block text-[11px] text-slate-500 mt-1">
+                    {closePreview.storageFilesCount || 0} tệp ({(((closePreview.storageBytesCount || 0)) / (1024 * 1024)).toFixed(1)} MB) không thể hoàn tác
+                  </span>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Red Warnings (Cảnh báo đỏ bài chưa nộp/chờ chấm) */}
-            {closePreview && closePreview.warnings.length > 0 && (
-              <div className="p-3.5 bg-rose-50 border border-rose-300 rounded-xl text-xs space-y-1">
-                <div className="font-bold text-rose-900 flex items-center gap-1.5">
-                  <IconAlertTriangle className="w-4 h-4 text-rose-600" />
-                  <span>CẢNH BÁO ĐỎ VỀ TIẾN ĐỘ BÀI LÀM CỦA HỌC SINH:</span>
+          {/* CẢNH BÁO ĐỎ: Về tiến độ học sinh (KHÔNG chặn Admin xác nhận) */}
+          {closePreview && closePreview.warnings.length > 0 && (
+            <div className="p-4 bg-rose-50/90 border border-rose-200 rounded-2xl text-xs space-y-1.5">
+              <div className="font-bold text-rose-900 flex items-center gap-1.5">
+                <IconAlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>CẢNH BÁO ĐỎ VỀ TIẾN ĐỘ VÀ MẤT DỮ LIỆU CỦA ĐỢT HỌC (KHÔNG CHẶN ĐÓNG KHÓA):</span>
+              </div>
+              <ul className="list-disc list-inside text-rose-800 space-y-0.5 pl-1">
+                {closePreview.warnings.map((w, idx) => (
+                  <li key={idx}>{w}</li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-rose-700 italic pt-1 border-t border-rose-200/80 mt-1">
+                * Ghi chú an toàn: Học sinh chưa nộp bài, chưa hoàn tất hoặc còn bài chờ chấm là cảnh báo đỏ để Admin cân nhắc, KHÔNG phải lỗi kỹ thuật chặn. Admin vẫn có toàn quyền xác nhận sau khi xem xét. CSV là báo cáo tổng kết, không phải bản backup và không thể khôi phục dữ liệu đã xóa.
+              </p>
+            </div>
+          )}
+
+          {/* LỖI KỸ THUẬT CHẶN (Buộc dừng kể cả khi Admin muốn tiếp tục) */}
+          {closePreview && closePreview.blockErrors.length > 0 && (
+            <div className="p-4 bg-amber-50/90 border border-amber-200 rounded-2xl text-xs space-y-1.5">
+              <div className="font-bold text-amber-900 flex items-center gap-1.5">
+                <IconAlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>ĐIỀU KIỆN KỸ THUẬT CHẶN (BUỘC DỪNG XÁC NHẬN CHO ĐẾN KHI XỬ LÝ):</span>
+              </div>
+              <ul className="list-disc list-inside text-amber-800 space-y-0.5 pl-1">
+                {closePreview.blockErrors.map((err, idx) => (
+                  <li key={idx} className="font-medium">{err}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Tác vụ chưa hoàn tất (Incomplete Task Warning & Resume Button) */}
+          {isIncomplete && (
+            <div className="p-4 bg-amber-50 border-2 border-amber-400 rounded-2xl text-xs space-y-2">
+              <div className="font-bold text-amber-900 flex items-center gap-1.5">
+                <IconAlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                <span>TÁC VỤ ĐÓNG KHÓA ĐANG Ở TRẠNG THÁI CHƯA HOÀN TẤT (INCOMPLETE)</span>
+              </div>
+              <p className="text-amber-800">
+                Tác vụ xóa trước đó đã dừng lại giữa chừng (do sự cố mạng hoặc thử nghiệm lỗi). Đã xóa{' '}
+                <strong>{(currentCloseOp.deletedStoragePaths || []).length} tệp</strong>, còn lại{' '}
+                <strong>{(currentCloseOp.remainingStoragePaths || []).length} tệp</strong>. Khóa chặn ghi mới trên lớp vẫn được giữ nguyên để bảo vệ an toàn dữ liệu.
+              </p>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  disabled={isClosingCourse}
+                  onClick={() => handleExecuteClose(true)}
+                  className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-sm transition-colors flex items-center gap-1.5"
+                >
+                  <IconRotateCcw className={`w-4 h-4 ${isClosingCourse ? 'animate-spin' : ''}`} />
+                  <span>Tiếp tục hoàn tất tác vụ xóa (Resume)</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 3. Bước 1: Xác nhận 14 buổi & Xuất + Tự kiểm tra CSV 14 buổi */}
+          <div className="p-5 bg-[#f8fafc] rounded-2xl border border-slate-200/80 space-y-3.5">
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-[#1d63ed] text-white font-black text-xs flex items-center justify-center">
+                1
+              </span>
+              <span className="font-extrabold text-slate-900 text-xs">
+                Bước 1: Xác nhận đủ 14 buổi theo lịch & Xuất + Tự kiểm tra CSV 14 buổi
+              </span>
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer bg-white p-3.5 rounded-xl border border-slate-200/80 hover:border-blue-200 transition-colors">
+              <input
+                type="checkbox"
+                checked={confirmed14Sessions}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setConfirmed14Sessions(val);
+                  if (selectedClass) {
+                    setConfirmed14SessionsForClass(selectedClass.id, val).catch(() => {});
+                  }
+                }}
+                className="mt-0.5 w-4 h-4 text-[#1d63ed] rounded border-slate-300 focus:ring-[#1d63ed]"
+              />
+              <div className="text-xs">
+                <span className="font-bold text-slate-900 block">
+                  Admin xác nhận lớp {selectedClass.code} đã hoàn thành đủ 14 buổi theo lịch trình thực tế
+                </span>
+                <span className="text-slate-500">
+                  (Điều kiện tiên quyết bắt buộc. Không suy ra từ tỷ lệ hoàn thành của học sinh.)
+                </span>
+              </div>
+            </label>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                type="button"
+                disabled={isExportingCsv || !selectedClass}
+                onClick={handleExportCloseCsv}
+                className="px-4 py-2.5 bg-[#0f172a] hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-slate-900/15 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <IconDownload className={`w-4 h-4 ${isExportingCsv ? 'animate-spin' : ''}`} />
+                <span>
+                  {isExportingCsv
+                    ? 'Đang xuất & tự kiểm tra CSV...'
+                    : `Xuất & Tự kiểm tra CSV 14 Buổi (${closePreview ? closePreview.totalParticipants * 14 : 0} dòng)`}
+                </span>
+              </button>
+            </div>
+
+            {/* Bảng kết quả tự kiểm tra CSV */}
+            {csvVerificationResult && csvVerificationResult.classId === selectedClass.id && (
+              <div className={`p-4 rounded-2xl border text-xs space-y-2 ${
+                csvVerificationResult.valid
+                  ? 'bg-emerald-50/90 border-emerald-200 text-emerald-950'
+                  : 'bg-rose-50/90 border-rose-200 text-rose-950'
+              }`}>
+                <div className="font-bold flex items-center gap-1.5">
+                  {csvVerificationResult.valid ? (
+                    <IconCheckCircle className="w-4 h-4 text-emerald-600" />
+                  ) : (
+                    <IconAlertCircle className="w-4 h-4 text-rose-600" />
+                  )}
+                  <span>
+                    KẾT QUẢ TỰ ĐỘNG ĐỐI CHIẾU CSV THEO CHUẨN RFC 4180:{' '}
+                    {csvVerificationResult.valid ? 'HỢP LỆ 100%' : 'PHÁT HIỆN LỖI TOÀN VẸN'}
+                  </span>
                 </div>
-                <ul className="list-disc list-inside text-rose-800 space-y-0.5 pl-1">
-                  {closePreview.warnings.map((w, idx) => (
-                    <li key={idx}>{w}</li>
-                  ))}
-                </ul>
-                <p className="text-[11px] text-rose-700 italic pt-1">
-                  * Lưu ý: Tình trạng học sinh chưa nộp bài hoặc còn bài chờ chấm là cảnh báo để Admin cân nhắc,
-                  KHÔNG phải lỗi kỹ thuật chặn. Admin vẫn có toàn quyền xác nhận đóng khóa.
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
+                  <div>
+                    • Số học sinh tham gia: <strong>{csvVerificationResult.participantCount}</strong> (đủ mọi em active, transferred, archived)
+                  </div>
+                  <div>
+                    • Tổng số dòng dữ liệu: <strong>{csvVerificationResult.rowCount}</strong> dòng (đúng {csvVerificationResult.participantCount} x 14 buổi)
+                  </div>
+                  <div>
+                    • Kiểm tra bảo mật: <strong>0 mã PIN / token / mật khẩu</strong> bị rò rỉ trong CSV
+                  </div>
+                  <div>
+                    • SHA-256 Digest: <span className="font-mono text-[10px] break-all">{csvVerificationResult.sha256?.slice(0, 16)}...</span>
+                  </div>
+                </div>
+
+                {!csvVerificationResult.valid && (
+                  <ul className="list-disc list-inside text-rose-800 space-y-0.5 pt-1">
+                    {csvVerificationResult.errors.map((err: string, i: number) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                )}
+
+                {csvVerificationResult.valid && (
+                  <label className="flex items-start gap-2.5 cursor-pointer bg-white p-3 rounded-xl border border-emerald-200 mt-2">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(
+                        csvVerificationResult.sha256 &&
+                        confirmedCsvOpenedByClass[selectedClass.id] === csvVerificationResult.sha256
+                      )}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        const sha = csvVerificationResult.sha256 || '';
+                        setConfirmedCsvOpenedByClass((prev) => ({
+                          ...prev,
+                          [selectedClass.id]: checked ? sha : '',
+                        }));
+                      }}
+                      className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-emerald-400 focus:ring-emerald-500"
+                    />
+                    <div className="text-[11px] text-emerald-950">
+                      <span className="font-bold block">
+                        Admin/Owner xác nhận đã tải về, mở tệp CSV và kiểm tra đúng lớp ({selectedClass.code}) / khóa học ({selectedCourse?.title || '14 buổi'}) cùng bảng kiểm tra đủ 14 buổi
+                      </span>
+                      <span className="text-emerald-800">
+                        (Bắt buộc trước khi xóa. Tệp CSV là báo cáo tổng kết, không phải bản backup và không khôi phục được dữ liệu đã xóa.)
+                      </span>
+                    </div>
+                  </label>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 4. Bước 2: Chọn Khóa học mới (tùy chọn) & Xác nhận Xóa vĩnh viễn */}
+          <div className="p-5 bg-[#f8fafc] rounded-2xl border border-slate-200/80 space-y-3.5">
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-rose-600 text-white font-black text-xs flex items-center justify-center">
+                2
+              </span>
+              <span className="font-extrabold text-slate-900 text-xs">
+                Bước 2: Chọn Khóa học kế tiếp (tùy chọn) & Xác nhận Xóa vĩnh viễn dữ liệu cũ
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1.5">
+                  Gán Khóa học mới cho lớp sau khi xóa:
+                </label>
+                <select
+                  value={nextCourseId}
+                  onChange={(e) => setNextCourseId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10"
+                >
+                  <option value="">-- Không gán khóa mới (Đóng lớp sang Hoàn thành) --</option>
+                  {courses
+                    .filter((c) => c.id !== selectedClass.courseId)
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title} (14 Buổi)
+                      </option>
+                    ))}
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Nếu chọn khóa học mới, lớp sẽ được gán khóa này và đặt lại tiến độ mới 0/14.
                 </p>
               </div>
-            )}
 
-            {/* Action Buttons for Close Course */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1.5">
+                  Chế độ kiểm thử an toàn trên TEST:
+                </label>
+                <select
+                  value={(selectedClass.isFixture || selectedClass.code === 'ROB-K14-M5-01') ? simulateFailureStage : 'none'}
+                  disabled={!(selectedClass.isFixture || selectedClass.code === 'ROB-K14-M5-01')}
+                  onChange={(e) => setSimulateFailureStage(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                >
+                  <option value="none">Bình thường (Thực thi xóa thành công 100%)</option>
+                  {(selectedClass.isFixture || selectedClass.code === 'ROB-K14-M5-01') && (
+                    <>
+                      <option value="mid_storage_batch">Mô phỏng lỗi giữa các lô Storage (Dừng ở Chưa hoàn tất)</option>
+                      <option value="between_storage_and_db">Mô phỏng lỗi giữa Storage và DB (Dừng ở Chưa hoàn tất)</option>
+                    </>
+                  )}
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  {(selectedClass.isFixture || selectedClass.code === 'ROB-K14-M5-01')
+                    ? 'Kiểm thử khả năng chịu lỗi và tính năng Tiếp tục (Resume) của Mốc 5 trên lớp fixture.'
+                    : 'Chỉ khả dụng trên lớp fixture thử nghiệm (ROB-K14-M5-01).'}
+                </p>
+              </div>
+            </div>
+
+            {/* Nút xác nhận đóng khóa */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/80">
+              <div className="text-[11px] text-slate-500">
+                {!confirmed14Sessions
+                  ? 'Chưa tích xác nhận đủ 14 buổi theo lịch.'
+                  : !closePreview?.csvVerified || (csvVerificationResult && csvVerificationResult.classId !== selectedClass.id)
+                  ? 'Bắt buộc phải Xuất & Tự kiểm tra CSV thành công trước khi mở nút Xóa.'
+                  : !isLatestCsvOpenedConfirmed
+                  ? 'Bắt buộc phải tích xác nhận đã mở và kiểm tra tệp CSV mới nhất đúng lớp/khóa trước khi mở nút Xóa.'
+                  : 'Đã sẵn sàng. Thao tác xóa vĩnh viễn không thể khôi phục.'}
+              </div>
+
               <button
                 type="button"
-                onClick={handleExportCloseCsv}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
-              >
-                <IconDownload className="w-4 h-4" />
-                <span>Xuất & Đối chiếu CSV 14 Buổi ({closePreview ? closePreview.totalParticipants * 14 : 0} dòng)</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={!confirmed14Sessions}
+                disabled={!closePreview?.canExecuteDelete || isClosingCourse || (csvVerificationResult && csvVerificationResult.classId !== selectedClass.id) || !isLatestCsvOpenedConfirmed}
                 onClick={() => setCloseConfirmModalOpen(true)}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:hover:bg-rose-600 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
+                className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:hover:bg-rose-600 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <IconAlertTriangle className="w-4 h-4" />
                 <span>Xác nhận Đóng khóa & Xóa vĩnh viễn dữ liệu cũ</span>
               </button>
             </div>
           </div>
-        )
+        </div>
       )}
 
       {/* Drawer: Student Detail & Actions */}
@@ -1258,9 +1837,9 @@ function ClassesManagementContent() {
       <ConfirmDialog
         isOpen={closeConfirmModalOpen}
         onClose={() => setCloseConfirmModalOpen(false)}
-        onConfirm={handleExecuteClose}
+        onConfirm={() => handleExecuteClose(false)}
         title={`Xác nhận kết thúc khóa lớp ${selectedClass?.code || ''}?`}
-        message="Hành động này sẽ XÓA VĨNH VIỄN toàn bộ điểm số quiz, bài nộp thực hành, tiến độ và nhận xét của lớp này để chuẩn bị đón khóa học mới. Tài khoản học sinh và nội dung bài học sẽ được bảo toàn. Thao tác không thể hoàn tác!"
+        message={`Hành động này sẽ XÓA VĨNH VIỄN toàn bộ điểm số quiz, bài nộp thực hành, tiến độ và nhận xét của lớp ${selectedClass?.code || ''} thuộc khóa "${selectedCourse?.title || '14 buổi'}" (Mã kiểm tra CSV: ${csvVerificationResult?.sha256?.slice(0, 12) || 'N/A'}). Lưu ý tệp CSV chỉ là báo cáo tổng kết, không phải bản backup và không thể khôi phục dữ liệu đã xóa!`}
         confirmText="Tôi hiểu và Xác nhận Xóa dữ liệu cũ"
         cancelText="Hủy bỏ"
         isDanger={true}

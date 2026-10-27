@@ -22,9 +22,11 @@ console.log(`[generator] Reader core SHA-256: ${readerHash}`);
 
 // Transform ESM exports into clean script body (without export and without execution call)
 // 1. Remove "export const " -> "const "
-// 2. Remove "export function " -> "function "
+// 2. Remove "export async function " -> "async function "
+// 3. Remove "export function " -> "function "
 const readerCoreBody = readerCoreRaw
   .replace(/export\s+const\s+/g, 'const ')
+  .replace(/export\s+async\s+function\s+/g, 'async function ')
   .replace(/export\s+function\s+/g, 'function ')
   .trim();
 

@@ -41,15 +41,17 @@ export default function AdminCoursesPage() {
 
   if (!currentUser || currentUser.role !== 'admin') {
     return (
-      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-xl border border-slate-200">
-        <IconAlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-900 mb-2">Quyền truy cập bị từ chối</h2>
-        <p className="text-xs text-slate-500 mb-4">
-          Chỉ có Admin mới có quyền truy cập trang quản trị khóa học [UI-05].
+      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(8,112,184,0.07)]">
+        <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-4">
+          <IconAlertCircle className="w-7 h-7" />
+        </div>
+        <h2 className="text-lg font-extrabold text-slate-900 mb-2">Quyền truy cập bị từ chối</h2>
+        <p className="text-xs text-slate-500 mb-6">
+          Chỉ có Admin mới có quyền truy cập trang quản trị khóa học 14 buổi.
         </p>
         <button
           onClick={() => router.push('/login')}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700"
+          className="px-5 py-2.5 bg-[#0f172a] text-white rounded-xl text-xs font-bold hover:bg-slate-800 shadow-md transition-all cursor-pointer"
         >
           Đăng nhập vai trò Admin
         </button>
@@ -86,19 +88,17 @@ export default function AdminCoursesPage() {
     setIsCreating(true);
     setCreateError(null);
 
-    // Hiển thị nhãn "Đang lưu..." trong tối đa khoảng 400ms (300ms)
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
       const res = await createCourse(trimmedTitle, createDescription.trim());
       if (!res.success) {
-        // Dưới save_error: action trả lỗi, giữ modal/form, không thay dữ liệu, hiện lỗi và nút Thử lại
         setCreateError(res.message);
       } else {
         if (res.course) {
           setSelectedCourseId(res.course.id);
         }
-        setSuccessMessage(res.message || 'Tạo khóa học thành công (đã lưu trong dữ liệu giả).');
+        setSuccessMessage(res.message || 'Tạo khóa học thành công.');
         setIsCreateOpen(false);
         setCreateTitle('');
         setCreateDescription('');
@@ -125,7 +125,6 @@ export default function AdminCoursesPage() {
     setIsEditing(true);
     setEditError(null);
 
-    // Hiển thị nhãn "Đang lưu..." trong tối đa khoảng 400ms (300ms)
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
@@ -134,11 +133,10 @@ export default function AdminCoursesPage() {
         description: editDescription.trim(),
       });
       if (!res.success) {
-        // Dưới save_error: action trả lỗi, giữ modal/form, không thay dữ liệu, hiện lỗi và nút Thử lại
         setEditError(res.message);
       } else {
         setSelectedCourseId(selectedCourse.id);
-        setSuccessMessage(res.message || 'Cập nhật khóa học thành công (đã lưu trong dữ liệu giả).');
+        setSuccessMessage(res.message || 'Cập nhật khóa học thành công.');
         setIsEditOpen(false);
         setEditError(null);
       }
@@ -158,38 +156,36 @@ export default function AdminCoursesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Title & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800">
-              Quản trị Admin
-            </span>
-            <span className="text-xs text-slate-400 font-mono">[UI-05]</span>
+      {/* Title & Actions Card */}
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_14px_40px_rgba(8,112,184,0.06)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#1d63ed] border border-blue-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
+            <span>Quản trị Khóa học (Admin)</span>
           </div>
-          <h1 className="text-xl font-extrabold text-slate-900 mt-1">
-            Chương trình & Khóa học 14 Buổi Cố Định
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            Chương trình &amp; Khóa học 14 Buổi Cố Định
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
             Mỗi khóa học có đúng 14 vị trí Buổi 1–14 cố định. Không thêm, xóa hoặc đổi thứ tự vị trí để bảo
-            toàn tính nhất quán của CSV tổng kết.
+            toàn tính nhất quán của báo cáo CSV tổng kết.
           </p>
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 self-start sm:self-auto">
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1d63ed] text-white rounded-xl text-xs font-bold hover:bg-[#154ec2] transition-all shadow-md shadow-blue-600/20 cursor-pointer"
           >
             <IconPlus className="w-4 h-4" />
-            <span>Tạo khóa mẫu</span>
+            <span>Tạo khóa học mới</span>
           </button>
         </div>
       </div>
 
       {/* Success Notification Alert */}
       {successMessage && (
-        <div className="flex items-center justify-between p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-medium">
+        <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold">
           <div className="flex items-center gap-2">
             <IconCheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{successMessage}</span>
@@ -197,7 +193,7 @@ export default function AdminCoursesPage() {
           <button
             type="button"
             onClick={() => setSuccessMessage(null)}
-            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold ml-2 underline"
+            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold ml-2 underline cursor-pointer"
           >
             Đóng
           </button>
@@ -206,39 +202,41 @@ export default function AdminCoursesPage() {
 
       {/* Empty Courses State */}
       {courses.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm max-w-lg mx-auto my-6">
-          <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center shadow-[0_14px_40px_rgba(8,112,184,0.06)] max-w-lg mx-auto my-6">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#1d63ed] flex items-center justify-center mx-auto mb-4">
             <IconBookOpen className="w-6 h-6" />
           </div>
-          <h2 className="text-base font-bold text-slate-900 mb-1.5">Chưa có khóa học nào trong hệ thống</h2>
+          <h2 className="text-base font-extrabold text-slate-900 mb-1.5">Chưa có khóa học nào trong hệ thống</h2>
           <p className="text-xs text-slate-500 mb-6 leading-relaxed max-w-sm mx-auto">
-            Hiện tại danh sách khóa học đang trống (hoặc đang kích hoạt kịch bản dữ liệu rỗng). Vui lòng tạo khóa học mẫu mới để bắt đầu thiết lập chương trình 14 buổi học cố định.
+            Hiện tại danh sách khóa học đang trống. Vui lòng tạo khóa học mới để bắt đầu thiết lập chương trình 14 buổi học cố định.
           </p>
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1d63ed] text-white rounded-xl text-xs font-bold hover:bg-[#154ec2] transition-all shadow-md shadow-blue-600/20 cursor-pointer"
           >
             <IconPlus className="w-4 h-4" />
-            <span>Tạo khóa mẫu</span>
+            <span>Tạo khóa học mới</span>
           </button>
         </div>
       ) : (
         <>
           {/* Course Selection List */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-[0_14px_40px_rgba(8,112,184,0.05)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
-                <IconBookOpen className="w-4 h-4 text-blue-600" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1d63ed] flex items-center justify-center">
+                  <IconBookOpen className="w-4 h-4" />
+                </div>
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-800">
                   Danh sách khóa học ({courses.length})
                 </h2>
               </div>
               <span className="text-[11px] text-slate-400">
-                Bấm chọn khóa học để xem cấu trúc và bài học tương ứng
+                Bấm chọn khóa học để xem cấu trúc và 14 buổi học tương ứng
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {courses.map((crs) => {
                 const isSelected = crs.id === selectedCourse?.id;
                 return (
@@ -249,32 +247,32 @@ export default function AdminCoursesPage() {
                       setSelectedCourseId(crs.id);
                       setSuccessMessage(null);
                     }}
-                    className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                    className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
                       isSelected
-                        ? 'border-blue-500 bg-blue-50/70 shadow-sm ring-2 ring-blue-500/20'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-[#1d63ed] bg-blue-50/60 shadow-sm ring-2 ring-blue-500/15'
+                        : 'border-slate-200/80 bg-white hover:border-blue-200 hover:bg-slate-50/60'
                     }`}
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-mono font-bold text-blue-600 uppercase">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-mono font-bold text-[#1d63ed] uppercase bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
                           {crs.id}
                         </span>
                         {isSelected && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#1d63ed] bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
                             <IconCheckCircle className="w-3 h-3" />
                             Đang chọn
                           </span>
                         )}
                       </div>
-                      <div className="text-xs font-bold text-slate-900 line-clamp-1">{crs.title}</div>
-                      <div className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                      <div className="text-sm font-extrabold text-slate-900 line-clamp-1">{crs.title}</div>
+                      <div className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
                         {crs.description}
                       </div>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>14 buổi chuẩn</span>
-                      <span className="text-blue-600 font-semibold">{isSelected ? 'Khóa hiện hành' : 'Bấm để chọn →'}</span>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                      <span className="font-medium">14 buổi chuẩn</span>
+                      <span className="text-[#1d63ed] font-bold">{isSelected ? 'Khóa hiện hành' : 'Bấm để chọn →'}</span>
                     </div>
                   </button>
                 );
@@ -284,31 +282,31 @@ export default function AdminCoursesPage() {
 
           {/* Course Detail Card */}
           {selectedCourse && (
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+            <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_14px_40px_rgba(8,112,184,0.06)] space-y-5">
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                <div className="space-y-1.5 max-w-2xl">
+                <div className="space-y-2 max-w-2xl">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-blue-600 uppercase tracking-wider">
+                    <span className="text-xs font-mono font-bold text-[#1d63ed] uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-100">
                       Mã khóa: {selectedCourse.id}
                     </span>
                   </div>
-                  <h2 className="text-lg font-black text-slate-900">{selectedCourse.title}</h2>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">{selectedCourse.title}</h2>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     {selectedCourse.description}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end gap-2.5 shrink-0">
-                  <div className="bg-blue-50 border border-blue-200 px-4 py-2.5 rounded-xl text-center w-full md:w-auto">
-                    <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">
+                  <div className="bg-blue-50/80 border border-blue-200/80 px-5 py-3 rounded-2xl text-center w-full md:w-auto">
+                    <span className="text-[10px] font-bold text-[#1d63ed] uppercase tracking-wider block">
                       Cấu trúc chương trình
                     </span>
-                    <span className="text-lg font-black text-blue-900 block mt-0.5">14 Buổi chuẩn</span>
-                    <span className="text-[10px] text-blue-600 font-semibold">(Không lệch số buổi)</span>
+                    <span className="text-lg font-black text-slate-900 block mt-0.5">14 Buổi chuẩn</span>
+                    <span className="text-[10px] text-slate-500 font-semibold">(Không lệch số buổi)</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleOpenEditModal}
-                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-xs font-bold transition-colors shadow-sm w-full md:w-auto"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors shadow-2xs w-full md:w-auto cursor-pointer"
                   >
                     <IconFileText className="w-3.5 h-3.5 text-slate-500" />
                     <span>Sửa thông tin khóa</span>
@@ -316,17 +314,17 @@ export default function AdminCoursesPage() {
                 </div>
               </div>
 
-              <div className="pt-3 flex flex-wrap items-center gap-4 text-xs text-slate-500 border-t border-slate-100 font-medium">
+              <div className="pt-4 flex flex-wrap items-center gap-4 text-xs text-slate-500 border-t border-slate-100 font-medium">
                 <span>
                   Đã xuất bản:{' '}
-                  <strong className="text-emerald-700">
+                  <strong className="text-emerald-700 font-extrabold">
                     {courseLessons.filter((l) => l.status === 'published').length}/14 buổi
                   </strong>
                 </span>
                 <span>•</span>
                 <span>
                   Bản nháp:{' '}
-                  <strong className="text-amber-700">
+                  <strong className="text-amber-700 font-extrabold">
                     {courseLessons.filter((l) => l.status === 'draft').length}/14 buổi
                   </strong>
                 </span>
@@ -340,26 +338,26 @@ export default function AdminCoursesPage() {
 
           {/* 14 Sessions Grid / Table */}
           {selectedCourse && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-slate-900">
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_14px_40px_rgba(8,112,184,0.06)] overflow-hidden">
+              <div className="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <h3 className="text-base font-extrabold text-slate-900">
                   Danh sách 14 vị trí bài học ({selectedCourse.title})
                 </h3>
                 <span className="text-xs text-slate-400 font-medium">
-                  Bấm &quot;Soạn [UI-06]&quot; để cập nhật nội dung bài học
+                  Bấm &ldquo;Soạn bài&rdquo; để cập nhật giáo trình và câu hỏi Quiz
                 </span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
+                  <thead className="bg-[#f8fafc] text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[11px]">
                     <tr>
-                      <th className="px-4 py-3 w-20">Vị trí</th>
-                      <th className="px-4 py-3">Tiêu đề bài học &amp; Chủ đề</th>
-                      <th className="px-4 py-3 w-40">Thành phần đánh giá</th>
-                      <th className="px-4 py-3 w-32">Chế độ nộp bài</th>
-                      <th className="px-4 py-3 w-32">Trạng thái</th>
-                      <th className="px-4 py-3 w-28 text-right">Thao tác</th>
+                      <th className="px-5 py-3.5 w-24">Vị trí</th>
+                      <th className="px-5 py-3.5">Tiêu đề bài học &amp; Chủ đề</th>
+                      <th className="px-5 py-3.5 w-44">Thành phần đánh giá</th>
+                      <th className="px-5 py-3.5 w-36">Chế độ nộp bài</th>
+                      <th className="px-5 py-3.5 w-36">Trạng thái</th>
+                      <th className="px-5 py-3.5 w-52 text-right">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -367,63 +365,73 @@ export default function AdminCoursesPage() {
                       const isPublished = les.status === 'published';
 
                       return (
-                        <tr key={les.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 rounded bg-slate-100 font-mono font-black text-slate-800 text-[11px]">
+                        <tr key={les.id} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="px-5 py-4 whitespace-nowrap">
+                            <span className="inline-block px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-100 font-mono font-bold text-[#1d63ed] text-[11px] whitespace-nowrap">
                               Buổi {les.sessionNumber}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-5 py-4">
                             <div className="font-bold text-slate-900">{les.title}</div>
-                            <div className="text-[11px] text-slate-500 line-clamp-1">{les.description}</div>
+                            <div className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{les.description}</div>
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1">
+                          <td className="px-5 py-4 whitespace-nowrap">
+                            <div className="flex flex-wrap gap-1.5">
                               {les.hasQuiz && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 whitespace-nowrap">
                                   Quiz (70%)
                                 </span>
                               )}
                               {les.hasPractice && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80 whitespace-nowrap">
                                   Thực hành
                                 </span>
                               )}
                               {!les.hasQuiz && !les.hasPractice && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap">
                                   Chỉ lý thuyết (Chặn xuất bản)
                                 </span>
                               )}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-slate-600 font-mono text-[11px]">
+                          <td className="px-5 py-4 text-slate-600 font-mono text-[11px] whitespace-nowrap">
                             {les.hasPractice
                               ? les.practiceMode === 'file_allowed'
                                 ? 'Tệp <= 2MB'
                                 : 'Chỉ nhận link'
                               : 'Không có TH'}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-5 py-4 whitespace-nowrap">
                             {isPublished ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                <IconCheckCircle className="w-3 h-3" />
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                <IconCheckCircle className="w-3 h-3 shrink-0" />
                                 <span>Đã xuất bản</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                <IconLock className="w-3 h-3" />
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                <IconLock className="w-3 h-3 shrink-0" />
                                 <span>Bản nháp</span>
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-right">
-                            <Link
-                              href={`/admin/lessons/${les.id}/edit`}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 font-bold hover:bg-blue-100 transition-colors"
-                            >
-                              <span>Soạn [UI-06]</span>
-                              <IconExternalLink className="w-3.5 h-3.5" />
-                            </Link>
+                          <td className="px-5 py-4 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center justify-end gap-2">
+                              <Link
+                                href={`/student/lessons/${les.id}`}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold hover:bg-emerald-100 transition-colors whitespace-nowrap"
+                                title="Xem trước giao diện bài học của Học sinh"
+                              >
+                                <IconBookOpen className="w-3.5 h-3.5 shrink-0" />
+                                <span>Xem thử</span>
+                              </Link>
+                              <Link
+                                href={`/admin/lessons/${les.id}/edit`}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-50 text-[#1d63ed] font-bold hover:bg-[#1d63ed] hover:text-white transition-all whitespace-nowrap"
+                              >
+                                <span>Soạn bài</span>
+                                <IconExternalLink className="w-3.5 h-3.5 shrink-0" />
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -445,15 +453,15 @@ export default function AdminCoursesPage() {
             setCreateError(null);
           }
         }}
-        title="Tạo khóa học mẫu mới"
+        title="Tạo khóa học mới (14 buổi chuẩn)"
       >
         <form onSubmit={handleCreateCourse} className="space-y-4">
           <p className="text-xs text-slate-500 leading-relaxed">
-            Khóa học mới sẽ được tự động khởi tạo đúng 14 buổi học cố định theo chuẩn chương trình (Dữ liệu giả).
+            Khóa học mới sẽ được tự động khởi tạo đúng 14 buổi học cố định theo chuẩn chương trình.
           </p>
 
           {createError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 space-y-2">
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-2">
               <div className="flex items-start gap-2">
                 <IconAlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <span className="font-medium leading-relaxed">{createError}</span>
@@ -472,7 +480,7 @@ export default function AdminCoursesPage() {
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Tiêu đề khóa học <span className="text-rose-500">*</span>
             </label>
             <input
@@ -481,12 +489,12 @@ export default function AdminCoursesPage() {
               onChange={(e) => setCreateTitle(e.target.value)}
               disabled={isCreating}
               placeholder="VD: Robotics & Tự Động Hóa K15"
-              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100"
+              className="w-full px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-100"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Mô tả khóa học
             </label>
             <textarea
@@ -494,12 +502,12 @@ export default function AdminCoursesPage() {
               onChange={(e) => setCreateDescription(e.target.value)}
               disabled={isCreating}
               rows={3}
-              placeholder="Nhập mô tả ngắn gọn về khóa học (Dữ liệu giả)..."
-              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 resize-none"
+              placeholder="Nhập mô tả ngắn gọn về khóa học..."
+              className="w-full px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-100 resize-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => {
@@ -507,16 +515,16 @@ export default function AdminCoursesPage() {
                 setCreateError(null);
               }}
               disabled={isCreating}
-              className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="px-4 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
               disabled={isCreating}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-sm"
+              className="px-5 py-2 bg-[#1d63ed] text-white rounded-xl text-xs font-bold hover:bg-[#154ec2] transition-all disabled:opacity-50 shadow-md shadow-blue-600/20"
             >
-              {isCreating ? 'Đang lưu...' : 'Tạo khóa mẫu'}
+              {isCreating ? 'Đang lưu...' : 'Tạo khóa học'}
             </button>
           </div>
         </form>
@@ -535,11 +543,11 @@ export default function AdminCoursesPage() {
       >
         <form onSubmit={handleUpdateCourse} className="space-y-4">
           <p className="text-xs text-slate-500 leading-relaxed">
-            Cập nhật tiêu đề hoặc mô tả cho khóa học đang chọn. Dữ liệu sẽ được lưu trong bộ nhớ giả lập.
+            Cập nhật tiêu đề hoặc mô tả cho khóa học đang chọn.
           </p>
 
           {editError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 space-y-2">
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-2">
               <div className="flex items-start gap-2">
                 <IconAlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <span className="font-medium leading-relaxed">{editError}</span>
@@ -558,7 +566,7 @@ export default function AdminCoursesPage() {
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Tiêu đề khóa học <span className="text-rose-500">*</span>
             </label>
             <input
@@ -567,12 +575,12 @@ export default function AdminCoursesPage() {
               onChange={(e) => setEditTitle(e.target.value)}
               disabled={isEditing}
               placeholder="Nhập tiêu đề khóa học..."
-              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100"
+              className="w-full px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-100"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Mô tả khóa học
             </label>
             <textarea
@@ -581,11 +589,11 @@ export default function AdminCoursesPage() {
               disabled={isEditing}
               rows={3}
               placeholder="Nhập mô tả khóa học..."
-              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 resize-none"
+              className="w-full px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-100 resize-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => {
@@ -593,14 +601,14 @@ export default function AdminCoursesPage() {
                 setEditError(null);
               }}
               disabled={isEditing}
-              className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="px-4 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
               disabled={isEditing}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-sm"
+              className="px-5 py-2 bg-[#1d63ed] text-white rounded-xl text-xs font-bold hover:bg-[#154ec2] transition-all disabled:opacity-50 shadow-md shadow-blue-600/20"
             >
               {isEditing ? 'Đang lưu...' : 'Lưu thay đổi'}
             </button>

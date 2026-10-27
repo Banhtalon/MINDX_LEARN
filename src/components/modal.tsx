@@ -122,26 +122,26 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'md' }: Mod
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`bg-white rounded-xl shadow-2xl border border-slate-200 w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 outline-none`}
+        className={`bg-white rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 outline-none`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
-          <h3 id={titleId} className="text-base font-bold text-slate-900">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+          <h3 id={titleId} className="text-base font-bold text-slate-900 tracking-tight">
             {title}
           </h3>
           <button
             type="button"
             onClick={onClose}
             aria-label="Đóng cửa sổ"
-            className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
           >
-            <IconX className="w-5 h-5" />
+            <IconX className="w-4 h-4" />
           </button>
         </div>
         <div className="p-6 overflow-y-auto flex-1">{children}</div>
@@ -180,17 +180,17 @@ export function Drawer({ isOpen, onClose, title, children, width = 'lg' }: Drawe
           aria-modal="true"
           aria-labelledby={titleId}
           tabIndex={-1}
-          className={`w-screen ${widthClasses[width]} max-h-screen bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-200 outline-none`}
+          className={`w-screen ${widthClasses[width]} max-h-screen bg-white shadow-[0_20px_60px_rgba(15,23,42,0.2)] border-l border-slate-100 flex flex-col animate-in slide-in-from-right duration-200 outline-none`}
         >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
-            <h3 id={titleId} className="text-base font-bold text-slate-900">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
+            <h3 id={titleId} className="text-base font-bold text-slate-900 tracking-tight">
               {title}
             </h3>
             <button
               type="button"
               onClick={onClose}
               aria-label="Đóng thanh trượt"
-              className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+              className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
             >
               <IconX className="w-5 h-5" />
             </button>
@@ -232,7 +232,7 @@ export function ConfirmDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         ref={dialogRef}
         role="alertdialog"
@@ -240,29 +240,29 @@ export function ConfirmDialog({
         aria-labelledby={titleId}
         aria-describedby={descId}
         tabIndex={-1}
-        className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full max-h-[90vh] overflow-y-auto p-6 animate-in fade-in zoom-in-95 duration-150 outline-none"
+        className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 max-w-md w-full max-h-[90vh] overflow-y-auto p-6 sm:p-7 animate-in fade-in zoom-in-95 duration-150 outline-none"
       >
         <div className="flex items-start gap-4">
           <div
-            className={`p-3 rounded-full shrink-0 ${
-              isDanger ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
+            className={`p-3 rounded-2xl shrink-0 ${
+              isDanger ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-blue-50 text-[#1d63ed] border border-blue-100'
             }`}
           >
             {isDanger ? <IconAlertTriangle className="w-6 h-6" /> : <IconInfo className="w-6 h-6" />}
           </div>
           <div className="flex-1">
-            <h3 id={titleId} className="text-base font-bold text-slate-900 mb-2">
+            <h3 id={titleId} className="text-base font-bold text-slate-900 mb-2 tracking-tight">
               {title}
             </h3>
             <p id={descId} className="text-sm text-slate-600 leading-relaxed mb-6">
               {message}
             </p>
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+                className="px-4 py-2.5 border border-slate-200 bg-white text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-colors"
               >
                 {cancelText}
               </button>
@@ -270,10 +270,10 @@ export function ConfirmDialog({
                 type="button"
                 onClick={onConfirm}
                 disabled={isLoading}
-                className={`px-4 py-2 text-white rounded-lg text-sm font-semibold transition-colors ${
+                className={`px-5 py-2.5 text-white rounded-xl text-xs font-semibold shadow-sm transition-all ${
                   isDanger
                     ? 'bg-rose-600 hover:bg-rose-700 disabled:opacity-50'
-                    : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50'
+                    : 'bg-[#1d63ed] hover:bg-blue-700 shadow-blue-500/20 disabled:opacity-50'
                 }`}
               >
                 {isLoading ? 'Đang xử lý...' : confirmText}

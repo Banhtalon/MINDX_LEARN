@@ -9,9 +9,7 @@ import {
   IconCheckCircle,
   IconAlertCircle,
   IconRefreshCw,
-  IconCheck,
   IconAlertTriangle,
-  IconClock,
   IconRotateCcw,
 } from '@/components/icons';
 
@@ -20,7 +18,7 @@ export default function StudentQuizPage() {
   const router = useRouter();
   const lessonId = params.lessonId as string;
 
-  const { currentUser, lessons, quizResults, submitQuizAttempt, qaState } = useStore();
+  const { currentUser, lessons, quizResults, submitQuizAttempt, qaState, isLiveMode } = useStore();
 
   const lesson = lessons.find((l) => l.id === lessonId);
 
@@ -32,15 +30,17 @@ export default function StudentQuizPage() {
   // Simulation: Quiz updated mid-attempt
   const [quizChangedMidAttempt, setQuizChangedMidAttempt] = useState(false);
 
-  if (!currentUser || currentUser.role !== 'student') {
+  if (!currentUser) {
     return (
-      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-xl border border-slate-200">
-        <IconAlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-900 mb-2">Trang dành cho Học sinh</h2>
-        <p className="text-xs text-slate-500 mb-4">Vui lòng đăng nhập tài khoản Học sinh để làm trắc nghiệm.</p>
+      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(8,112,184,0.07)]">
+        <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-4">
+          <IconAlertCircle className="w-7 h-7" />
+        </div>
+        <h2 className="text-lg font-extrabold text-slate-900 mb-2">Trang dành cho Học sinh</h2>
+        <p className="text-xs text-slate-500 mb-6">Vui lòng đăng nhập tài khoản Học sinh để làm trắc nghiệm.</p>
         <button
           onClick={() => router.push('/login')}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700"
+          className="px-5 py-2.5 bg-[#1d63ed] text-white rounded-xl text-xs font-bold hover:bg-[#154ec2] shadow-md shadow-blue-600/20 transition-all cursor-pointer"
         >
           Đăng nhập Học sinh
         </button>
@@ -48,19 +48,23 @@ export default function StudentQuizPage() {
     );
   }
 
-  if (!lesson || lesson.status !== 'published' || !lesson.hasQuiz || lesson.questions.length === 0) {
+  const isStaffPreview = currentUser.role === 'admin' || currentUser.role === 'teacher';
+
+  if (!lesson || (!isStaffPreview && lesson.status !== 'published') || !lesson.hasQuiz || lesson.questions.length === 0) {
     return (
-      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-xl border border-slate-200">
-        <IconAlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-900 mb-2">Quiz chưa xuất bản hoặc không khả dụng</h2>
-        <p className="text-xs text-slate-500 mb-4">
+      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(8,112,184,0.07)]">
+        <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-4">
+          <IconAlertCircle className="w-7 h-7" />
+        </div>
+        <h2 className="text-lg font-extrabold text-slate-900 mb-2">Quiz chưa xuất bản hoặc không khả dụng</h2>
+        <p className="text-xs text-slate-500 mb-6 leading-relaxed">
           Bài trắc nghiệm này thuộc buổi học chưa được xuất bản hoặc không có câu hỏi trắc nghiệm.
         </p>
         <Link
-          href="/student/course"
-          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700"
+          href={isStaffPreview ? '/admin/courses' : '/student/course'}
+          className="inline-block px-5 py-2.5 bg-[#1d63ed] text-white rounded-xl text-xs font-bold hover:bg-[#154ec2] shadow-md shadow-blue-600/20 transition-all"
         >
-          Quay lại danh sách bài học [UI-11]
+          {isStaffPreview ? 'Quay lại Quản lý khóa học' : 'Quay lại danh sách bài học'}
         </Link>
       </div>
     );
@@ -95,6 +99,25 @@ export default function StudentQuizPage() {
       selectedAnswers[idx] !== undefined ? selectedAnswers[idx] : -1
     );
 
+    if (isStaffPreview) {
+      let correctCount = 0;
+      lesson.questions.forEach((q, idx) => {
+        if (typeof q.correctOptionIndex === 'number' && answersArray[idx] === q.correctOptionIndex) {
+          correctCount++;
+        }
+      });
+      const score = Math.round((correctCount / lesson.questions.length) * 100);
+      const passed = score >= 70;
+      setLastResult({
+        score,
+        passed,
+        message: `[Chế độ Xem trước Admin/GV] Đúng ${correctCount}/${lesson.questions.length} câu (${score}%). ${
+          passed ? 'Đạt ngưỡng >= 70%!' : 'Chưa đạt ngưỡng 70%.'
+        }`,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setTimeout(async () => {
       const res = await submitQuizAttempt(currentUser.id, lesson.id, answersArray);
@@ -114,24 +137,23 @@ export default function StudentQuizPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Navigation Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-3">
-        <div className="flex items-center gap-3">
+      {/* Navigation Header Card */}
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_14px_40px_rgba(8,112,184,0.06)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
           <Link
             href={`/student/lessons/${lesson.id}`}
-            className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
-            title="Quay lại Bài học [UI-12]"
+            className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0"
+            title="Quay lại Bài học"
           >
             <IconArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-purple-100 text-purple-800">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-50 text-[#1d63ed] border border-blue-100">
                 Quiz Buổi {lesson.sessionNumber}
               </span>
-              <span className="text-xs text-slate-400 font-mono">[UI-13]</span>
             </div>
-            <h1 className="text-xl font-extrabold text-slate-900 mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Trắc nghiệm: {lesson.title}
             </h1>
           </div>
@@ -139,51 +161,64 @@ export default function StudentQuizPage() {
 
         {/* Existing Highest Score Badge */}
         {existingResult && (
-          <div className="bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-xl text-xs font-bold text-purple-900 flex items-center gap-2 self-start sm:self-auto">
-            <span>Điểm cao nhất:</span>
-            <span className="text-purple-700 font-black text-sm">{existingResult.highestScore}%</span>
-            <span>({existingResult.passed ? 'ĐẠT >= 70%' : 'Chưa đạt'})</span>
+          <div className="bg-blue-50/80 border border-blue-200/80 px-4 py-2.5 rounded-2xl text-xs font-bold text-blue-950 flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <span className="text-slate-600">Điểm cao nhất:</span>
+            <span className="text-[#1d63ed] font-black text-sm">{existingResult.highestScore}%</span>
+            <span className={existingResult.passed ? 'text-emerald-700' : 'text-amber-700'}>
+              ({existingResult.passed ? 'ĐẠT >= 70%' : 'Chưa đạt'})
+            </span>
           </div>
         )}
       </div>
 
       {/* Rules Notice */}
-      <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
-        <div className="font-bold text-slate-800">Quy tắc làm bài Quiz (Kế hoạch v3):</div>
-        <div>• Mỗi câu hỏi có 1 đáp án đúng duy nhất, các câu hỏi có trọng số điểm bằng nhau.</div>
-        <div>• Ngưỡng hoàn thành ĐẠT: từ 70% trở lên.</div>
-        <div>• Được phép làm lại không giới hạn số lần, hệ thống luôn lưu giữ điểm số cao nhất.</div>
+      <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-xs text-xs text-slate-600 space-y-1.5">
+        <div className="font-extrabold text-slate-900 text-sm mb-1">Hướng dẫn làm bài Trắc nghiệm:</div>
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
+          <span>Mỗi câu hỏi có 1 đáp án đúng duy nhất, các câu hỏi có trọng số điểm bằng nhau.</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
+          <span>Ngưỡng hoàn thành ĐẠT: từ <strong>70%</strong> trở lên.</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
+          <span>Được phép làm lại không giới hạn số lần, hệ thống luôn lưu giữ điểm số cao nhất.</span>
+        </div>
       </div>
 
-      {/* Mid-attempt change simulator banner */}
-      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs flex items-center justify-between">
-        <span className="text-blue-900">
-          Mô phỏng QA: Kiểm tra hành vi khi giáo viên cập nhật bài trắc nghiệm giữa lượt làm
-        </span>
-        <button
-          type="button"
-          onClick={() => setQuizChangedMidAttempt(true)}
-          className={`px-2.5 py-1 rounded font-bold text-[11px] transition-colors ${
-            quizChangedMidAttempt
-              ? 'bg-amber-600 text-white'
-              : 'bg-white border border-blue-300 text-blue-700 hover:bg-blue-100'
-          }`}
-        >
-          {quizChangedMidAttempt ? 'Đang kích hoạt giả lập' : 'Kích hoạt thử'}
-        </button>
-      </div>
+      {/* Mid-attempt change simulator banner (only visible in Demo/QA mode) */}
+      {!isLiveMode && (
+        <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-2xl text-xs flex items-center justify-between gap-2">
+          <span className="text-blue-900 font-medium">
+            Mô phỏng QA: Kiểm tra hành vi khi giáo viên cập nhật bài trắc nghiệm giữa lượt làm
+          </span>
+          <button
+            type="button"
+            onClick={() => setQuizChangedMidAttempt(true)}
+            className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition-colors cursor-pointer ${
+              quizChangedMidAttempt
+                ? 'bg-amber-600 text-white'
+                : 'bg-white border border-blue-200 text-[#1d63ed] hover:bg-blue-100'
+            }`}
+          >
+            {quizChangedMidAttempt ? 'Đang kích hoạt giả lập' : 'Kích hoạt thử'}
+          </button>
+        </div>
+      )}
 
       {/* Result Display after Submit */}
       {lastResult && (
         <div
-          className={`p-6 rounded-2xl border shadow-sm animate-in fade-in space-y-3 ${
+          className={`p-6 rounded-3xl border shadow-sm animate-in fade-in space-y-3 ${
             lastResult.passed
-              ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-              : 'bg-amber-50 border-amber-300 text-amber-900'
+              ? 'bg-emerald-50/90 border-emerald-200 text-emerald-950'
+              : 'bg-amber-50/90 border-amber-200 text-amber-950'
           }`}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {lastResult.passed ? (
                 <IconCheckCircle className="w-6 h-6 text-emerald-600" />
               ) : (
@@ -193,19 +228,19 @@ export default function StudentQuizPage() {
                 {lastResult.passed ? 'CHÚC MỪNG BẠN ĐÃ ĐẠT!' : 'BẠN CHƯA ĐẠT NGƯỠNG 70%'}
               </h2>
             </div>
-            <div className="text-xl font-black">{lastResult.score}%</div>
+            <div className="text-2xl font-black">{lastResult.score}%</div>
           </div>
 
           <p className="text-xs leading-relaxed">{lastResult.message}</p>
 
-          <div className="pt-2 flex items-center justify-between border-t border-current/20">
+          <div className="pt-3 flex items-center justify-between border-t border-current/15">
             <span className="text-xs">
               Điểm cao nhất hệ thống ghi nhận:{' '}
               <strong>{existingResult ? existingResult.highestScore : lastResult.score}%</strong>
             </span>
             <button
               onClick={handleResetForm}
-              className="px-3.5 py-1.5 rounded-lg bg-white/80 hover:bg-white text-slate-800 font-bold text-xs shadow-sm transition-colors flex items-center gap-1"
+              className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <IconRotateCcw className="w-3.5 h-3.5" />
               <span>Làm lại lần nữa</span>
@@ -215,33 +250,33 @@ export default function StudentQuizPage() {
       )}
 
       {/* Quiz Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {lesson.questions.map((q, qIndex) => {
           const selectedOption = selectedAnswers[qIndex];
 
           return (
             <div
               key={q.id}
-              className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4 text-xs"
+              className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-7 shadow-[0_14px_40px_rgba(8,112,184,0.05)] space-y-4 text-xs"
             >
-              <div className="flex items-start gap-2">
-                <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold font-mono">
+              <div className="flex items-start gap-3">
+                <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-[#1d63ed] border border-blue-100 font-bold font-mono shrink-0">
                   Câu {qIndex + 1}
                 </span>
-                <h3 className="font-bold text-slate-900 text-sm leading-relaxed flex-1">{q.prompt}</h3>
+                <h3 className="font-extrabold text-slate-900 text-sm leading-relaxed flex-1 pt-0.5">{q.prompt}</h3>
               </div>
 
-              <div className="space-y-2 pt-1 pl-1">
+              <div className="space-y-2.5 pt-1">
                 {q.options.map((opt, optIndex) => {
                   const isChecked = selectedOption === optIndex;
 
                   return (
                     <label
                       key={optIndex}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      className={`flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${
                         isChecked
-                          ? 'border-blue-600 bg-blue-50/80 ring-1 ring-blue-600 font-semibold text-blue-900'
-                          : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                          ? 'border-[#1d63ed] bg-blue-50/70 ring-2 ring-blue-500/15 font-bold text-slate-900'
+                          : 'border-slate-200/80 hover:bg-slate-50 text-slate-700'
                       }`}
                     >
                       <input
@@ -249,12 +284,16 @@ export default function StudentQuizPage() {
                         name={`question_${q.id}`}
                         checked={isChecked}
                         onChange={() => handleSelectOption(qIndex, optIndex)}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        className="w-4 h-4 text-[#1d63ed] focus:ring-[#1d63ed]"
                       />
-                      <span className="font-mono text-slate-400 font-bold">
-                        {String.fromCharCode(65 + optIndex)}.
+                      <span
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono text-[11px] font-bold shrink-0 ${
+                          isChecked ? 'bg-[#1d63ed] text-white' : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {String.fromCharCode(65 + optIndex)}
                       </span>
-                      <span className="flex-1">{opt}</span>
+                      <span className="flex-1 leading-relaxed">{opt}</span>
                     </label>
                   );
                 })}
@@ -267,7 +306,7 @@ export default function StudentQuizPage() {
         <div className="flex items-center justify-between pt-2">
           <Link
             href={`/student/lessons/${lesson.id}`}
-            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50"
+            className="px-5 py-2.5 border border-slate-200 bg-white text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors"
           >
             Quay lại bài học
           </Link>
@@ -275,7 +314,7 @@ export default function StudentQuizPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold shadow-md transition-colors flex items-center gap-2"
+            className="px-6 py-3 bg-[#1d63ed] hover:bg-[#154ec2] disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer"
           >
             {isSubmitting && <IconRefreshCw className="w-4 h-4 animate-spin" />}
             <span>Nộp bài chấm điểm</span>
