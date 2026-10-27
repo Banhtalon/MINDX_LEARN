@@ -1,60 +1,186 @@
-# MINDX LEARN — Master Design System (`MASTER.md`)
-
-> **Tài liệu Quy chuẩn Thiết kế Hệ thống (System Design Source of Truth)**
-> Kết hợp từ: **Dembrandt Design Tokens** (rút trích từ mẫu chuẩn `/login` đã được Owner duyệt) + **UI UX Pro Max** + **Taste Skill** + **Genjutsu Micro-Interactions**.
-
+---
+name: MindX Learn High-Contrast Educational System
+colors:
+  surface: '#f8f9ff'
+  surface-dim: '#cbdbf5'
+  surface-bright: '#f8f9ff'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#eff4ff'
+  surface-container: '#e5eeff'
+  surface-container-high: '#dce9ff'
+  surface-container-highest: '#d3e4fe'
+  on-surface: '#0b1c30'
+  on-surface-variant: '#44474d'
+  inverse-surface: '#213145'
+  inverse-on-surface: '#eaf1ff'
+  outline: '#74777e'
+  outline-variant: '#c4c6cd'
+  surface-tint: '#4d6079'
+  primary: '#000c1e'
+  on-primary: '#ffffff'
+  primary-container: '#0f233a'
+  on-primary-container: '#788ba6'
+  inverse-primary: '#b5c8e6'
+  secondary: '#3755c3'
+  on-secondary: '#ffffff'
+  secondary-container: '#708cfd'
+  on-secondary-container: '#00217a'
+  tertiary: '#000f08'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#00281b'
+  on-tertiary-container: '#3a9976'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#d3e4ff'
+  primary-fixed-dim: '#b5c8e6'
+  on-primary-fixed: '#071c33'
+  on-primary-fixed-variant: '#354861'
+  secondary-fixed: '#dde1ff'
+  secondary-fixed-dim: '#b8c4ff'
+  on-secondary-fixed: '#001453'
+  on-secondary-fixed-variant: '#173bab'
+  tertiary-fixed: '#97f5cc'
+  tertiary-fixed-dim: '#7bd8b1'
+  on-tertiary-fixed: '#002115'
+  on-tertiary-fixed-variant: '#00513a'
+  background: '#f8f9ff'
+  on-background: '#0b1c30'
+  surface-variant: '#d3e4fe'
+typography:
+  headline-xl:
+    fontFamily: Public Sans
+    fontSize: 40px
+    fontWeight: '800'
+    lineHeight: 48px
+    letterSpacing: -0.02em
+  headline-xl-mobile:
+    fontFamily: Public Sans
+    fontSize: 30px
+    fontWeight: '800'
+    lineHeight: 38px
+    letterSpacing: -0.02em
+  headline-lg:
+    fontFamily: Public Sans
+    fontSize: 32px
+    fontWeight: '700'
+    lineHeight: 40px
+    letterSpacing: -0.015em
+  headline-lg-mobile:
+    fontFamily: Public Sans
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+    letterSpacing: -0.01em
+  headline-md:
+    fontFamily: Public Sans
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+    letterSpacing: -0.01em
+  headline-sm:
+    fontFamily: Public Sans
+    fontSize: 20px
+    fontWeight: '700'
+    lineHeight: 28px
+    letterSpacing: 0em
+  title-md:
+    fontFamily: Public Sans
+    fontSize: 16px
+    fontWeight: '700'
+    lineHeight: 24px
+    letterSpacing: 0em
+  body-lg:
+    fontFamily: Public Sans
+    fontSize: 18px
+    fontWeight: '400'
+    lineHeight: 28px
+    letterSpacing: 0em
+  body-md:
+    fontFamily: Public Sans
+    fontSize: 15px
+    fontWeight: '400'
+    lineHeight: 24px
+    letterSpacing: 0em
+  body-sm:
+    fontFamily: Public Sans
+    fontSize: 13px
+    fontWeight: '400'
+    lineHeight: 20px
+    letterSpacing: 0.01em
+  label-lg:
+    fontFamily: Public Sans
+    fontSize: 14px
+    fontWeight: '700'
+    lineHeight: 20px
+    letterSpacing: 0.02em
+  label-md:
+    fontFamily: Public Sans
+    fontSize: 12px
+    fontWeight: '700'
+    lineHeight: 16px
+    letterSpacing: 0.04em
+  label-sm:
+    fontFamily: Public Sans
+    fontSize: 11px
+    fontWeight: '700'
+    lineHeight: 14px
+    letterSpacing: 0.05em
+rounded:
+  sm: 0.125rem
+  DEFAULT: 0.25rem
+  md: 0.375rem
+  lg: 0.5rem
+  xl: 0.75rem
+  full: 9999px
+spacing:
+  gutter: 1.5rem
+  gutter-sm: 1rem
+  margin: 2rem
+  margin-sm: 1rem
+  space-xs: 0.25rem
+  space-sm: 0.5rem
+  space-md: 1rem
+  space-lg: 1.5rem
+  space-xl: 2.5rem
 ---
 
-## 1. Bảng Màu Chuẩn (Color Tokens)
+## Brand & Style
 
-| Vai trò | Giá trị / Lớp Tailwind | Mục đích sử dụng |
-|---|---|---|
-| **Primary Brand Blue** | `#1d63ed` (`bg-[#1d63ed]`, `text-[#1d63ed]`) | Nút hành động chính của Học sinh / Admin, tab đang chọn, điểm nhấn thương hiệu MindX |
-| **Primary Hover & Glow** | `hover:bg-blue-700`, `shadow-lg shadow-blue-500/25` | Trạng thái di chuột và bóng đổ phát sáng nhẹ cho nút chính |
-| **Secondary Dark Action** | `#0f172a` (`bg-[#0f172a] hover:bg-slate-800`) | Nút hành động phụ quan trọng (Đăng nhập nhân sự, Hàng đợi chấm bài, Xuất CSV) |
-| **Background Canvas** | `#f8fafc` (`bg-[#f8fafc]` / `bg-slate-50/70`) | Nền tổng thể toàn trang sáng, sạch, tạo độ tương phản êm mắt với thẻ trắng |
-| **Ambient Soft Glow** | `bg-blue-100/35 blur-3xl rounded-full` | Quầng sáng nền dịu nhẹ phía sau các khung trung tâm |
-| **Card Surface (Lớp 1)** | `bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(8,112,184,0.07)]` | Khung thẻ chính (Hero card, biểu mẫu trung tâm, khung tổng quan lớn) |
-| **Card Surface (Lớp 2)** | `bg-white rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgba(15,23,42,0.04)]` | Thẻ thông số (Metric card), thẻ bài học 14 buổi, khung danh sách |
-| **Subtle Surface (Lớp 3)** | `bg-slate-50/80 rounded-2xl border border-slate-200/60` | Vùng thông tin phụ, thanh công cụ lọc, khung ghi chú |
-| **Semantic Status** | `emerald` (Đạt / Đã xuất bản), `amber` (Chờ chấm / Nháp), `rose` (Cần sửa / Cảnh báo xóa) | Chỉ dùng dạng nhãn viên thuốc (`rounded-full px-2.5 py-0.5 text-xs font-semibold`) nhẹ nhàng, không tô đậm cả mảng lớn gây chói mắt |
+This design system establishes an authoritative, highly legible, and rigorous digital environment engineered specifically for structured learning, technical problem solving, and academic management. The visual tone is decisive, direct, and distraction-free—deliberately rejecting decorative gradients, blurry atmospheric glows, and ambiguous low-contrast states.
 
----
+Drawing inspiration from technical Swiss editorial typography and high-density academic administrative tools, the style relies on crisp structural lines, bold functional hierarchy, and uncompromising contrast. It instills absolute confidence, mental clarity, and systematic focus for students, educators, and administrative leaders across desktop workstations and mobile study viewports.
 
-## 2. Kiểu Chữ & Phân Cấp Thị Giác (Typography & Hierarchy)
+## Colors
 
-- **Tiêu đề trang (Page Title):** `text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight`
-- **Tiêu đề khu vực (Section Title):** `text-base font-bold text-slate-900 tracking-tight`
-- **Nhãn biểu mẫu (Field Label):** `text-xs font-semibold text-slate-700 mb-1.5`
-- **Văn bản nội dung (Body):** `text-sm text-slate-600 leading-relaxed`
-- **Chú thích phụ (Caption):** `text-xs text-slate-400`
-- **Mã định danh / Số liệu (Mono):** `font-mono text-xs text-slate-500`
+The palette is engineered around high WCAG AAA compliance, solid color fills, and immediate semantic discernibility. 
 
----
+### Core Palette
+- **Deep Academic Navy (`#0F233A` / `#0B1C30`)**: The foundational anchor used for primary headings, essential navigational shells, deep structural headers, and highest-priority typography.
+- **Royal Blue Interactive (`#1E40AF` / `#1D4ED8`)**: The dedicated interactive action color for primary buttons, active tabs, focused link states, and interactive checkpoints.
+- **Pure Canvas (`#FFFFFF`)**: Pure clinical white dedicated to card faces, input interiors, and readouts.
+- **Chalk Surface (`#F8F9FF` / `#F8FAFC`)**: Canvas base layer providing distinction between surrounding layout architecture and pure white active components.
+- **Structural Slate Border (`#CBD5E1`)**: Crisp definition line separating cards, table rows, and grid modules. Elevated strokes and focus borders deepen to `#94A3B8` or `#0F233A`.
 
-## 3. Thành Phần Giao Diện Chuẩn (Component Tokens)
+### Role-Based High-Contrast Badges
+- **Student (Học sinh)**: Deep Royal Blue (`#1D4ED8`) with `#EFF4FF` / `#FFFFFF`.
+- **Instructor (Giảng viên)**: Deep Pine Green (`#047857`) with `#ECFDF5` / `#FFFFFF`.
+- **Administrator (Quản trị viên)**: Imperial Violet (`#6D28D9`) or Crimson Flag (`#B91C1C`) with `#F5F3FF` / `#FFFFFF`.
 
-1. **Thanh Điều Hướng (`Navbar`):**
-   - Nền kính mờ `bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40`.
-   - Menu chuyển trang dạng **Segmented Pill** (`rounded-full px-3.5 py-1.5 text-xs font-semibold`): mục đang chọn dùng `bg-[#1d63ed] text-white shadow-sm shadow-blue-500/20`, mục khác dùng `text-slate-600 hover:text-slate-900 hover:bg-slate-100/70`.
-   - **Quy tắc chống rối:** Trên môi trường chạy thật (`isLiveMode = true`), **ẩn hoàn toàn** thanh cảnh báo màu cam thử nghiệm Mốc 1/Mốc 2 và dòng chữ *"Bản thử nghiệm Mốc 2"*.
-2. **Bộ Chuyển Tab Viên Thuốc (`Segmented Pill Tabs`):**
-   - Khung ngoài: `bg-slate-100/80 p-1 rounded-full inline-flex gap-1 border border-slate-200/50`.
-   - Nút đang chọn: `bg-[#1d63ed] text-white shadow-md shadow-blue-500/25 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200`.
-3. **Ô Nhập Liệu (`Inputs & Selects`):**
-   - `w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-blue-500/20 text-slate-800 placeholder:text-slate-400 min-h-[44px] transition-all`.
-4. **Nút Bấm (`Buttons`):**
-   - **Primary Blue:** `min-h-[44px] px-4 py-2.5 bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all active:scale-[0.99]`.
-   - **Primary Dark:** `min-h-[44px] px-4 py-2.5 bg-[#0f172a] hover:bg-slate-800 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-[0.99]`.
-   - **Secondary Outline:** `min-h-[44px] px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all`.
-5. **Hộp Thoại (`Modal` & `Drawer`):**
-   - Nền phủ mờ `bg-slate-900/40 backdrop-blur-sm`.
-   - Khung hộp thoại `bg-white rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100`.
+## Typography
 
----
+The typography leverages **Public Sans**, an open, institutional, and highly legible grotesque typeface designed for clarity across varying densities and viewports.
 
-## 4. Quy Tắc Chống Rối ("Anti-Slop" & Progressive Disclosure)
+## Elevation & Depth
 
-1. **Loại bỏ nhãn kỹ thuật nội bộ trên giao diện người dùng:** Không hiển thị các mã `[UI-01]`..`[UI-13]`, `Mốc 1..6`, hay các câu mô tả kỹ thuật (`AES-256-GCM`, `RLS`, `Dữ liệu giả lập`) trước mắt người dùng.
-2. **Mỗi màn hình chỉ có 1 điểm nhấn chính:** Không đặt quá nhiều hộp cảnh báo đậm màu chồng lên nhau.
-3. **Giữ nguyên 100% logic nghiệp vụ và khả năng vượt 381 bài kiểm thử tự động (`npm test`).**
+This system intentionally eliminates blurred drop shadows, multi-tier ambient spreads, and semi-transparent glass surfaces. Depth is established through **Structural Contrast, Crisp Borders, and Tonal Stacking**:
+1. **Base Ground (Level 0)**: Canvas rendered in `#F8F9FF`.
+2. **Surface Layer (Level 1)**: Component cards, panels, and data tables rendered in `#FFFFFF`, outlined by a solid `1.5px` border in `#CBD5E1`.
+3. **Elevated & Modal Layer (Level 2)**: Flyouts, dropdowns, and dialogs remain `#FFFFFF` framed by a high-contrast `2px` border in `#0F233A` with a crisp hard-edge offset block shadow (`box-shadow: 4px 4px 0px #0F233A`).
+4. **Active Focus Layer**: Interactive surfaces receive a direct `2px solid #1E40AF` focus outline.
+
+## Shapes
+
+- Form inputs, cards, and structured action buttons utilize `0.25rem` (4px) to `0.375rem` (6px) radii.
+- Modals, large course panels, and content groupings use `rounded-lg` (`0.5rem` / 8px).

@@ -4,41 +4,168 @@
 
 @layer base {
   :root {
-    --mindx-blue: #1d63ed;
-    --mindx-dark: #0f172a;
-    --mindx-surface: #ffffff;
-    --mindx-canvas: #f8fafc;
+    --surface: #f8f9ff;
+    --surface-dim: #cbdbf5;
+    --surface-bright: #f8f9ff;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #eff4ff;
+    --surface-container: #e5eeff;
+    --surface-container-high: #dce9ff;
+    --surface-container-highest: #d3e4fe;
+    --on-surface: #0b1c30;
+    --on-surface-variant: #44474d;
+    --inverse-surface: #213145;
+    --inverse-on-surface: #eaf1ff;
+    --outline: #74777e;
+    --outline-variant: #c4c6cd;
+    --surface-tint: #4d6079;
+    --primary: #000c1e;
+    --on-primary: #ffffff;
+    --primary-container: #0f233a;
+    --on-primary-container: #788ba6;
+    --inverse-primary: #b5c8e6;
+    --secondary: #3755c3;
+    --on-secondary: #ffffff;
+    --secondary-container: #708cfd;
+    --on-secondary-container: #00217a;
+    --tertiary: #000f08;
+    --on-tertiary: #ffffff;
+    --tertiary-container: #00281b;
+    --on-tertiary-container: #3a9976;
+    --error: #ba1a1a;
+    --on-error: #ffffff;
+    --error-container: #ffdad6;
+    --on-error-container: #93000a;
+    --background: #f8f9ff;
+    --on-background: #0b1c30;
+    --surface-variant: #d3e4fe;
+
+    --mindx-navy: #0f233a;
+    --mindx-blue: #1e40af;
+    --mindx-border: #cbd5e1;
   }
 
   body {
-    @apply bg-[#f8fafc] text-slate-900 antialiased font-sans selection:bg-blue-100 selection:text-[#1d63ed];
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: var(--font-public-sans), 'Public Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
     min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, th {
+    color: #0b1c30;
+    letter-spacing: -0.015em;
   }
 }
 
-@layer components {
-  .mindx-card-hero {
-    @apply bg-white rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(8,112,184,0.07)] transition-all;
+/* MindX Learn High-Contrast Educational System Structural Overrides */
+@layer utilities {
+  /* Replace soft rounded-3xl / rounded-2xl cards & blurry shadows with crisp 1.5px #CBD5E1 borders & Level-1 radii */
+  .rounded-3xl {
+    border-radius: 0.5rem !important;
   }
 
-  .mindx-card {
-    @apply bg-white rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition-all;
+  .rounded-2xl {
+    border-radius: 0.5rem !important;
   }
 
-  .mindx-input {
-    @apply w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-blue-500/20 text-slate-800 placeholder:text-slate-400 min-h-[44px] transition-all;
+  .rounded-xl {
+    border-radius: 0.375rem !important;
   }
 
-  .mindx-btn-primary {
-    @apply min-h-[44px] px-4 py-2.5 bg-[#1d63ed] hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all active:scale-[0.99] inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500;
+  .shadow-\[0_14px_40px_rgba\(8\,112\,184\,0\.06\)\],
+  .shadow-\[0_20px_50px_rgba\(8\,112\,184\,0\.07\)\],
+  .shadow-\[0_8px_30px_rgba\(15\,23\,42\,0\.04\)\],
+  .shadow-\[0_14px_40px_rgba\(8\,112\,184\,0\.05\)\],
+  .shadow-\[0_2px_20px_rgba\(15\,23\,42\,0\.03\)\],
+  .shadow-md,
+  .shadow-lg,
+  .shadow-sm,
+  .shadow-2xs {
+    box-shadow: none !important;
   }
 
-  .mindx-btn-dark {
-    @apply min-h-[44px] px-4 py-2.5 bg-[#0f172a] hover:bg-slate-800 disabled:opacity-50 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-[0.99] inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700;
+  .bg-white.rounded-3xl,
+  .bg-white.rounded-2xl {
+    border-width: 1.5px !important;
+    border-color: #cbd5e1 !important;
   }
 
-  .mindx-btn-secondary {
-    @apply min-h-[44px] px-4 py-2.5 bg-white hover:bg-slate-50 disabled:opacity-50 text-slate-700 border border-slate-200 font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-[0.99] inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500;
+  /* Map legacy interactive blues & slates to High-Contrast Academic Palette */
+  .bg-\[\#1d63ed\] {
+    background-color: #1e40af !important;
+  }
+
+  .hover\:bg-\[\#154ec2\]:hover,
+  .hover\:bg-blue-700:hover {
+    background-color: #0f233a !important;
+  }
+
+  .bg-\[\#0f172a\] {
+    background-color: #0f233a !important;
+  }
+
+  .hover\:bg-slate-800:hover {
+    background-color: #1e40af !important;
+  }
+
+  .text-\[\#1d63ed\] {
+    color: #1e40af !important;
+  }
+
+  .border-\[\#1d63ed\] {
+    border-color: #1e40af !important;
+  }
+
+  .text-slate-900,
+  .text-slate-800 {
+    color: #0b1c30 !important;
+  }
+
+  .text-slate-600,
+  .text-slate-500 {
+    color: #44474d !important;
+  }
+
+  /* Crisp structural borders on cards and inputs */
+  .border-slate-100,
+  .border-slate-200\/80,
+  .border-slate-200\/70,
+  .border-slate-200\/60 {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* High-contrast table headers */
+  table thead {
+    background-color: #f1f5f9 !important;
+    border-bottom: 2px solid #0f233a !important;
+    color: #0b1c30 !important;
+  }
+
+  table thead th {
+    color: #0b1c30 !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* Crisp inputs & selects */
+  input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  select,
+  textarea {
+    border-radius: 0.25rem !important;
+    border-width: 1.5px !important;
+    border-color: #cbd5e1 !important;
+    color: #0b1c30 !important;
+    box-shadow: none !important;
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+  select:focus,
+  textarea:focus {
+    border-color: #1e40af !important;
+    outline: 1px solid #1e40af !important;
+    box-shadow: none !important;
   }
 }
 
@@ -49,16 +176,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #eff4ff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #94a3b8;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #0f233a;
 }
 
 /* Animations */

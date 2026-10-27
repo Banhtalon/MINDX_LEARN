@@ -8,6 +8,20 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-10-27] — Áp dụng Hệ thống Thiết kế "MindX Learn High-Contrast Educational System" (Public Sans, High-Contrast Navy & Royal Blue)
+- **Mục tiêu:** Cập nhật toàn bộ bảng màu, phông chữ (`Public Sans`), đường viền sắc nét (`1.5px solid #CBD5E1`) và phong cách học thuật độ tương phản cao (**MindX Learn High-Contrast Educational System**) theo đúng ảnh mẫu và bộ thông số thiết kế của Owner, giữ nguyên 100% logic nghiệp vụ và không thêm phần tử dư thừa.
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Cập nhật Master Design System (`design-system/mindx-learn/MASTER.md`, `src/app/layout.tsx`, `src/app/globals.css`):**
+     - Tích hợp phông chữ **Public Sans** (`400`, `500`, `600`, `700`, `800`) qua `next/font/google`.
+     - Áp dụng bảng màu học thuật độ tương phản cao: nền `#f8f9ff`, chữ chính Deep Academic Navy `#0b1c30` / `#0f233a`, nút tương tác Royal Blue `#1e40af`, viền cấu trúc `#cbd5e1` (`1.5px`), loại bỏ hoàn toàn các bóng đổ mờ (`blurry drop shadows`) và bo góc quá tròn.
+     - Tiêu đề bảng dữ liệu (`table thead`) dùng nền `#f1f5f9` kèm đường viền đáy đậm `2px solid #0f233a`.
+  2. **Thanh điều hướng (`src/components/navbar.tsx`), Hộp thoại (`src/components/modal.tsx`), Trang chủ (`src/app/page.tsx`) & Đăng nhập (`src/app/login/page.tsx`):**
+     - `Navbar`: Logo vuông `#0b1c30`, thanh menu gạch chân sắc nét (`border-b-[2.5px] border-[#0b1c30]`), huy hiệu vai trò độ tương phản cao (`Học sinh` `#1d4ed8`, `Giảng viên` `#047857`, `Quản trị viên` `#6d28d9`).
+     - `HomePage` (`/`): Khớp với ảnh mẫu của Owner — thẻ Hero viền `#cbd5e1`, 3 thẻ khu vực có huy hiệu góc phải (`HỌC SINH`, `GIẢNG VIÊN`, `QUẢN TRỊ`), và 3 thẻ lộ trình 14 buổi (`Basic` xanh dương, `Advanced` vàng hổ phách, `Intensive` đỏ hồng) kèm danh sách `MÃ HỌC PHẦN`.
+     - `Modal`: Viền đậm `2px solid #0f233a` kèm bóng khối cứng `shadow-[4px_4px_0px_#0f233a]`.
+
+---
+
 ### [2026-10-27] — Thiết kế lại Toàn bộ 19 Màn hình MINDX LEARN theo Master Design System (Dembrandt + Genjutsu + UI UX Pro Max & Taste Skill)
 - **Mục tiêu:** Giải quyết triệt để tình trạng giao diện chưa đồng bộ giữa Trang Đăng nhập mới (`UI-01`) và các trang bên trong; loại bỏ các dải cảnh báo môi trường/mã kỹ thuật gây rối mắt và thiết lập một **Master Design System** thống nhất cho toàn bộ 19 màn hình của hệ thống.
 - **Tính năng & Thay đổi đã thực hiện:**
