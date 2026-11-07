@@ -17,7 +17,7 @@ import {
 } from '@/components/icons';
 
 const M6_REAL_SYNC_BOOKMARKLET_HREF =
-  "javascript:(function(){if(location.origin!=='https://teachingmindx.top'||!/\\/hocsinh\\.php$/i.test(location.pathname)){alert('Vui lòng mở trang https://teachingmindx.top/hocsinh.php đã đăng nhập rồi bấm lại dấu trang này.');return;}var pages=[],start=0,len=15,pageIdx=0;(async function(){try{while(pageIdx<500){var draw=pageIdx+1;var r=await fetch('/hocsinh.php?datatable=students&draw='+draw+'&start='+start+'&length='+len,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});if(!r.ok)throw new Error('HTTP '+r.status);var j=await r.json();if(!j||!Array.isArray(j.data))throw new Error('Phản hồi không phải JSON DataTables');pages.push(j);start+=j.data.length;pageIdx++;if(start>=(j.recordsFiltered||0)||j.data.length===0)break;}var snap={pageLength:len,snapshotVersion:new Date().toISOString(),pages:pages};if(window.opener&&!window.opener.closed){try{window.opener.postMessage({type:'MINDX_TEACHING_SNAPSHOT_M6',snapshot:snap},'*');}catch(e){}}var b=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='teaching-snapshot.json';document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},500);alert('Đã đọc xong '+pages.length+' trang từ Teaching và tải tệp teaching-snapshot.json! Hãy quay lại tab MindX Learn để xem trước & xác nhận áp dụng.');}catch(err){alert('Không thể đọc danh sách từ Teaching: '+(err&&err.message?err.message:err));}})();})();";
+  "javascript:(function(){if(location.origin!=='https://teachingmindx.top'||!/\\/hocsinh\\.php$/i.test(location.pathname)){alert('Vui lòng mở trang https://teachingmindx.top/hocsinh.php đã đăng nhập rồi bấm lại dấu trang này.');return;}var clsInput=prompt('Nhập mã lớp cần đồng bộ nhanh (VD: VT-JSB16, VT-JSA15...) hoặc ĐỂ TRỐNG rồi bấm OK để đọc toàn bộ các lớp:','VT-JSB16');if(clsInput===null)return;var targetCls=clsInput.trim().toUpperCase();var pages=[],start=0,len=15,pageIdx=0;(async function(){try{if(targetCls){var r1=await fetch('/hocsinh.php?get_students_of_class=1&class_code='+encodeURIComponent(targetCls),{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});if(!r1.ok)throw new Error('HTTP '+r1.status);var arr=await r1.json();if(!Array.isArray(arr))throw new Error('Phản hồi lớp '+targetCls+' không phải danh sách hợp lệ');var rows=arr.map(function(x){var sid=(x&&(typeof x.id==='string'||typeof x.id==='number'))?String(x.id).trim():'';var nm=(x&&typeof x.student_name==='string'&&x.student_name.trim())?x.student_name:((x&&typeof x.full_name==='string'&&x.full_name.trim())?x.full_name:'');var st=(x&&typeof x.status==='string'&&x.status.trim())?x.status:'Chưa rõ trạng thái';if(!sid||!nm)throw new Error('Bản ghi học sinh thiếu mã ID hoặc họ tên');return {id:sid,student_name:nm,class_code:x.class_code||targetCls,status:st,class_status:x.class_status||'Running'};});var singleLen=Math.max(15,rows.length||15);var snap1={pageLength:singleLen,snapshotVersion:new Date().toISOString(),targetClassCode:targetCls,pages:[{draw:1,recordsTotal:rows.length,recordsFiltered:rows.length,data:rows}]};if(window.opener&&!window.opener.closed){try{window.opener.postMessage({type:'MINDX_TEACHING_SNAPSHOT_M6',snapshot:snap1},'*');}catch(e){}}var b1=new Blob([JSON.stringify(snap1,null,2)],{type:'application/json'});var a1=new Blob?document.createElement('a'):null;a1.href=URL.createObjectURL(b1);a1.download='teaching-snapshot-'+targetCls.toLowerCase()+'.json';document.body.appendChild(a1);a1.click();setTimeout(function(){a1.remove();},500);alert('Đã đọc xong lớp '+targetCls+' ('+rows.length+' học sinh) và tải tệp! Hãy quay lại tab MindX Learn để xem trước & xác nhận áp dụng.');return;}while(pageIdx<500){var draw=pageIdx+1;var r=await fetch('/hocsinh.php?datatable=students&draw='+draw+'&start='+start+'&length='+len,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});if(!r.ok)throw new Error('HTTP '+r.status);var j=await r.json();if(!j||!Array.isArray(j.data))throw new Error('Phản hồi không phải JSON DataTables');pages.push(j);start+=j.data.length;pageIdx++;if(start>=(j.recordsFiltered||0)||j.data.length===0)break;}var snap={pageLength:len,snapshotVersion:new Date().toISOString(),pages:pages};if(window.opener&&!window.opener.closed){try{window.opener.postMessage({type:'MINDX_TEACHING_SNAPSHOT_M6',snapshot:snap},'*');}catch(e){}}var b=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='teaching-snapshot.json';document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},500);alert('Đã đọc xong '+pages.length+' trang từ Teaching và tải tệp teaching-snapshot.json! Hãy quay lại tab MindX Learn để xem trước & xác nhận áp dụng.');}catch(err){alert('Không thể đọc danh sách từ Teaching: '+(err&&err.message?err.message:err));}})();})();";
 
 type ScenarioKey =
   | 'valid_multipage'
@@ -56,6 +56,8 @@ export default function AdminSyncPage() {
 
   const [isLoadingRealPreview, setIsLoadingRealPreview] = useState(false);
   const [isApplyingRealSync, setIsApplyingRealSync] = useState(false);
+  const [realFilterMode, setRealFilterMode] = useState<'all_classes' | 'include_rob'>('all_classes');
+  const [realTargetClassCode, setRealTargetClassCode] = useState<string>('');
   const [realDiffReport, setRealDiffReport] = useState<TeachingSyncDiffReport | null>(null);
   const [realAbortError, setRealAbortError] = useState<{
     code: string;
@@ -66,6 +68,7 @@ export default function AdminSyncPage() {
   const [realStatusMessage, setRealStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [realSnapshotSourceLabel, setRealSnapshotSourceLabel] = useState<string | null>(null);
   const realPreviewReqSeqRef = useRef<number>(0);
+  const lastRealSnapshotRef = useRef<{ payload: any; label: string } | null>(null);
 
   const previewReqSeqRef = useRef<number>(0);
   const sampleAggregateReqSeqRef = useRef<number>(0);
@@ -89,8 +92,24 @@ export default function AdminSyncPage() {
     timestamp: string;
   } | null>(null);
 
-  const handleRealSnapshotPreview = async (snapshotPayload: any, sourceLabel: string) => {
+  const handleRealSnapshotPreview = async (
+    snapshotPayload: any,
+    sourceLabel: string,
+    overrideFilterMode?: 'all_classes' | 'include_rob',
+    overrideTargetCode?: string
+  ) => {
     if (inFlightMutationRef.current !== null || isApplyingRealSync || isApplyingSync || isResetting) return;
+    lastRealSnapshotRef.current = { payload: snapshotPayload, label: sourceLabel };
+    const effectiveMode = overrideFilterMode ?? realFilterMode;
+    const effectiveTargetCode = (
+      overrideTargetCode !== undefined
+        ? overrideTargetCode
+        : realTargetClassCode ||
+          (!Array.isArray(snapshotPayload) && typeof snapshotPayload?.targetClassCode === 'string'
+            ? snapshotPayload.targetClassCode
+            : '')
+    ).trim();
+
     const reqSeq = ++realPreviewReqSeqRef.current;
     setIsLoadingRealPreview(true);
     setRealSnapshotSourceLabel(sourceLabel);
@@ -100,7 +119,8 @@ export default function AdminSyncPage() {
 
     try {
       const result = await previewTeachingSync(snapshotPayload, {
-        robFilterMode: 'include_rob',
+        robFilterMode: effectiveMode,
+        targetClassCode: effectiveTargetCode,
         sourceMode: 'real_teaching_sync',
       });
       if (realPreviewReqSeqRef.current !== reqSeq || inFlightMutationRef.current !== null) return;
@@ -122,7 +142,7 @@ export default function AdminSyncPage() {
       setRealAbortError(null);
       setRealDiffReport(result.report);
       setRealStatusMessage({
-        text: `Đã đọc và kiểm tra xong toàn bộ ${result.report.pagination.pagesRead} trang DataTables từ ${sourceLabel} (${result.report.pagination.recordsFiltered}/${result.report.pagination.recordsTotal} dòng). Phát hiện +${result.report.counts.addedCount} học sinh ROB mới, ${result.report.counts.updatedCount} cập nhật, ${result.report.counts.unchangedCount} giữ nguyên, ${result.report.counts.needsReviewCount} cần Admin đối chiếu, ${result.report.counts.ignoredCount} bỏ qua.`,
+        text: `Đã đọc và kiểm tra xong ${result.report.pagination.pagesRead} trang dữ liệu từ ${sourceLabel} (${result.report.pagination.recordsFiltered}/${result.report.pagination.recordsTotal} dòng). Phát hiện +${result.report.counts.addedCount} học sinh mới, ${result.report.counts.updatedCount} cập nhật, ${result.report.counts.unchangedCount} giữ nguyên, ${result.report.counts.needsReviewCount} cần Admin đối chiếu, ${result.report.counts.ignoredCount} bỏ qua.`,
         isError: false,
       });
     } catch {
@@ -154,15 +174,15 @@ export default function AdminSyncPage() {
 
   if (!currentUser || currentUser.role !== 'admin') {
     return (
-      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-xl border border-slate-200">
+      <div className="max-w-md mx-auto my-12 text-center p-8 bg-white rounded-3xl border border-slate-100 shadow-[0_14px_40px_rgba(8,112,184,0.06)]">
         <IconAlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-900 mb-2">Quyền truy cập hạn chế</h2>
+        <h2 className="text-lg font-extrabold text-slate-900 mb-2">Quyền truy cập hạn chế</h2>
         <p className="text-xs text-slate-500 mb-4">
-          Chỉ có Admin mới có quyền truy cập trang đồng bộ danh sách học sinh [UI-08].
+          Chỉ có Admin mới có quyền truy cập trang đồng bộ danh sách học sinh.
         </p>
         <button
           onClick={() => router.push('/login')}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700"
+          className="px-4 py-2 bg-[#1d63ed] text-white rounded-xl text-xs font-bold hover:bg-[#154ec2]"
         >
           Đăng nhập vai trò Admin
         </button>
@@ -450,7 +470,7 @@ export default function AdminSyncPage() {
             Đồng bộ Danh sách Học sinh từ Teaching MindX
           </h1>
           <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-            Cập nhật danh sách lớp Robotics (ROB) và học sinh đang học từ Teaching MindX, có bước xem trước và kiểm tra trước khi áp dụng.
+            Cập nhật danh sách lớp học (Lập trình JSB/JSA/JSI/CSB/CSA/CSI, C4K, PT &amp; Robotics) và học sinh đang học từ Teaching MindX, có bước xem trước trước khi lưu.
           </p>
         </div>
 
@@ -885,7 +905,7 @@ export default function AdminSyncPage() {
                             <td className="px-3 py-2 font-medium text-slate-800">{cls.name}</td>
                             <td className="px-3 py-2">
                               <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800">
-                                Chờ Admin gán khóa 14 buổi (courseId: null)
+                                Chờ Admin gán khóa 14 buổi
                               </span>
                             </td>
                           </tr>
@@ -1106,7 +1126,7 @@ export default function AdminSyncPage() {
               {/* Safety Commitments */}
               <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 text-[11px] text-slate-600 space-y-1">
                 <span className="font-bold text-slate-800 block">Cam kết an toàn đồng bộ Mốc 4:</span>
-                <div>• Đồng bộ KHÔNG tự động cấp mã PIN và KHÔNG tạo/tải tệp CSV PIN (việc cấp PIN chỉ qua thao tác Admin riêng tại [UI-07]).</div>
+                <div>• Đồng bộ KHÔNG tự động cấp mã PIN và KHÔNG tạo/tải tệp CSV PIN (việc cấp PIN thực hiện riêng tại trang Quản lý Lớp &amp; Học sinh).</div>
                 <div>• Đồng bộ KHÔNG tự xóa các học sinh vắng mặt trong lần đọc này ({diffReport.counts.absentPreservedCount} hồ sơ vắng mặt được giữ nguyên).</div>
                 <div>• Không hợp nhất học sinh theo tên; không tự mở khóa tài khoản đã lưu trữ; không ghi đè mật khẩu, mã PIN hay điểm bài học bằng các trường nguồn không liên quan.</div>
               </div>
@@ -1137,7 +1157,7 @@ export default function AdminSyncPage() {
                 Đồng bộ danh sách từ trang Teaching MindX của bạn
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Hệ thống tự động lọc các lớp Robotics (ROB), giữ nguyên mã PIN và điểm số hiện có của học sinh, đồng thời dừng lại báo Admin kiểm tra nếu phát hiện học sinh đổi lớp hoặc trùng tên.
+                Hỗ trợ đồng bộ tất cả các lớp Lập trình (JSB, JSA, JSI, CSB, CSA, CSI, C4K, PT...) và Robotics (ROB), hoặc lọc riêng từng mã lớp (ví dụ: VT-JSB16). Giữ nguyên mã PIN và điểm số hiện có của học sinh, đồng thời dừng lại báo Admin kiểm tra nếu phát hiện học sinh đổi lớp hoặc trùng tên.
               </p>
               {!isLiveMode && (
                 <ul className="list-disc list-inside text-xs text-slate-700 space-y-1 pl-1">
@@ -1299,7 +1319,7 @@ export default function AdminSyncPage() {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="space-y-1.5">
                 <h4 className="text-sm font-extrabold text-slate-900">
-                  Các bước đồng bộ Danh sách Lớp ROB &amp; Học sinh từ Teaching
+                  Các bước đồng bộ Danh sách Lớp Học &amp; Học sinh từ Teaching
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   <strong>Bước 1:</strong> Kéo nút xanh <strong>&ldquo;⚡ Đọc Teaching &amp; Tải Snapshot Đồng Bộ&rdquo;</strong> lên thanh Dấu trang (Bookmarks Bar) của Chrome, mở trang{' '}
@@ -1317,7 +1337,11 @@ export default function AdminSyncPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <a
-                  href={M6_REAL_SYNC_BOOKMARKLET_HREF}
+                  ref={(el) => {
+                    if (el) {
+                      el.setAttribute('href', M6_REAL_SYNC_BOOKMARKLET_HREF);
+                    }
+                  }}
                   onClick={(e) => {
                     e.preventDefault();
                     alert(
@@ -1339,6 +1363,82 @@ export default function AdminSyncPage() {
                     className="hidden"
                   />
                 </label>
+              </div>
+            </div>
+
+            {/* Bộ lọc nhóm lớp & mã lớp cụ thể khi đồng bộ từ Teaching */}
+            <div className="p-3.5 bg-white/90 rounded-xl border border-emerald-200/80 grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
+              <div>
+                <label htmlFor="real-sync-filter-mode" className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Nhóm lớp cần đồng bộ:
+                </label>
+                <select
+                  id="real-sync-filter-mode"
+                  value={realFilterMode}
+                  disabled={isMutating || isLoadingRealPreview}
+                  onChange={(e) => {
+                    const nextMode = e.target.value as 'all_classes' | 'include_rob';
+                    setRealFilterMode(nextMode);
+                    if (lastRealSnapshotRef.current) {
+                      void handleRealSnapshotPreview(
+                        lastRealSnapshotRef.current.payload,
+                        lastRealSnapshotRef.current.label,
+                        nextMode,
+                        realTargetClassCode
+                      );
+                    }
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="all_classes">Tất cả lớp Lập trình &amp; Robotics (JSB, JSA, JSI, CSB, CSA, CSI, C4K, PT, ROB...)</option>
+                  <option value="include_rob">Chỉ lấy các lớp Robotics (ROB)</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="real-sync-target-class-code" className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Lọc riêng 1 mã lớp cụ thể (tùy chọn — VD: VT-JSB16):
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="real-sync-target-class-code"
+                    type="text"
+                    value={realTargetClassCode}
+                    disabled={isMutating || isLoadingRealPreview}
+                    placeholder="Để trống nếu muốn lấy tất cả lớp, hoặc gõ VD: VT-JSB16"
+                    onChange={(e) => {
+                      const nextCode = e.target.value;
+                      setRealTargetClassCode(nextCode);
+                      if (lastRealSnapshotRef.current) {
+                        void handleRealSnapshotPreview(
+                          lastRealSnapshotRef.current.payload,
+                          lastRealSnapshotRef.current.label,
+                          realFilterMode,
+                          nextCode
+                        );
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-mono font-semibold text-slate-800 uppercase placeholder:normal-case placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  {realTargetClassCode && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRealTargetClassCode('');
+                        if (lastRealSnapshotRef.current) {
+                          void handleRealSnapshotPreview(
+                            lastRealSnapshotRef.current.payload,
+                            lastRealSnapshotRef.current.label,
+                            realFilterMode,
+                            ''
+                          );
+                        }
+                      }}
+                      className="px-2.5 py-2 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold shrink-0 cursor-pointer"
+                    >
+                      Xóa lọc
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -1411,7 +1511,7 @@ export default function AdminSyncPage() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
                   <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200">
-                    <div className="text-emerald-700 font-semibold text-[10px]">+ Thêm mới ROB</div>
+                    <div className="text-emerald-700 font-semibold text-[10px]">+ Thêm mới</div>
                     <div className="text-base font-extrabold text-emerald-900">
                       {realDiffReport.counts.addedCount} HS (+{realDiffReport.counts.newClassesCount} lớp)
                     </div>
@@ -1435,7 +1535,7 @@ export default function AdminSyncPage() {
                     </div>
                   </div>
                   <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                    <div className="text-slate-600 font-semibold text-[10px]">⊘ Bỏ qua ngoài ROB/nghỉ</div>
+                    <div className="text-slate-600 font-semibold text-[10px]">⊘ Bỏ qua ngoài bộ lọc/nghỉ</div>
                     <div className="text-base font-extrabold text-slate-700">
                       {realDiffReport.counts.ignoredCount} dòng
                     </div>
@@ -1451,7 +1551,7 @@ export default function AdminSyncPage() {
                 {realDiffReport.newClassesToCreate.length > 0 && (
                   <div className="pt-2">
                     <div className="text-xs font-bold text-purple-800 mb-1.5">
-                      Lớp ROB mới sẽ được tạo ({realDiffReport.newClassesToCreate.length}):
+                      Lớp mới sẽ được tạo ({realDiffReport.newClassesToCreate.length}):
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {realDiffReport.newClassesToCreate.map((cls) => (

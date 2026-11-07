@@ -116,6 +116,7 @@ function ClassesManagementContent() {
   const [editClassCode, setEditClassCode] = useState('');
   const [editClassName, setEditClassName] = useState('');
   const [editClassTeacherId, setEditClassTeacherId] = useState<string>('');
+  const [editClassCourseId, setEditClassCourseId] = useState<string>('');
   const [isUpdatingClass, setIsUpdatingClass] = useState(false);
   const [updateClassError, setUpdateClassError] = useState<string | null>(null);
 
@@ -599,14 +600,15 @@ function ClassesManagementContent() {
                     setEditClassCode(selectedClass.code);
                     setEditClassName(selectedClass.name);
                     setEditClassTeacherId(selectedClass.teacherId || '');
+                    setEditClassCourseId(selectedClass.courseId || '');
                     setUpdateClassError(null);
                     setEditClassModalOpen(true);
                   }}
                   className="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-[#1d63ed] border border-blue-100 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="Sửa mã lớp, tên lớp và phân công giáo viên phụ trách"
+                  title="Sửa mã lớp, tên lớp, gán khóa học 14 buổi và phân công giáo viên phụ trách"
                 >
                   <IconFileText className="w-4 h-4" />
-                  <span>Sửa lớp / Phân công GV</span>
+                  <span>Sửa lớp / Gán khóa &amp; GV</span>
                 </button>
 
                 <button
@@ -1136,7 +1138,7 @@ function ClassesManagementContent() {
                     • Kiểm tra bảo mật: <strong>An toàn</strong> (không chứa mã PIN hay mật khẩu)
                   </div>
                   <div>
-                    • Mã kiểm tra tệp: <span className="font-mono text-[10px] break-all">{csvVerificationResult.sha256?.slice(0, 12)}</span>
+                    • Cấu trúc 14 buổi: <strong>Đạt chuẩn</strong> (sẵn sàng tải về lưu trữ)
                   </div>
                 </div>
 
@@ -1720,6 +1722,7 @@ function ClassesManagementContent() {
                 code: editClassCode.trim().toUpperCase(),
                 name: editClassName.trim(),
                 teacherId: editClassTeacherId ? editClassTeacherId.trim() : null,
+                courseId: editClassCourseId ? editClassCourseId.trim() : null,
               });
               setIsUpdatingClass(false);
               if (res.success) {
@@ -1797,15 +1800,22 @@ function ClassesManagementContent() {
               <label htmlFor="edit-class-course-info" className="block font-semibold text-slate-700 mb-1">
                 Khóa học liên kết (14 buổi)
               </label>
-              <input
+              <select
                 id="edit-class-course-info"
-                type="text"
-                disabled
-                value={selectedCourse ? selectedCourse.title : 'Chưa gán khóa học'}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed min-h-[44px]"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Bạn có thể gán hoặc thay đổi khóa học cho lớp tại mục Quản lý Khóa học.
+                disabled={isUpdatingClass}
+                value={editClassCourseId}
+                onChange={(e) => setEditClassCourseId(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:opacity-70 min-h-[44px]"
+              >
+                <option value="">-- Chưa gán khóa học (Để trống) --</option>
+                {courses.map((crs) => (
+                  <option key={crs.id} value={crs.id}>
+                    {crs.title}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Chọn khóa học 14 buổi áp dụng cho lớp (ví dụ sau khi đồng bộ lớp mới từ Teaching).
               </p>
             </div>
 
@@ -1846,7 +1856,7 @@ function ClassesManagementContent() {
         onClose={() => setCloseConfirmModalOpen(false)}
         onConfirm={() => handleExecuteClose(false)}
         title={`Xác nhận kết thúc khóa lớp ${selectedClass?.code || ''}?`}
-        message={`Hành động này sẽ XÓA VĨNH VIỄN toàn bộ điểm số quiz, bài nộp thực hành, tiến độ và nhận xét của lớp ${selectedClass?.code || ''} thuộc khóa "${selectedCourse?.title || '14 buổi'}" (Mã kiểm tra CSV: ${csvVerificationResult?.sha256?.slice(0, 12) || 'N/A'}). Lưu ý tệp CSV chỉ là báo cáo tổng kết, không phải bản backup và không thể khôi phục dữ liệu đã xóa!`}
+        message={`Hành động này sẽ XÓA VĨNH VIỄN toàn bộ điểm số quiz, bài nộp thực hành, tiến độ và nhận xét của lớp ${selectedClass?.code || ''} thuộc khóa "${selectedCourse?.title || '14 buổi'}". Lưu ý tệp CSV chỉ là báo cáo tổng kết, không phải bản backup và không thể khôi phục dữ liệu đã xóa!`}
         confirmText="Tôi hiểu và Xác nhận Xóa dữ liệu cũ"
         cancelText="Hủy bỏ"
         isDanger={true}

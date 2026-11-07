@@ -11,13 +11,14 @@ Tệp này áp dụng cho các agent làm việc trong kho MINDX LEARN. Nó bổ
 
 Đây là quy tắc phân vai chuẩn cho mọi gói việc trong dự án. Yêu cầu của Owner, an toàn dữ liệu và hướng dẫn Next.js trong AGENTS.md vẫn được ưu tiên. Nếu một prompt cũ phân vai khác, dùng quy tắc này mà không tự thay đổi phạm vi sản phẩm đã duyệt.
 
-### Phân vai thực thi và kiểm duyệt
+### Phân vai thực thi và kiểm duyệt (Team Workflow)
 
-- **Điều phối & Code chính:** Agent hiện tại trực tiếp điều phối công việc và thực hiện viết/sửa code chính.
-- **Tham vấn việc quá khó:** Khi gặp bài toán hoặc lỗi kỹ thuật quá phức tạp, tham khảo `opus 5.5 high` (`claude-opus-5-5-high`, effort `high`).
-- **Reviewer độc lập (Chính):** Dùng Codex CLI model `gpt-6.1-sol` mức `high` (`codex exec -m gpt-6.1-sol -c 'model_reasoning_effort="high"' -s read-only -`).
-- **Reviewer dự phòng (Backup Reviewer):** Dùng `claude-sonnet-5-5-high` (effort `high`) khi Reviewer chính không khả dụng hoặc chạm giới hạn.
-- **Cách báo cáo cho Owner:** Luôn trình bày ngắn gọn, đi thẳng vào kết quả bằng ngôn ngữ đời thường dễ hiểu, hạn chế tối đa thuật ngữ kỹ thuật/tên hàm vì Owner không biết code.
+- **Điều phối & Code chính (Main Agent):** Agent hiện tại trực tiếp điều phối công việc, lập kế hoạch và thực hiện viết/sửa code chính.
+- **Kiểm định viên Độc lập — Reviewer (`Codex CLI` — `gpt-6.1-sol` `xhigh`):** Phụ trách kiểm định độc lập qua `codex exec` (`codex exec -m gpt-6.1-sol -c 'model_reasoning_effort="xhigh"' -s read-only -`) để rà soát chất lượng code, độ an toàn dữ liệu và bộ kiểm thử trước khi bàn giao.
+- **Chuyên gia Giải quyết Bài toán Khó (Subagent `Argon High` — `Model: "pro"` / `"inherit"`):** Triệu tập Subagent `Argon High` hỗ trợ khi gặp bài toán kiến trúc hoặc lỗi kỹ thuật quá phức tạp (tuyệt đối không sử dụng các mô hình Claude).
+- **Cấm tuyệt đối `send_input` (`Thêm dữ liệu từ bàn phím / stdin`):** Cả Agent chính lẫn mọi Subagent **tuyệt đối KHÔNG BAO GIỜ** gọi `manage_task` với `Action: "send_input"`, vì khi chạy ngầm hoặc trong Subagent, hộp thoại này sẽ làm kẹt cứng tiến trình vô thời hạn. Nếu một lệnh chạy nền bị treo, chỉ được dùng `manage_task(Action: "kill")` để tắt đi. Mọi lệnh `run_command` phải chạy ở chế độ tự động thoát (không tương tác bàn phím, đặt `WaitMsBeforeAsync: 10000` cho lệnh kiểm tra nhanh).
+- **Cách báo cáo cho Owner:** Luôn trình bày **ngắn gọn, dễ hiểu bằng ngôn ngữ đời thường** vì Owner không biết code (hạn chế tối đa thuật ngữ lập trình phức tạp).
+- **Đồng bộ GitHub (Source of Truth):** Sau khi hoàn thành tính năng/bản sửa lỗi, kiểm thử đạt và cập nhật [`projectstates.md`](../projectstates.md) + [`changelog.md`](../changelog.md), luôn thực hiện `git add`, `git commit` và `git push` lên kho GitHub chính của dự án.
 
 ### Bàn giao khi ngữ cảnh vượt 60%
 

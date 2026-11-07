@@ -29,19 +29,19 @@ export function Navbar() {
     switch (currentUser.role) {
       case 'admin':
         return (
-          <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#6d28d9] text-white rounded">
+          <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#6d28d9] text-white rounded-full">
             Quản trị viên
           </span>
         );
       case 'teacher':
         return (
-          <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#047857] text-white rounded">
+          <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#047857] text-white rounded-full">
             Giảng viên
           </span>
         );
       case 'student':
         return (
-          <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#1d4ed8] text-white rounded">
+          <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#1d63ed] text-white rounded-full">
             Học sinh
           </span>
         );
@@ -51,20 +51,20 @@ export function Navbar() {
   const navTabClass = (isActive: boolean) =>
     `h-16 inline-flex items-center px-1 border-b-[2.5px] text-xs transition-colors whitespace-nowrap ${
       isActive
-        ? 'border-[#0b1c30] text-[#0b1c30] font-extrabold'
-        : 'border-transparent text-[#44474d] hover:text-[#0b1c30] font-semibold'
+        ? 'border-[#1d63ed] text-[#1d63ed] font-extrabold'
+        : 'border-transparent text-slate-600 hover:text-[#0b1c30] font-semibold'
     }`;
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b-[1.5px] border-[#cbd5e1]">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(11,28,48,0.04)]">
       {/* Only show simulation banner in offline/demo mode */}
       {!isLiveMode && (
-        <div className="bg-amber-50 text-amber-950 px-4 py-1.5 text-xs font-bold flex items-center justify-between border-b border-amber-300">
+        <div className="bg-amber-50 text-amber-950 px-4 py-1.5 text-xs font-bold flex items-center justify-between border-b border-amber-200">
           <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
             <IconAlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
             <span>Chế độ mô phỏng cục bộ (Offline Demo)</span>
             {qaState.scenario !== 'normal' && (
-              <span className="ml-auto bg-[#0b1c30] text-white px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider">
+              <span className="ml-auto bg-[#0b1c30] text-white px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
                 Kịch bản: {qaState.scenario.toUpperCase()}
               </span>
             )}
@@ -80,7 +80,7 @@ export function Navbar() {
             <span className="font-bold flex-1">{bootstrapError}</span>
             <button
               onClick={() => retryBootstrap()}
-              className="px-3 py-1 bg-[#ba1a1a] hover:bg-[#93000a] text-white rounded text-xs font-bold transition-colors"
+              className="px-3 py-1 bg-[#ba1a1a] hover:bg-[#93000a] text-white rounded-lg text-xs font-bold transition-colors"
             >
               Thử lại
             </button>
@@ -94,14 +94,14 @@ export function Navbar() {
           {/* Logo & Brand */}
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-9 h-9 rounded-md bg-[#0b1c30] text-white flex items-center justify-center group-hover:bg-[#1e40af] transition-colors">
+              <div className="w-9 h-9 rounded-xl bg-[#1d63ed] text-white flex items-center justify-center shadow-sm group-hover:bg-[#164fc4] transition-colors">
                 <IconBookOpen className="w-4 h-4" />
               </div>
               <div className="leading-tight">
                 <span className="font-extrabold text-[#0b1c30] text-sm tracking-tight block">
                   MINDX LEARN
                 </span>
-                <span className="block text-[9px] text-[#44474d] font-bold uppercase tracking-wider">
+                <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider">
                   Hệ thống Học tập 14 Buổi
                 </span>
               </div>
@@ -200,10 +200,10 @@ export function Navbar() {
 
                 <Link
                   href="/account"
-                  className={`p-2 rounded-md border-[1.5px] transition-colors ${
+                  className={`p-2 rounded-xl border transition-colors ${
                     pathname === '/account'
-                      ? 'border-[#1e40af] bg-[#eff4ff] text-[#1e40af]'
-                      : 'border-[#cbd5e1] bg-[#eff4ff] text-[#0b1c30] hover:border-[#0f233a]'
+                      ? 'border-[#1d63ed]/30 bg-[#eff4ff] text-[#1d63ed]'
+                      : 'border-slate-200 bg-slate-50/80 text-slate-700 hover:border-[#1d63ed]/40 hover:text-[#1d63ed]'
                   }`}
                   title="Hồ sơ tài khoản & Bảo mật"
                   aria-label="Hồ sơ tài khoản"
@@ -213,7 +213,7 @@ export function Navbar() {
 
                 <button
                   onClick={handleLogout}
-                  className="p-2 rounded-md border-[1.5px] border-[#cbd5e1] bg-white text-[#44474d] hover:text-[#b91c1c] hover:bg-[#ffdad6]/40 hover:border-[#b91c1c] transition-colors"
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-[#b91c1c] hover:bg-[#ffdad6]/40 hover:border-[#b91c1c]/40 transition-colors"
                   title="Đăng xuất"
                   aria-label="Đăng xuất"
                 >
@@ -224,7 +224,7 @@ export function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2 bg-[#0b1c30] hover:bg-[#1e40af] text-white rounded-md text-xs font-bold transition-colors inline-flex items-center gap-1.5"
+                  className="px-4 py-2 bg-[#1d63ed] hover:bg-[#164fc4] text-white rounded-xl text-xs font-bold shadow-sm transition-colors inline-flex items-center gap-1.5"
                 >
                   <span>Đăng nhập</span>
                   <span>→</span>

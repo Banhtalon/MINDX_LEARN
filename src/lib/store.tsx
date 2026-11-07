@@ -223,7 +223,8 @@ export interface StoreContextType {
   previewTeachingSync: (
     fixtureData?: any,
     options?: {
-      robFilterMode?: 'include_rob' | 'exclude_rob';
+      robFilterMode?: 'include_rob' | 'exclude_rob' | 'all_classes';
+      targetClassCode?: string;
       sourceMode?: 'synthetic_fixture' | 'real_teaching_preview' | 'real_teaching_sync';
     }
   ) => Promise<{
@@ -3220,7 +3221,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const previewTeachingSync = async (
     fixtureData?: any,
     options?: {
-      robFilterMode?: 'include_rob' | 'exclude_rob';
+      robFilterMode?: 'include_rob' | 'exclude_rob' | 'all_classes';
+      targetClassCode?: string;
       sourceMode?: 'synthetic_fixture' | 'real_teaching_preview' | 'real_teaching_sync';
     }
   ) => {
@@ -3243,6 +3245,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       { students, classes },
       {
         robFilterMode: options?.robFilterMode || 'include_rob',
+        targetClassCode: options?.targetClassCode || '',
         sourceMode: options?.sourceMode || 'synthetic_fixture',
       }
     );

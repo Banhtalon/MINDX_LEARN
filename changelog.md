@@ -8,6 +8,31 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-07] — Đồng nhất Giao diện 19 Màn hình, Mở khóa Gán khóa học cho Lớp & Mở khóa Đồng bộ Lớp Lập trình (`JSB`, `JSA`, `CSB`, `VT-JSB16`...)
+- **Mục tiêu:**
+  1. Cập nhật quy trình phối hợp đội ngũ AI 3 vai trò (`Agent chính`, `Codex CLI — gpt-6.1-sol xhigh`, `Argon High`) trong `AGENTS.md`, `docs/AI_AGENT_WORKFLOW.md` và `.agents/skills/team-workflow/SKILL.md`.
+  2. Đồng nhất phong cách thiết kế bo góc mềm mại (`rounded-2xl`/`rounded-3xl`, viền mảnh `border-slate-100`, xanh dương `#1d63ed`, đổ bóng mềm) trên `Navbar`, `Footer`, `Trang chủ` (`/`) và `Trang Đăng nhập` (`/login`) khớp 100% với 15 trang bên trong.
+  3. Mở khóa chọn **Khóa học liên kết (14 buổi)** ngay trong hộp thoại *"Sửa lớp / Phân công giáo viên"* tại `/manage/classes` và lược bỏ các chuỗi mã băm `SHA-256` kỹ thuật trên giao diện.
+  4. Mở rộng bộ máy Đồng bộ Teaching MindX (`/admin/sync`, `teaching-sync-core.mjs`, `m2-backend`, SQL RPC `m4_apply_teaching_sync`) để đồng bộ được **tất cả các lớp Lập trình (`JSB`, `JSA`, `JSI`, `CSB`, `CSA`, `CSI`, `C4K`, `PT`...) và Robotics (`ROB`)**, hỗ trợ lọc đích danh 1 mã lớp (ví dụ `VT-JSB16`) và đọc trực tiếp API lấy danh sách học sinh theo lớp (`?get_students_of_class=1&class_code=VT-JSB16`).
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Đồng nhất Giao diện Khung chung & Đăng nhập (`src/components/navbar.tsx`, `src/components/footer.tsx`, `src/app/page.tsx`, `src/app/login/page.tsx`):**
+     - `Navbar`: Chuyển sang nền trắng mờ `bg-white/90 backdrop-blur-md`, cụm menu dạng viên thuốc (`Segmented Pill`), huy hiệu vai trò bo tròn nhẹ nhàng.
+     - `HomePage` (`/`) & `LoginPage` (`/login`): Chuyển toàn bộ khung viền vuông đậm sang thẻ bo góc `rounded-3xl` + bóng đổ mềm `shadow-[0_14px_40px_rgba(8,112,184,0.06)]`; ẩn thẻ thông tin kỹ thuật dư thừa trên trang Đăng nhập.
+  2. **Mở khóa Gán khóa học cho Lớp & Ẩn mã SHA-256 (`src/app/manage/classes/page.tsx`):**
+     - Thay ô khóa cứng trong modal *"Sửa lớp / Phân công giáo viên"* bằng ô chọn `<select id="edit-class-course-info">` giúp Admin gán khóa `JSB — Lập trình Web Cơ bản` (hoặc khóa 14 buổi bất kỳ) cho lớp vừa đồng bộ từ Teaching.
+     - Ẩn các chuỗi mã kiểm tra tệp `SHA-256` khỏi giao diện Đóng khóa 14 buổi (vẫn giữ nguyên kiểm tra toàn vẹn ngầm ở tầng `store` và `backend`).
+  3. **Mở khóa Đồng bộ Lớp Lập trình & Lọc theo Mã lớp (`src/lib/teaching-sync-core.mjs`, `src/lib/simulation-rules.ts`, `src/lib/store.tsx`, `src/app/admin/sync/page.tsx`, `supabase/functions/m2-backend/index.ts`, `supabase/migrations/20261022120000_m6_allow_coding_classes_sync.sql`):**
+     - Hỗ trợ `robFilterMode = 'all_classes'` (mặc định trên giao diện Đồng bộ thật) và `targetClassCode` (ví dụ `VT-JSB16`).
+     - Hỗ trợ đọc tệp JSON mảng học sinh của 1 lớp từ `?get_students_of_class=1&class_code=...` bên cạnh định dạng DataTables.
+     - Cập nhật Bookmarklet trên `/admin/sync` cho phép nhập mã lớp cần lấy nhanh (ví dụ `VT-JSB16`) hoặc để trống để đọc toàn bộ các trang.
+  4. **Làm gọn câu chữ trên `/admin/teachers` và `/admin/lessons/[lessonId]/edit`:**
+     - Lược bỏ mã `[UI-08]` và các cụm từ kỹ thuật (`Markdown / Rich Text`, `courseId: null`, `[UI-07]`).
+- **Kiểm thử & Nghiệm thu:**
+  - `npm run typecheck`: `0` lỗi.
+  - `npm test`: `382 / 382 PASS` (bổ sung test `M4-14` kiểm thử đồng bộ lớp lập trình `VT-JSB16`).
+
+---
+
 ### [2026-11-07] — Tinh gọn Giao diện (UI Streamlining): Ẩn chi tiết kỹ thuật & công cụ kiểm thử trên môi trường thật (`isLiveMode`)
 - **Mục tiêu:** Theo yêu cầu của Owner trước khi nạp thêm nội dung bài học mới, lược bỏ toàn bộ thông tin kỹ thuật nội bộ (UUID, `participantId`, thuật ngữ `RFC 4180` / `SHA-256 Digest`, đường dẫn tệp nội bộ, các hộp giải thích quy tắc hệ thống dài dòng) và ẩn các công cụ kiểm thử giả lập (`Fixture`, `Simulate Failure`) khi chạy trên môi trường thật (`isLiveMode`).
 - **Tính năng & Thay đổi đã thực hiện:**

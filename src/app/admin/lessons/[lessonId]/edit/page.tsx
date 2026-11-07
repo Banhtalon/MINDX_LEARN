@@ -261,7 +261,7 @@ export default function EditLessonPage() {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Nội dung bài giảng (Hỗ trợ văn bản Markdown hoặc nhúng khối bài học tương tác HTML)
+              Nội dung bài giảng &amp; Tài liệu hướng dẫn
             </label>
             <textarea
               rows={6}

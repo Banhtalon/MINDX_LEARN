@@ -4521,16 +4521,25 @@ export async function handleRequest(req: Request): Promise<Response> {
         String(val || '').trim().replace(/\s+/g, ' ');
 
       if (isRealTeachingSync) {
+        const requireRobOnly =
+          rawReport.robFilterMode !== 'all_classes' &&
+          !(typeof rawReport.targetClassCode === 'string' && rawReport.targetClassCode.trim());
+
         const newClassesList = Array.isArray(rawReport.newClassesToCreate) ? rawReport.newClassesToCreate : [];
         for (const cls of newClassesList) {
           const cCode = normClassCode(cls?.code);
           const rawName = typeof cls?.name === 'string' ? normText(cls.name) : '';
-          const expectedClassName = `Lớp Robotics ${cCode} (Mới đồng bộ — Chờ Admin gán khóa học)`;
-          if (!cCode || !/rob/i.test(cCode) || (rawName && rawName !== expectedClassName)) {
+          const expectedClassNameRob = `Lớp Robotics ${cCode} (Mới đồng bộ — Chờ Admin gán khóa học)`;
+          const expectedClassNameGen = `Lớp ${cCode} (Mới đồng bộ — Chờ Admin gán khóa học)`;
+          if (
+            !cCode ||
+            (requireRobOnly && !/rob/i.test(cCode)) ||
+            (rawName && rawName !== expectedClassNameRob && rawName !== expectedClassNameGen)
+          ) {
             return jsonResponse(
               {
                 success: false,
-                message: `Mã lớp hoặc tên lớp "${cCode || ''}" không hợp lệ (chỉ chấp nhận lớp có mã ROB).`,
+                message: `Mã lớp hoặc tên lớp "${cCode || ''}" không hợp lệ.`,
                 code: 'INVALID_DIFF_REPORT',
               },
               400
@@ -4545,12 +4554,20 @@ export async function handleRequest(req: Request): Promise<Response> {
           const prevName = typeof upd?.previousName === 'string' ? normText(upd.previousName) : '';
           const classCode = normClassCode(upd?.classCode);
           const prevClassCode = normClassCode(upd?.previousClassCode);
-          if (!code || !nextName || !prevName || !classCode || !prevClassCode || classCode !== prevClassCode || !/rob/i.test(classCode)) {
+          if (
+            !code ||
+            !nextName ||
+            !prevName ||
+            !classCode ||
+            !prevClassCode ||
+            classCode !== prevClassCode ||
+            (requireRobOnly && !/rob/i.test(classCode))
+          ) {
             return jsonResponse(
               {
                 success: false,
                 message:
-                  'Báo cáo xem trước thiếu thông tin đối chiếu bắt buộc (id, name, previousName, classCode, previousClassCode) hoặc lớp không thuộc diện ROB.',
+                  'Báo cáo xem trước thiếu thông tin đối chiếu bắt buộc (id, name, previousName, classCode, previousClassCode).',
                 code: 'INVALID_DIFF_REPORT',
               },
               400
@@ -4563,11 +4580,11 @@ export async function handleRequest(req: Request): Promise<Response> {
           const code = normText(add?.id).toUpperCase();
           const name = normText(add?.name);
           const classCode = normClassCode(add?.classCode);
-          if (!code || !name || !classCode || !/rob/i.test(classCode)) {
+          if (!code || !name || !classCode || (requireRobOnly && !/rob/i.test(classCode))) {
             return jsonResponse(
               {
                 success: false,
-                message: 'Báo cáo xem trước thiếu thông tin bắt buộc ở mục thêm mới (id, name, classCode ROB).',
+                message: 'Báo cáo xem trước thiếu thông tin bắt buộc ở mục thêm mới (id, name, classCode).',
                 code: 'INVALID_DIFF_REPORT',
               },
               400

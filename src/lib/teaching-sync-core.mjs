@@ -173,17 +173,27 @@ export function evaluateTeachingRowStatuses(rawStudentStatus, rawClassStatus) {
 }
 
 /**
- * Checks whether a class code matches the ROB filter rule.
+ * Checks whether a class code matches the class filter rule.
  * @param {string} classCode
- * @param {'include_rob' | 'exclude_rob'} [robFilterMode='include_rob']
+ * @param {'include_rob' | 'exclude_rob' | 'all_classes'} [robFilterMode='include_rob']
+ * @param {string} [targetClassCode='']
  */
-export function evaluateRobClassFilter(classCode, robFilterMode = 'include_rob') {
-  const hasRob = /rob/i.test(String(classCode || ''));
-  const passesFilter = robFilterMode === 'exclude_rob' ? !hasRob : hasRob;
+export function evaluateRobClassFilter(classCode, robFilterMode = 'include_rob', targetClassCode = '') {
+  const normCode = normalizeClassCode(classCode);
+  const hasRob = /rob/i.test(normCode);
+  const normTarget = normalizeClassCode(targetClassCode);
+  const passesFilter = normTarget
+    ? normCode === normTarget
+    : robFilterMode === 'all_classes'
+      ? Boolean(normCode)
+      : robFilterMode === 'exclude_rob'
+        ? !hasRob
+        : hasRob;
   return {
     hasRob,
     passesFilter,
     robFilterMode,
+    targetClassCode: normTarget,
   };
 }
 
@@ -192,10 +202,53 @@ export function evaluateRobClassFilter(classCode, robFilterMode = 'include_rob')
  * Supports:
  * - `{ pages: [page1, page2, ...], pageLength?: number }`
  * - Single DataTables response `{ draw, recordsTotal, recordsFiltered, data }`
+ * - Single-class student array `[ { id, student_name, class_code, status, class_status? }, ... ]`
  *
  * @param {any} fixtureInput
  */
-export function createFixturePageFetcher(fixtureInput) {
+export function createFixturePageFetcher(fixtureInput, defaultClassCode = '') {
+  if (Array.isArray(fixtureInput)) {
+    const fallbackClassCode = normalizeClassCode(defaultClassCode);
+    const normalizedRows = fixtureInput.map((row) =>
+      row && typeof row === 'object' && !Array.isArray(row)
+        ? {
+            ...row,
+            student_name:
+              typeof row.student_name === 'string' && row.student_name.trim()
+                ? row.student_name
+                : typeof row.full_name === 'string' && row.full_name.trim()
+                  ? row.full_name
+                  : row.student_name,
+            class_code:
+              typeof row.class_code === 'string' && row.class_code.trim()
+                ? row.class_code
+                : fallbackClassCode || row.class_code,
+            status:
+              typeof row.status === 'string' && row.status.trim()
+                ? row.status
+                : 'Chưa rõ trạng thái',
+            class_status:
+              typeof row.class_status === 'string' && row.class_status.trim()
+                ? row.class_status
+                : 'Running',
+          }
+        : row
+    );
+    const pageLen = Math.max(TEACHING_DATATABLES_DEFAULT_PAGE_LENGTH, normalizedRows.length || 15);
+    return createFixturePageFetcher({
+      pageLength: pageLen,
+      snapshotVersion: `single-class-${normalizedRows.length}`,
+      pages: [
+        {
+          draw: 1,
+          recordsTotal: normalizedRows.length,
+          recordsFiltered: normalizedRows.length,
+          data: normalizedRows,
+        },
+      ],
+    });
+  }
+
   if (!fixtureInput || typeof fixtureInput !== 'object') {
     return async () => ({
       ok: false,
@@ -702,7 +755,13 @@ export async function readAllTeachingDataTablesPages(options = {}) {
 export function classifyAndDiffTeachingSnapshot(validatedRows, currentState = {}, options = {}) {
   const existingStudents = Array.isArray(currentState.students) ? currentState.students : [];
   const existingClasses = Array.isArray(currentState.classes) ? currentState.classes : [];
-  const robFilterMode = options.robFilterMode === 'exclude_rob' ? 'exclude_rob' : 'include_rob';
+  const robFilterMode =
+    options.robFilterMode === 'exclude_rob'
+      ? 'exclude_rob'
+      : options.robFilterMode === 'all_classes'
+        ? 'all_classes'
+        : 'include_rob';
+  const targetClassCode = normalizeClassCode(options.targetClassCode || '');
 
   // Build lookups for existing classes and students
   const classByCode = new Map();
@@ -803,11 +862,11 @@ export function classifyAndDiffTeachingSnapshot(validatedRows, currentState = {}
     const sourceId = String(row.id).trim().toUpperCase();
     seenSnapshotStudentCodes.add(sourceId);
 
-    const robEval = evaluateRobClassFilter(row.classCode, robFilterMode);
+    const robEval = evaluateRobClassFilter(row.classCode, robFilterMode, targetClassCode);
     const statusEval = evaluateTeachingRowStatuses(row.status, row.classStatus);
     const existingStudent = studentByCode.get(sourceId) || null;
 
-    // 1. Check ROB class filter first
+    // 1. Check class filter first
     if (!robEval.passesFilter) {
       ignored.push({
         id: sourceId,
@@ -816,8 +875,9 @@ export function classifyAndDiffTeachingSnapshot(validatedRows, currentState = {}
         status: row.status,
         classStatus: row.classStatus,
         reasonCode: robFilterMode === 'exclude_rob' ? 'EXCLUDED_ROB_CLASS' : 'NON_ROB_CLASS',
-        reason:
-          robFilterMode === 'exclude_rob'
+        reason: targetClassCode
+          ? `Mã lớp (${row.classCode}) khác mã lớp đang chọn lọc (${targetClassCode})`
+          : robFilterMode === 'exclude_rob'
             ? `Bỏ qua lớp có mã ROB (${row.classCode}) theo chế độ loại trừ ROB`
             : `Mã lớp (${row.classCode}) không chứa tiền tố ROB`,
       });
@@ -992,11 +1052,11 @@ export function classifyAndDiffTeachingSnapshot(validatedRows, currentState = {}
       continue;
     }
 
-    // 7. Valid new active ROB student!
+    // 7. Valid new active student!
     if (!targetClass && !newClassesMap.has(row.classCode)) {
       newClassesMap.set(row.classCode, {
         code: row.classCode,
-        name: `Lớp Robotics ${row.classCode} (Mới đồng bộ — Chờ Admin gán khóa học)`,
+        name: buildCanonicalM4SyncedClassName(row.classCode),
         courseId: null,
         teacherId: null,
         status: 'active',
@@ -1046,6 +1106,7 @@ export function classifyAndDiffTeachingSnapshot(validatedRows, currentState = {}
   return {
     sourceMode: options.sourceMode || 'synthetic_fixture',
     robFilterMode,
+    ...(targetClassCode ? { targetClassCode } : {}),
     pagination: {
       pagesRead: pagination.pagesRead,
       pageLength: pagination.pageLength,
@@ -1255,7 +1316,10 @@ export const CANONICAL_M4_SYNTHETIC_STUDENTS = new Map([
 
 export function buildCanonicalM4SyncedClassName(classCode) {
   const code = normalizeClassCode(classCode);
-  return `Lớp Robotics ${code} (Mới đồng bộ — Chờ Admin gán khóa học)`;
+  if (/rob/i.test(code) || CANONICAL_M4_SYNTHETIC_CLASSES.has(code)) {
+    return `Lớp Robotics ${code} (Mới đồng bộ — Chờ Admin gán khóa học)`;
+  }
+  return `Lớp ${code} (Mới đồng bộ — Chờ Admin gán khóa học)`;
 }
 
 export function validateCanonicalM4SyntheticDiffReport(diffReport) {
@@ -1373,16 +1437,25 @@ export function validateRealTeachingSyncDiffReport(diffReport) {
     };
   }
 
+  const requireRobOnly =
+    diffReport.robFilterMode !== 'all_classes' &&
+    !(typeof diffReport.targetClassCode === 'string' && diffReport.targetClassCode.trim());
+
   const newClasses = Array.isArray(diffReport.newClassesToCreate) ? diffReport.newClassesToCreate : [];
   for (const cls of newClasses) {
     const code = normalizeClassCode(cls?.code);
     const rawName = typeof cls?.name === 'string' ? cls.name.trim().replace(/\s+/g, ' ') : '';
-    const expectedName = buildCanonicalM4SyncedClassName(code);
-    if (!code || !/rob/i.test(code) || (rawName && rawName !== expectedName)) {
+    const expectedNameRob = `Lớp Robotics ${code} (Mới đồng bộ — Chờ Admin gán khóa học)`;
+    const expectedNameGen = `Lớp ${code} (Mới đồng bộ — Chờ Admin gán khóa học)`;
+    if (
+      !code ||
+      (requireRobOnly && !/rob/i.test(code)) ||
+      (rawName && rawName !== expectedNameRob && rawName !== expectedNameGen)
+    ) {
       return {
         valid: false,
         code: 'INVALID_DIFF_REPORT',
-        message: `Mã lớp hoặc tên lớp "${code || '(rỗng)'}" không hợp lệ (chỉ chấp nhận lớp có mã ROB).`,
+        message: `Mã lớp hoặc tên lớp "${code || '(rỗng)'}" không hợp lệ.`,
       };
     }
   }
@@ -1404,13 +1477,13 @@ export function validateRealTeachingSyncDiffReport(diffReport) {
       !classCode ||
       !prevClassCode ||
       classCode !== prevClassCode ||
-      !/rob/i.test(classCode)
+      (requireRobOnly && !/rob/i.test(classCode))
     ) {
       return {
         valid: false,
         code: 'INVALID_DIFF_REPORT',
         message:
-          'Báo cáo xem trước thiếu thông tin đối chiếu bắt buộc (id, name, previousName, classCode, previousClassCode) hoặc lớp không thuộc diện ROB.',
+          'Báo cáo xem trước thiếu thông tin đối chiếu bắt buộc (id, name, previousName, classCode, previousClassCode).',
       };
     }
   }
@@ -1420,11 +1493,11 @@ export function validateRealTeachingSyncDiffReport(diffReport) {
     const code = String(item?.id || '').trim().toUpperCase();
     const name = String(item?.name || '').trim().replace(/\s+/g, ' ');
     const classCode = normalizeClassCode(item?.classCode);
-    if (!code || !name || !classCode || !/rob/i.test(classCode)) {
+    if (!code || !name || !classCode || (requireRobOnly && !/rob/i.test(classCode))) {
       return {
         valid: false,
         code: 'INVALID_DIFF_REPORT',
-        message: 'Báo cáo xem trước thiếu thông tin bắt buộc ở mục thêm mới (id, name, classCode ROB).',
+        message: 'Báo cáo xem trước thiếu thông tin bắt buộc ở mục thêm mới (id, name, classCode).',
       };
     }
   }
@@ -1752,15 +1825,23 @@ export function applyTeachingSyncDiffToState(currentState, diffReport) {
  * @param {Object} [options] - `{ robFilterMode?: 'include_rob' | 'exclude_rob', allowConfirmedClassChange?: boolean, sourceMode?: string }`
  */
 export async function runTeachingSnapshotPreview(fixtureInput, currentState = {}, options = {}) {
-  const pageLength =
-    typeof fixtureInput?.pageLength === 'number'
+  const pageLength = Array.isArray(fixtureInput)
+    ? Math.max(TEACHING_DATATABLES_DEFAULT_PAGE_LENGTH, fixtureInput.length || 15)
+    : typeof fixtureInput?.pageLength === 'number'
       ? fixtureInput.pageLength
       : options.pageLength || TEACHING_DATATABLES_DEFAULT_PAGE_LENGTH;
+
+  const effectiveTargetClassCode =
+    typeof options.targetClassCode === 'string' && options.targetClassCode.trim()
+      ? options.targetClassCode.trim()
+      : !Array.isArray(fixtureInput) && typeof fixtureInput?.targetClassCode === 'string' && fixtureInput.targetClassCode.trim()
+        ? fixtureInput.targetClassCode.trim()
+        : '';
 
   const fetchPage =
     typeof options.fetchPage === 'function'
       ? options.fetchPage
-      : createFixturePageFetcher(fixtureInput);
+      : createFixturePageFetcher(fixtureInput, effectiveTargetClassCode);
 
   const pageReadResult = await readAllTeachingDataTablesPages({
     fetchPage,
@@ -1800,6 +1881,7 @@ export async function runTeachingSnapshotPreview(fixtureInput, currentState = {}
 
   const report = classifyAndDiffTeachingSnapshot(pageReadResult.rows, currentState, {
     ...options,
+    targetClassCode: effectiveTargetClassCode,
     sourceMode: options.sourceMode || 'synthetic_fixture',
     paginationSummary: {
       pagesRead: pageReadResult.pagesRead,

@@ -108,7 +108,7 @@ export default function AdminTeachersPage() {
             Quản lý Giáo viên &amp; Phân công lớp
           </h1>
           <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-            Admin tạo trước tài khoản (email và mật khẩu) trực tiếp trên Supabase Auth, sau đó nhập chính xác email tại đây để gán vai trò Giáo viên và phân công lớp phụ trách.
+            Kết nối tài khoản giáo viên bằng email, cập nhật hồ sơ và phân công các lớp học phụ trách.
           </p>
         </div>
 

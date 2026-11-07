@@ -16,8 +16,8 @@ Theo quyết định của Owner ngày `22/10/2026` (*"Dùng luôn Supabase MIND
 | **Supabase PROD** | Project `MINDX_LEARN` (`eythjapspkoyqdxlxtcd`) | **ACTIVE** (`environment_mode = 'production'`, khóa cứng toàn bộ thao tác tạo dữ liệu giả `fixture`) |
 | **Edge Function (`m2-backend`)** | **Version `18`** (`status: ACTIVE`, `verify_jwt: false`) | Đã bật `coordinatorFixtureLock` (`HTTP 403 PRODUCTION_ENVIRONMENT_LOCKED` với mọi yêu cầu tạo/reset fixture) |
 | **Migration mới nhất trên DB** | `20261022153000_m6_jsb_course_session1_curriculum.sql` | Đã áp dụng trên `MINDX_LEARN` |
-| **Bộ kiểm thử tự động (`npm test`)** | **381 / 381 PASS** (`npx tsc --noEmit` = `0` lỗi) | Toàn bộ 23 tệp kiểm thử từ Mốc 1 → Mốc 6 đều xanh |
-| **Hệ thống Thiết kế (Design System)** | [`design-system/mindx-learn/MASTER.md`](./design-system/mindx-learn/MASTER.md) & [`src/app/globals.css`](./src/app/globals.css) | **HOÀN THÀNH 100%** — Đồng bộ toàn bộ 4 đợt giao diện (Khung chung, Học sinh, Giáo viên/Lớp, Admin) với chuẩn `UI-01` |
+| **Bộ kiểm thử tự động (`npm test`)** | **382 / 382 PASS** (`npx tsc --noEmit` = `0` lỗi) | Toàn bộ 23 tệp kiểm thử từ Mốc 1 → Mốc 6 đều xanh |
+| **Hệ thống Thiết kế (Design System)** | [`design-system/mindx-learn/MASTER.md`](./design-system/mindx-learn/MASTER.md) & [`src/app/globals.css`](./src/app/globals.css) | **HOÀN THÀNH 100%** — Đồng bộ toàn bộ 19 màn hình với phong cách bo tròn hiện đại (`rounded-2xl`/`rounded-3xl`, xanh dương `#1d63ed`, ẩn chi tiết kỹ thuật trên PROD) |
 
 ### Số lượng dữ liệu thực tế trong Database `MINDX_LEARN` hiện tại:
 - **Tài khoản Quản trị viên (`profiles` / `auth.users`):** **`1`** (Chỉ giữ duy nhất tài khoản Owner: `quangctm07@gmail.com` — `Admin Quản Trị Hệ Thống`, `id: 2d99957f-8608-4366-ade3-094f0c40a904`).

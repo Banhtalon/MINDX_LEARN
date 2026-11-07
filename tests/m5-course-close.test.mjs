@@ -3698,13 +3698,12 @@ test('Suite 17: Regression tests for Review Round 8 Fixes (R8-01 through R8-03)'
       'handleExecuteClose phải truyền confirmedCsvOpened và confirmedCsvSha256 vào verifyAndExecuteCourseClose'
     );
 
-    // 4. UI: ConfirmDialog message contains class code, course title, CSV SHA-256 snippet, and reminder
+    // 4. UI: ConfirmDialog message contains class code, course title, and reminder (raw SHA-256 hidden from UI for clarity while verified in store/backend)
     assert.ok(
       classesPageSource.includes('selectedClass?.code') &&
       classesPageSource.includes('selectedCourse?.title') &&
-      classesPageSource.includes('csvVerificationResult?.sha256?.slice(0, 12)') &&
       classesPageSource.includes('tệp CSV chỉ là báo cáo tổng kết, không phải bản backup và không thể khôi phục'),
-      'ConfirmDialog message phải nêu rõ lớp, khóa, mã SHA-256 của CSV và lưu ý CSV không phải bản backup'
+      'ConfirmDialog message phải nêu rõ lớp, khóa và lưu ý CSV không phải bản backup'
     );
 
     // 5. Store: verifyAndExecuteCourseClose options & validation

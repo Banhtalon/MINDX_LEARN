@@ -2437,5 +2437,55 @@ test('M4-12: Round 4 regressions — class spacing preservation, inactive-to-act
   dom.window.close();
 });
 
+test('M4-14: Coding classes sync (VT-JSB16, JSA, CSB, all_classes, targetClassCode, and single-class array snapshot)', async () => {
+  const {
+    evaluateRobClassFilter,
+    validateRealTeachingSyncDiffReport,
+  } = await import('../src/lib/teaching-sync-core.mjs');
+  const {
+    runTeachingSnapshotPreview: runTeachingSnapshotPreviewTs,
+  } = await import('../src/lib/simulation-rules.ts');
+
+  assert.equal(evaluateRobClassFilter('VT-JSB16', 'all_classes').passesFilter, true);
+  assert.equal(evaluateRobClassFilter('HN-JSA02', 'all_classes').passesFilter, true);
+  assert.equal(evaluateRobClassFilter('HCM-CSB01', 'all_classes').passesFilter, true);
+  assert.equal(evaluateRobClassFilter('VT-JSB16', 'include_rob', 'VT-JSB16').passesFilter, true);
+  assert.equal(evaluateRobClassFilter('HN-JSA02', 'all_classes', 'VT-JSB16').passesFilter, false);
+
+  // Single-class array format from hocsinh.php?get_students_of_class=1&class_code=VT-JSB16
+  const singleClassArray = [
+    { id: 'MX-JSB16-001', full_name: 'Nguyễn Minh Quân', status: 'Đang học', class_status: 'Running' },
+    { id: 'MX-JSB16-002', full_name: 'Trần Bảo Ngọc', status: 'Đang học', class_status: 'Running' },
+    { id: 'MX-JSB16-003', full_name: 'Lê Hoàng Nam', status: 'Nghỉ học', class_status: 'Running' },
+    { id: 'MX-JSB16-004', full_name: 'Phạm Gia Huy' },
+  ];
+
+  const initialState = createInitialTestState();
+  for (const runner of [runTeachingSnapshotPreview, runTeachingSnapshotPreviewTs]) {
+    const preview = await runner(singleClassArray, initialState, {
+      robFilterMode: 'all_classes',
+      targetClassCode: 'VT-JSB16',
+      sourceMode: 'real_teaching_sync',
+      requireUnfilteredSource: false,
+    });
+
+    assert.equal(preview.aborted, false);
+    assert.equal(preview.report.counts.addedCount, 2);
+    assert.equal(preview.report.counts.ignoredCount, 1);
+    assert.equal(preview.report.counts.needsReviewCount, 1);
+    assert.equal(preview.report.newClassesToCreate.length, 1);
+    assert.equal(preview.report.newClassesToCreate[0].code, 'VT-JSB16');
+    assert.equal(
+      preview.report.newClassesToCreate[0].name,
+      'Lớp VT-JSB16 (Mới đồng bộ — Chờ Admin gán khóa học)'
+    );
+    assert.equal(preview.report.newClassesToCreate[0].courseId, null);
+
+    const validation = validateRealTeachingSyncDiffReport(preview.report);
+    assert.equal(validation.valid, true);
+  }
+});
+
+
 
 

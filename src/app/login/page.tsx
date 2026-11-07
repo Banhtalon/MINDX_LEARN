@@ -108,9 +108,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-170px)] flex flex-col justify-center items-center py-6 px-4">
       {/* Main Login Card */}
-      <div className="w-full max-w-[430px] bg-white rounded-lg border-[1.5px] border-[#cbd5e1] p-7 sm:p-8">
+      <div className="w-full max-w-[430px] bg-white rounded-3xl border border-slate-100 shadow-[0_12px_32px_-8px_rgba(11,28,48,0.08)] p-7 sm:p-8">
         {/* Shield Icon Header */}
-        <div className="w-11 h-11 mx-auto mb-3 rounded-md bg-[#eff4ff] border border-[#b8c4ff] flex items-center justify-center text-[#1e40af]">
+        <div className="w-12 h-12 mx-auto mb-3.5 rounded-2xl bg-[#eff4ff] border border-[#dbeafe] flex items-center justify-center text-[#1d63ed]">
           <IconShield className="w-5 h-5" />
         </div>
 
@@ -118,22 +118,22 @@ export default function LoginPage() {
         <h1 className="text-xl font-extrabold text-[#0b1c30] text-center tracking-tight">
           Đăng nhập MINDX LEARN
         </h1>
-        <p className="text-xs text-[#44474d] text-center mt-1 mb-6 font-normal">
+        <p className="text-xs text-slate-500 text-center mt-1 mb-6 font-normal">
           Hệ thống học tập và quản lý lớp học
         </p>
 
-        {/* High-Contrast Tab Switcher */}
-        <div className="bg-[#f8f9ff] p-1 rounded-md flex gap-1 mb-6 border-[1.5px] border-[#cbd5e1]">
+        {/* Tab Switcher */}
+        <div className="bg-slate-100/80 p-1 rounded-xl flex gap-1 mb-6 border border-slate-200/60">
           <button
             type="button"
             onClick={() => {
               setTab('student');
               setErrorMessage(null);
             }}
-            className={`flex-1 py-2 px-4 rounded text-xs font-bold transition-colors text-center min-h-[36px] ${
+            className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all text-center min-h-[36px] ${
               tab === 'student'
-                ? 'bg-[#1e40af] text-white'
-                : 'text-[#44474d] hover:text-[#0b1c30]'
+                ? 'bg-[#1d63ed] text-white shadow-sm'
+                : 'text-slate-600 hover:text-[#0b1c30]'
             }`}
           >
             Học sinh
@@ -144,10 +144,10 @@ export default function LoginPage() {
               setTab('staff');
               setErrorMessage(null);
             }}
-            className={`flex-1 py-2 px-4 rounded text-xs font-bold transition-colors text-center min-h-[36px] ${
+            className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all text-center min-h-[36px] ${
               tab === 'staff'
-                ? 'bg-[#0f233a] text-white'
-                : 'text-[#44474d] hover:text-[#0b1c30]'
+                ? 'bg-[#1d63ed] text-white shadow-sm'
+                : 'text-slate-600 hover:text-[#0b1c30]'
             }`}
           >
             Giáo viên / Admin
@@ -156,14 +156,14 @@ export default function LoginPage() {
 
         {/* Status Alerts */}
         {errorMessage && (
-          <div className="mb-4 p-3 rounded bg-[#ffdad6] border border-[#ba1a1a]/40 text-[#93000a] text-xs font-medium flex items-start gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-[#ffdad6] border border-[#ba1a1a]/30 text-[#93000a] text-xs font-medium flex items-start gap-2">
             <IconAlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#ba1a1a]" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-4 p-3 rounded bg-[#ecfdf5] border border-[#047857]/40 text-[#002115] text-xs font-medium flex items-start gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-[#ecfdf5] border border-[#047857]/30 text-[#002115] text-xs font-medium flex items-start gap-2">
             <IconCheckCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#047857]" />
             <span>{successMessage}</span>
           </div>
@@ -173,7 +173,7 @@ export default function LoginPage() {
           <div
             role="status"
             aria-live="polite"
-            className="mb-4 p-3 rounded bg-amber-50 border border-amber-300 text-amber-900 text-xs font-medium flex items-start gap-2"
+            className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-start gap-2"
           >
             <IconAlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-700" />
             <span>{logoutWarning}</span>
@@ -191,7 +191,7 @@ export default function LoginPage() {
                 Mã học sinh
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#74777e] pointer-events-none">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
                   <IconUser className="w-4 h-4" />
                 </span>
                 <input
@@ -201,7 +201,7 @@ export default function LoginPage() {
                   value={studentCode}
                   onChange={(e) => setStudentCode(e.target.value)}
                   placeholder="Ví dụ: HS_ROB_001"
-                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border-[1.5px] border-[#cbd5e1] rounded focus:outline-none focus:border-[#1e40af] text-[#0b1c30] placeholder:text-[#74777e] min-h-[42px]"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50/60 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-[#1d63ed]/15 text-[#0b1c30] placeholder:text-slate-400 min-h-[42px] transition-all"
                   autoComplete="off"
                 />
               </div>
@@ -215,7 +215,7 @@ export default function LoginPage() {
                 Mã PIN cá nhân
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#74777e] pointer-events-none">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
                   <IconLock className="w-4 h-4" />
                 </span>
                 <input
@@ -226,7 +226,7 @@ export default function LoginPage() {
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="8 chữ số bảo mật (ví dụ: 88889999)"
-                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border-[1.5px] border-[#cbd5e1] rounded focus:outline-none focus:border-[#1e40af] text-[#0b1c30] placeholder:text-[#74777e] font-mono tracking-wider min-h-[42px]"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50/60 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-[#1d63ed]/15 text-[#0b1c30] placeholder:text-slate-400 font-mono tracking-wider min-h-[42px] transition-all"
                   autoComplete="new-password"
                 />
               </div>
@@ -235,7 +235,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full min-h-[44px] py-2.5 px-4 bg-[#1e40af] hover:bg-[#0f233a] disabled:opacity-50 text-white font-bold rounded text-sm transition-colors flex items-center justify-center gap-2 mt-6"
+              className="w-full min-h-[44px] py-2.5 px-4 bg-[#1d63ed] hover:bg-[#164fc4] disabled:opacity-50 text-white font-bold rounded-xl text-sm shadow-sm transition-colors flex items-center justify-center gap-2 mt-6"
             >
               {isLoading ? (
                 <>
@@ -248,7 +248,7 @@ export default function LoginPage() {
             </button>
 
             <div className="text-center pt-2">
-              <span className="text-xs text-[#44474d] leading-relaxed">
+              <span className="text-xs text-slate-500 leading-relaxed">
                 Bạn chưa có PIN hoặc quên PIN? Liên hệ Giáo viên / Admin
               </span>
             </div>
@@ -264,7 +264,7 @@ export default function LoginPage() {
                 Email
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#74777e] pointer-events-none">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
                   <IconUser className="w-4 h-4" />
                 </span>
                 <input
@@ -274,7 +274,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Nhập email của bạn"
-                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border-[1.5px] border-[#cbd5e1] rounded focus:outline-none focus:border-[#1e40af] text-[#0b1c30] placeholder:text-[#74777e] min-h-[42px]"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50/60 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-[#1d63ed]/15 text-[#0b1c30] placeholder:text-slate-400 min-h-[42px] transition-all"
                   autoComplete="off"
                 />
               </div>
@@ -296,13 +296,13 @@ export default function LoginPage() {
                     setForgotSuccess(null);
                     setForgotEmail(email);
                   }}
-                  className="text-xs text-[#1e40af] hover:underline font-bold"
+                  className="text-xs text-[#1d63ed] hover:underline font-bold"
                 >
                   Quên mật khẩu?
                 </button>
               </div>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#74777e] pointer-events-none">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
                   <IconLock className="w-4 h-4" />
                 </span>
                 <input
@@ -312,7 +312,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Nhập mật khẩu"
-                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border-[1.5px] border-[#cbd5e1] rounded focus:outline-none focus:border-[#1e40af] text-[#0b1c30] placeholder:text-[#74777e] min-h-[42px]"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50/60 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-[#1d63ed]/15 text-[#0b1c30] placeholder:text-slate-400 min-h-[42px] transition-all"
                   autoComplete="new-password"
                 />
               </div>
@@ -321,7 +321,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full min-h-[44px] py-2.5 px-4 bg-[#0f233a] hover:bg-[#1e40af] disabled:opacity-50 text-white font-bold rounded text-sm transition-colors flex items-center justify-center gap-2 mt-6"
+              className="w-full min-h-[44px] py-2.5 px-4 bg-[#1d63ed] hover:bg-[#164fc4] disabled:opacity-50 text-white font-bold rounded-xl text-sm shadow-sm transition-colors flex items-center justify-center gap-2 mt-6"
             >
               {isLoading ? (
                 <>
@@ -338,15 +338,15 @@ export default function LoginPage() {
 
       {/* Forgot Password Modal (UI-1 Screen 2) */}
       {forgotModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[#0b1c30]/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[#0b1c30]/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="forgot-modal-title"
-            className="bg-white rounded-lg max-w-[420px] w-full p-6 border-2 border-[#0f233a] shadow-[4px_4px_0px_#0f233a] relative"
+            className="bg-white rounded-2xl max-w-[420px] w-full p-6 border border-slate-100 shadow-xl relative"
           >
             {/* Header row */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#cbd5e1]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h2
                 id="forgot-modal-title"
                 className="text-base font-extrabold text-[#0b1c30] tracking-tight"
@@ -357,13 +357,13 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => setForgotModalOpen(false)}
                 aria-label="Đóng"
-                className="text-[#44474d] hover:text-[#0b1c30] p-1 rounded border border-transparent hover:border-[#cbd5e1] transition-colors"
+                className="text-slate-500 hover:text-[#0b1c30] p-1 rounded-lg border border-transparent hover:border-slate-200 transition-colors"
               >
                 <IconX className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-[#44474d] mt-3 mb-4 leading-relaxed">
+            <p className="text-xs text-slate-500 mt-3 mb-4 leading-relaxed">
               Nhập email của bạn để nhận liên kết đặt lại mật khẩu.
             </p>
 
@@ -382,17 +382,17 @@ export default function LoginPage() {
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   placeholder="Nhập email của bạn..."
-                  className="w-full py-2.5 px-3.5 text-sm bg-white border-[1.5px] border-[#cbd5e1] rounded outline-none focus:border-[#1e40af] text-[#0b1c30] placeholder:text-[#74777e] min-h-[42px]"
+                  className="w-full py-2.5 px-3.5 text-sm bg-slate-50/60 focus:bg-white border border-slate-200 rounded-xl outline-none focus:border-[#1d63ed] focus:ring-2 focus:ring-[#1d63ed]/15 text-[#0b1c30] placeholder:text-slate-400 min-h-[42px] transition-all"
                   autoComplete="email"
                 />
               </div>
 
               {forgotStatus && (
                 <div
-                  className={`p-3 rounded text-xs leading-relaxed border ${
+                  className={`p-3 rounded-xl text-xs leading-relaxed border ${
                     forgotSuccess
-                      ? 'bg-[#ecfdf5] border-[#047857]/40 text-[#002115]'
-                      : 'bg-[#ffdad6] border-[#ba1a1a]/40 text-[#93000a]'
+                      ? 'bg-[#ecfdf5] border-[#047857]/30 text-[#002115]'
+                      : 'bg-[#ffdad6] border-[#ba1a1a]/30 text-[#93000a]'
                   }`}
                 >
                   {forgotStatus}
@@ -403,14 +403,14 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setForgotModalOpen(false)}
-                  className="px-4 py-2 min-h-[38px] text-xs font-bold text-[#0f233a] bg-white border-[1.5px] border-[#cbd5e1] hover:border-[#0f233a] rounded transition-colors"
+                  className="px-4 py-2 min-h-[38px] text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
                 >
                   Đóng
                 </button>
                 <button
                   type="submit"
                   disabled={isForgotLoading}
-                  className="px-4 py-2 min-h-[38px] text-xs font-bold text-white bg-[#1e40af] hover:bg-[#0f233a] disabled:opacity-50 rounded transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 min-h-[38px] text-xs font-bold text-white bg-[#1d63ed] hover:bg-[#164fc4] disabled:opacity-50 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
                 >
                   {isForgotLoading ? (
                     <>

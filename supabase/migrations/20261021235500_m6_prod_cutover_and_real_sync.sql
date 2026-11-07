@@ -126,7 +126,9 @@ BEGIN
             END IF;
 
             IF v_is_real_sync THEN
-                IF v_code !~* 'ROB' THEN
+                IF COALESCE(p_diff_report->>'robFilterMode', 'include_rob') <> 'all_classes'
+                   AND pg_catalog.btrim(COALESCE(p_diff_report->>'targetClassCode', '')) = ''
+                   AND v_code !~* 'ROB' THEN
                     RAISE EXCEPTION 'INVALID_DIFF_REPORT: Mã lớp % không thuộc diện lớp Robotics (ROB).', v_code;
                 END IF;
             ELSE
@@ -147,9 +149,16 @@ BEGIN
                 END IF;
             END IF;
 
-            v_name := 'Lớp Robotics ' || v_code || ' (Mới đồng bộ — Chờ Admin gán khóa học)';
+            IF v_is_real_sync AND v_code !~* 'ROB' THEN
+                v_name := 'Lớp ' || v_code || ' (Mới đồng bộ — Chờ Admin gán khóa học)';
+            ELSE
+                v_name := 'Lớp Robotics ' || v_code || ' (Mới đồng bộ — Chờ Admin gán khóa học)';
+            END IF;
             IF pg_catalog.btrim(COALESCE(v_item->>'name', '')) <> ''
-               AND pg_catalog.regexp_replace(pg_catalog.btrim(v_item->>'name'), '\s+', ' ', 'g') <> v_name THEN
+               AND pg_catalog.regexp_replace(pg_catalog.btrim(v_item->>'name'), '\s+', ' ', 'g') NOT IN (
+                   'Lớp Robotics ' || v_code || ' (Mới đồng bộ — Chờ Admin gán khóa học)',
+                   'Lớp ' || v_code || ' (Mới đồng bộ — Chờ Admin gán khóa học)'
+               ) THEN
                 IF v_is_real_sync THEN
                     RAISE EXCEPTION 'INVALID_DIFF_REPORT: Tên lớp của mã % không khớp định dạng chuẩn.', v_code;
                 ELSE
@@ -204,7 +213,10 @@ BEGIN
             END IF;
 
             IF v_is_real_sync THEN
-                IF v_item_class_code <> v_prev_class_code OR v_item_class_code !~* 'ROB' THEN
+                IF v_item_class_code <> v_prev_class_code
+                   OR (COALESCE(p_diff_report->>'robFilterMode', 'include_rob') <> 'all_classes'
+                       AND pg_catalog.btrim(COALESCE(p_diff_report->>'targetClassCode', '')) = ''
+                       AND v_item_class_code !~* 'ROB') THEN
                     RAISE EXCEPTION 'INVALID_DIFF_REPORT: Bản ghi cập nhật % có mã lớp không hợp lệ.', v_code;
                 END IF;
             ELSE
@@ -285,7 +297,9 @@ BEGIN
             END IF;
 
             IF v_is_real_sync THEN
-                IF v_item_class_code !~* 'ROB' THEN
+                IF COALESCE(p_diff_report->>'robFilterMode', 'include_rob') <> 'all_classes'
+                   AND pg_catalog.btrim(COALESCE(p_diff_report->>'targetClassCode', '')) = ''
+                   AND v_item_class_code !~* 'ROB' THEN
                     RAISE EXCEPTION 'INVALID_DIFF_REPORT: Bản ghi thêm mới % có mã lớp % không thuộc diện ROB.', v_code, v_item_class_code;
                 END IF;
             ELSE
