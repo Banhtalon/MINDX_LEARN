@@ -8,6 +8,16 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-07] — Nâng cấp Bản vá Bảo mật Next.js (`16.4.0 → 16.4.5`)
+- **Mục tiêu:** Nâng cấp `next` từ `16.4.0` lên `16.4.5` theo khuyến nghị bản vá bảo mật chính thức của Next.js và bật cấu hình `experimental.agentUpgrade = 'security'` trong [`next.config.mjs`](./next.config.mjs).
+- **Kiểm thử & Nghiệm thu:**
+  - `npx next --version`: `Next.js v16.4.5`.
+  - `npm run typecheck`: `0` lỗi.
+  - `npm test`: `382 / 382 PASS`.
+  - `npm run build`: Build Production sạch không còn cảnh báo bảo mật.
+
+---
+
 ### [2026-11-07] — Đồng nhất Giao diện 19 Màn hình, Mở khóa Gán khóa học cho Lớp & Mở khóa Đồng bộ Lớp Lập trình (`JSB`, `JSA`, `CSB`, `VT-JSB16`...)
 - **Mục tiêu:**
   1. Cập nhật quy trình phối hợp đội ngũ AI 3 vai trò (`Agent chính`, `Codex CLI — gpt-6.1-sol xhigh`, `Argon High`) trong `AGENTS.md`, `docs/AI_AGENT_WORKFLOW.md` và `.agents/skills/team-workflow/SKILL.md`.
