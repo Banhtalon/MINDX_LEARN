@@ -120,7 +120,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 3 Role Portals */}
+      {/* 3 Role Portals (shown when not logged in or in demo mode) */}
+      {(!isLiveMode || !currentUser) && (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Student Portal Card */}
         <div className="bg-white p-6 rounded-lg border-[1.5px] border-[#cbd5e1] hover:border-[#1d4ed8] transition-colors flex flex-col justify-between">
@@ -230,13 +231,14 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Standard MindX Course Track Overview */}
       <div className="bg-white rounded-lg border-[1.5px] border-[#cbd5e1] p-6 sm:p-7">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#cbd5e1]">
           <div>
             <h2 className="text-lg font-extrabold text-[#0b1c30] tracking-tight">
-              Lộ trình Đào tạo Chuẩn 3 Cấp Độ (Mỗi khóa 14 Buổi cố định)
+              Lộ trình Đào tạo 3 Cấp Độ (Mỗi khóa 14 Buổi)
             </h2>
             <p className="text-xs text-[#44474d] mt-0.5">
               Thứ tự học tập từ cơ bản đến chuyên sâu áp dụng thống nhất cho các bộ môn Robotics và Lập trình

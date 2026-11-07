@@ -416,7 +416,7 @@ export default function StudentLessonDetailPage() {
                             🔒 https://hocsinh.mindx.edu.vn/gioi-thieu-ban-than/index.html
                           </span>
                         </div>
-                        <span className="text-slate-400">Chế độ xem trước an toàn (Sandbox)</span>
+                        <span className="text-slate-400">Xem trực tiếp</span>
                       </div>
                       <iframe
                         title={`Xem trước HTML ${bIdx + 1}`}
@@ -550,7 +550,7 @@ export default function StudentLessonDetailPage() {
                 Chế độ bài học:{' '}
                 <strong className="text-slate-700">
                   {lesson.practiceMode === 'file_allowed'
-                    ? 'Cho phép nộp liên kết hoặc tải tệp <= 2MB'
+                    ? 'Nộp qua đường link hoặc tải tệp bài làm lên hệ thống'
                     : 'Chỉ nhận liên kết ngoài (URL)'}
                 </strong>
               </p>
@@ -595,7 +595,7 @@ export default function StudentLessonDetailPage() {
 
               <div className="p-3.5 bg-white rounded-xl border border-slate-200/80 flex items-center justify-between gap-2">
                 <span className="font-mono text-slate-800 font-semibold truncate">
-                  {currentSub.content}
+                  {currentSub.type === 'file' ? (currentSub.content.split('/').pop() || currentSub.content) : currentSub.content}
                 </span>
                 {currentSub.type === 'link' ? (
                   <a
@@ -700,7 +700,7 @@ export default function StudentLessonDetailPage() {
                 /* Real File Input (Max 2MB) */
                 <div className="space-y-2">
                   <label className="block font-bold text-slate-700">
-                    Chọn tệp bài làm (ZIP, PDF, PNG, JPG/JPEG, WEBP, TXT, PY, JS, HTML, CSS, JSON, MD, SB3 | Tối đa 2MB):
+                    Chọn tệp bài làm từ máy tính (Tối đa 2 MB):
                   </label>
 
                   <div className="p-6 border-2 border-dashed border-slate-200 hover:border-blue-300 rounded-2xl text-center bg-[#f8fafc] space-y-3 transition-colors">
@@ -729,7 +729,7 @@ export default function StudentLessonDetailPage() {
                     <span className="text-slate-500 block text-xs">
                       {selectedFile
                         ? `Đã chọn: ${selectedFile.name} (${Math.round(selectedFile.size / 1024)} KB)`
-                        : 'Vui lòng chọn tệp từ máy tính để tải lên máy chủ bảo mật.'}
+                        : 'Hỗ trợ tệp ZIP, PDF, ảnh, Scratch (.sb3) hoặc tệp mã nguồn (.py, .html, .js...)'}
                     </span>
                   </div>
                 </div>

@@ -81,7 +81,7 @@ export default function StudentCoursePage() {
               <span>Lộ trình 14 buổi học</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              Danh sách Buổi học đã xuất bản — {studentCourse.title}
+              {studentCourse.title}
             </h1>
           </div>
         </div>
@@ -93,16 +93,6 @@ export default function StudentCoursePage() {
             {progress.completedSessionsCount}/14 buổi ({progress.percentage}%)
           </span>
         </div>
-      </div>
-
-      <div className="p-4 bg-blue-50/60 text-slate-700 text-xs rounded-2xl border border-blue-100 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-white text-[#1d63ed] border border-blue-100 flex items-center justify-center shrink-0 shadow-xs">
-          <IconBookOpen className="w-4 h-4" />
-        </div>
-        <span className="leading-relaxed">
-          <strong className="text-slate-900">Quy tắc học tập:</strong> Học sinh được phép mở học bất kỳ bài học nào đã xuất bản mà
-          không bắt buộc phải hoàn thành bài trước đó. Các bài ở trạng thái Bản nháp sẽ được mở dần theo tiến độ lớp.
-        </span>
       </div>
 
       {/* Published Sessions Grid */}

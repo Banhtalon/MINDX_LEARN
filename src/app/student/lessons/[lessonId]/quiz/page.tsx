@@ -173,16 +173,16 @@ export default function StudentQuizPage() {
 
       {/* Rules Notice */}
       <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-xs text-xs text-slate-600 space-y-1.5">
-        <div className="font-extrabold text-slate-900 text-sm mb-1">Hướng dẫn làm bài Trắc nghiệm:</div>
-        <div className="flex items-center gap-2">
+        <div className="font-extrabold text-slate-900 text-xs">Chọn 1 đáp án đúng cho mỗi câu • Đạt từ 70% • Được làm lại nhiều lần (lưu điểm cao nhất)</div>
+        <div className="hidden">
           <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
           <span>Mỗi câu hỏi có 1 đáp án đúng duy nhất, các câu hỏi có trọng số điểm bằng nhau.</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="hidden">
           <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
           <span>Ngưỡng hoàn thành ĐẠT: từ <strong>70%</strong> trở lên.</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="hidden">
           <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
           <span>Được phép làm lại không giới hạn số lần, hệ thống luôn lưu giữ điểm số cao nhất.</span>
         </div>

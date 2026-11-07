@@ -164,11 +164,10 @@ export default function AdminCoursesPage() {
             <span>Quản trị Khóa học (Admin)</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            Chương trình &amp; Khóa học 14 Buổi Cố Định
+            Chương trình &amp; Khóa học 14 Buổi
           </h1>
           <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-            Mỗi khóa học có đúng 14 vị trí Buổi 1–14 cố định. Không thêm, xóa hoặc đổi thứ tự vị trí để bảo
-            toàn tính nhất quán của báo cáo CSV tổng kết.
+            Quản lý các khóa học 14 buổi và biên tập nội dung bài giảng, câu hỏi trắc nghiệm, bài tập thực hành cho từng buổi.
           </p>
         </div>
         <div className="shrink-0 self-start sm:self-auto">
@@ -255,8 +254,8 @@ export default function AdminCoursesPage() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-mono font-bold text-[#1d63ed] uppercase bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
-                          {crs.id}
+                        <span className="text-[10px] font-bold text-[#1d63ed] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                          Khóa 14 buổi
                         </span>
                         {isSelected && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#1d63ed] bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
@@ -271,8 +270,8 @@ export default function AdminCoursesPage() {
                       </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                      <span className="font-medium">14 buổi chuẩn</span>
-                      <span className="text-[#1d63ed] font-bold">{isSelected ? 'Khóa hiện hành' : 'Bấm để chọn →'}</span>
+                      <span className="font-medium">14 buổi học</span>
+                      <span className="text-[#1d63ed] font-bold">{isSelected ? 'Đang xem' : 'Bấm để chọn →'}</span>
                     </div>
                   </button>
                 );
@@ -286,8 +285,8 @@ export default function AdminCoursesPage() {
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                 <div className="space-y-2 max-w-2xl">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-[#1d63ed] uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-100">
-                      Mã khóa: {selectedCourse.id}
+                    <span className="text-xs font-bold text-[#1d63ed] bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-100">
+                      Chương trình 14 buổi
                     </span>
                   </div>
                   <h2 className="text-xl font-black text-slate-900 tracking-tight">{selectedCourse.title}</h2>
@@ -300,8 +299,7 @@ export default function AdminCoursesPage() {
                     <span className="text-[10px] font-bold text-[#1d63ed] uppercase tracking-wider block">
                       Cấu trúc chương trình
                     </span>
-                    <span className="text-lg font-black text-slate-900 block mt-0.5">14 Buổi chuẩn</span>
-                    <span className="text-[10px] text-slate-500 font-semibold">(Không lệch số buổi)</span>
+                    <span className="text-lg font-black text-slate-900 block mt-0.5">14 Buổi học</span>
                   </div>
                   <button
                     type="button"
@@ -389,17 +387,17 @@ export default function AdminCoursesPage() {
                               )}
                               {!les.hasQuiz && !les.hasPractice && (
                                 <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap">
-                                  Chỉ lý thuyết (Chặn xuất bản)
+                                  Chưa bật bài tập
                                 </span>
                               )}
                             </div>
                           </td>
-                          <td className="px-5 py-4 text-slate-600 font-mono text-[11px] whitespace-nowrap">
+                          <td className="px-5 py-4 text-slate-600 text-[11px] whitespace-nowrap">
                             {les.hasPractice
                               ? les.practiceMode === 'file_allowed'
-                                ? 'Tệp <= 2MB'
+                                ? 'Tải tệp / Link'
                                 : 'Chỉ nhận link'
-                              : 'Không có TH'}
+                              : '—'}
                           </td>
                           <td className="px-5 py-4 whitespace-nowrap">
                             {isPublished ? (

@@ -255,13 +255,13 @@ export default function EditLessonPage() {
               className="w-full px-4 py-3 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 font-mono transition-all"
             />
             <p className="text-[11px] text-slate-400 mt-1.5">
-              * Quy tắc hệ thống: Không tải video trực tiếp lên ứng dụng, chỉ sử dụng link video ngoài.
+              Hỗ trợ dán link video bài giảng từ YouTube hoặc nguồn ngoài.
             </p>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Tài liệu học tập (Định dạng Markdown / Khối code HTML5 trực tiếp)
+              Nội dung bài giảng (Hỗ trợ văn bản Markdown hoặc nhúng khối bài học tương tác HTML)
             </label>
             <textarea
               rows={6}
@@ -280,7 +280,7 @@ export default function EditLessonPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
             <h2 className="text-base font-extrabold text-slate-900">2. Thành phần đánh giá &amp; Xuất bản</h2>
             <span className="text-xs text-rose-600 font-bold bg-rose-50 px-3 py-1 rounded-full border border-rose-200/80">
-              Quy tắc bắt buộc: Chặn xuất bản bài chỉ có lý thuyết
+              Cần có Trắc nghiệm hoặc Thực hành để xuất bản
             </span>
           </div>
 

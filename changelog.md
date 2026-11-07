@@ -8,6 +8,32 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-07] — Tinh gọn Giao diện (UI Streamlining): Ẩn chi tiết kỹ thuật & công cụ kiểm thử trên môi trường thật (`isLiveMode`)
+- **Mục tiêu:** Theo yêu cầu của Owner trước khi nạp thêm nội dung bài học mới, lược bỏ toàn bộ thông tin kỹ thuật nội bộ (UUID, `participantId`, thuật ngữ `RFC 4180` / `SHA-256 Digest`, đường dẫn tệp nội bộ, các hộp giải thích quy tắc hệ thống dài dòng) và ẩn các công cụ kiểm thử giả lập (`Fixture`, `Simulate Failure`) khi chạy trên môi trường thật (`isLiveMode`).
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Trang Đồng bộ Teaching (`src/app/admin/sync/page.tsx`):**
+     - Khi chạy ở chế độ thật (`isLiveMode = true`), tự động mở thẳng giao diện **Đồng bộ chính thức từ Teaching MindX**, ẩn nút *"Khôi phục dữ liệu mẫu ban đầu"*, thanh chuyển tab dữ liệu giả TEST và các hộp kiểm tra chẩn đoán Mốc 1/Mốc 4 (`CORS/SOP probe`, mẫu báo cáo giả lập).
+     - Bổ sung bảng hiển thị danh sách lớp ROB mới và danh sách học sinh cần đối chiếu ngay trong thẻ Xem trước đồng bộ thật.
+     - Vẫn giữ nguyên đầy đủ cấu trúc DOM khi `!isLiveMode` để tương thích 100% với bộ kiểm thử tự động `tests/m4-teaching-sync.test.mjs`.
+  2. **Trang Quản lý Lớp học, Cấp PIN & Đóng khóa 14 buổi (`src/app/manage/classes/page.tsx`):**
+     - Bỏ cột *"Mã định danh nội bộ"* (`participantId`) khỏi bảng danh sách học sinh chính và ngăn kéo chi tiết học sinh, giúp bảng gọn và dễ nhìn.
+     - Bổ sung nút **Thu gọn / Mở rộng** (`isCloseSectionOpen`, mặc định thu gọn khi không có tác vụ dở dang) cho khu vực **Đóng khóa 14 buổi**, kèm nhãn tóm tắt dung lượng ngay trên tiêu đề để trang quản lý lớp hàng ngày ngắn gọn.
+     - Ẩn các nút tạo dữ liệu mẫu *"Chuẩn bị Lớp mẫu 14 buổi Mốc 5 (ROB-K14-M5-01)"* và ô chọn *"Chế độ kiểm thử an toàn trên TEST"* đối với các lớp học thật trên môi trường `isLiveMode`.
+     - Chuyển các thuật ngữ kỹ thuật (*"RFC 4180"*, *"SHA-256 Digest"*, *"Giữ chỗ đồng thời"*, *"no-store"*) sang tiếng Việt tự nhiên, dễ hiểu.
+  3. **Trang Quản lý Khóa học & Soạn bài (`src/app/admin/courses/page.tsx`, `src/app/admin/lessons/[lessonId]/edit/page.tsx`):**
+     - Loại bỏ mã UUID nội bộ (`44444444-...`) trên thẻ khóa học và tiêu đề chi tiết khóa học, thay bằng nhãn *"Khóa 14 buổi"* / *"Chương trình 14 buổi"*.
+     - Làm gọn câu chữ mô tả và nhãn cột bảng 14 buổi học (*"Tải tệp / Link"*, *"Chưa bật bài tập"*).
+  4. **Trang chủ, Khu vực Học sinh & Chấm bài (`src/app/page.tsx`, `src/app/student/course/page.tsx`, `src/app/student/lessons/[lessonId]/page.tsx`, `src/app/student/lessons/[lessonId]/quiz/page.tsx`, `src/app/teacher/submissions/page.tsx`):**
+     - Khi người dùng đã đăng nhập trên môi trường thật (`isLiveMode && currentUser`), ẩn 3 thẻ giới thiệu vai trò chung trên Trang chủ để tập trung vào lối tắt vào thẳng không gian làm việc và lộ trình 3 cấp độ.
+     - Bỏ hộp *"Quy tắc học tập"* dư thừa trên trang lộ trình khóa học của học sinh; rút gọn hộp hướng dẫn làm Quiz 4 dòng thành 1 dòng nhắc nhanh.
+     - Hiển thị tên tệp bài nộp sạch sẽ (`currentSub.content.split('/').pop()`) thay vì đường dẫn lưu trữ nội bộ dài dòng trên cả trang Học sinh và trang Giáo viên chấm bài.
+- **Kiểm thử & Nghiệm thu:**
+  - `npm run typecheck` (`tsc --noEmit`): `0` lỗi.
+  - `npm test`: `381 / 381 PASS` (23 bộ test từ Mốc 1 → Mốc 6).
+  - `npm run build`: Build Production thành công.
+
+---
+
 ### [2026-10-27] — Áp dụng Hệ thống Thiết kế "MindX Learn High-Contrast Educational System" (Public Sans, High-Contrast Navy & Royal Blue)
 - **Mục tiêu:** Cập nhật toàn bộ bảng màu, phông chữ (`Public Sans`), đường viền sắc nét (`1.5px solid #CBD5E1`) và phong cách học thuật độ tương phản cao (**MindX Learn High-Contrast Educational System**) theo đúng ảnh mẫu và bộ thông số thiết kế của Owner, giữ nguyên 100% logic nghiệp vụ và không thêm phần tử dư thừa.
 - **Tính năng & Thay đổi đã thực hiện:**

@@ -303,7 +303,7 @@ export default function TeacherSubmissionsPage() {
                       ? 'Liên kết ngoài (URL)'
                       : activeSub.type === 'text'
                       ? 'Văn bản trực tiếp'
-                      : 'Tệp tải lên (Dưới 2MB)'}
+                      : 'Tệp bài làm'}
                   </span>
                 </div>
 
@@ -312,7 +312,9 @@ export default function TeacherSubmissionsPage() {
                     <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1d63ed] flex items-center justify-center shrink-0">
                       <IconFileText className="w-4 h-4" />
                     </div>
-                    <span className="font-mono font-semibold text-slate-800 truncate">{activeSub.content}</span>
+                    <span className="font-mono font-semibold text-slate-800 truncate">
+                      {activeSub.type === 'file' ? (activeSub.content.split('/').pop() || activeSub.content) : activeSub.content}
+                    </span>
                   </div>
 
                   {activeSub.type === 'link' ? (

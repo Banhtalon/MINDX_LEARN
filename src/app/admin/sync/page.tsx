@@ -36,12 +36,15 @@ export default function AdminSyncPage() {
     currentUser,
     classes,
     students,
+    isLiveMode,
     previewTeachingSync,
     applyTeachingSync,
     resetTeachingFixtureSync,
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'mock_fixture' | 'real_source'>('mock_fixture');
+  const [activeTab, setActiveTab] = useState<'mock_fixture' | 'real_source'>(
+    isLiveMode ? 'real_source' : 'mock_fixture'
+  );
   const [robFilterMode, setRobFilterMode] = useState<'include_rob' | 'exclude_rob'>('include_rob');
   const [selectedScenario, setSelectedScenario] = useState<ScenarioKey>('valid_multipage');
 
@@ -444,28 +447,30 @@ export default function AdminSyncPage() {
             <span>Quản trị Đồng bộ (Admin)</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            Đồng bộ Danh sách Học sinh Teaching MindX (Có Xem Trước)
+            Đồng bộ Danh sách Học sinh từ Teaching MindX
           </h1>
           <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-            Đọc đủ phân trang DataTables, kiểm tra tính nhất quán, lọc lớp ROB, đối chiếu ID khi đổi lớp và xác nhận trước khi áp dụng danh sách.
+            Cập nhật danh sách lớp Robotics (ROB) và học sinh đang học từ Teaching MindX, có bước xem trước và kiểm tra trước khi áp dụng.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3.5 bg-[#f8fafc] border border-slate-200/80 rounded-2xl px-4 py-3 text-xs shrink-0">
           <div>
-            <span className="text-slate-500 block text-[11px] font-medium">Trạng thái hệ thống hiện tại:</span>
+            <span className="text-slate-500 block text-[11px] font-medium">Danh sách hiện có trên hệ thống:</span>
             <span className="font-extrabold text-slate-900">
               {classes.length} lớp • {students.length} học sinh ({activeStudentsCount} đang học, {transferredStudentsCount} chuyển lớp, {archivedStudentsCount} lưu trữ)
             </span>
           </div>
-          <button
-            type="button"
-            disabled={isMutating}
-            onClick={handleRequestResetSandbox}
-            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 text-slate-700 font-bold text-xs transition-colors shadow-2xs cursor-pointer"
-          >
-            {isResetting ? 'Đang khôi phục...' : '↺ Khôi phục dữ liệu mẫu ban đầu'}
-          </button>
+          {!isLiveMode && (
+            <button
+              type="button"
+              disabled={isMutating}
+              onClick={handleRequestResetSandbox}
+              className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 text-slate-700 font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+            >
+              {isResetting ? 'Đang khôi phục...' : '↺ Khôi phục dữ liệu mẫu ban đầu'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -502,41 +507,43 @@ export default function AdminSyncPage() {
         </div>
       )}
 
-      {/* Segmented Source Selector Tab */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 p-1.5 bg-slate-100/90 border border-slate-200/80 rounded-2xl">
-        <button
-          type="button"
-          disabled={isMutating}
-          onClick={() => {
-            if (isMutating) return;
-            setActiveTab('mock_fixture');
-            setStatusMessage(null);
-          }}
-          className={`py-3 px-4 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer ${
-            activeTab === 'mock_fixture'
-              ? 'bg-white text-[#1d63ed] shadow-sm ring-1 ring-slate-200/70'
-              : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          1. Nguồn Dữ liệu giả TEST (Fixture DataTables Nhiều Trang — Áp dụng TEST)
-        </button>
-        <button
-          type="button"
-          disabled={isMutating}
-          onClick={() => {
-            if (isMutating) return;
-            setActiveTab('real_source');
-            setStatusMessage(null);
-          }}
-          className={`py-3 px-4 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer ${
-            activeTab === 'real_source'
-              ? 'bg-[#1d63ed] text-white shadow-md shadow-blue-600/20'
-              : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          2. Nguồn Teaching MindX Thật (Xem trước Tổng hợp &amp; Đồng bộ Snapshot)
-        </button>
-      </div>
+      {/* Segmented Source Selector Tab (shown in test/sandbox mode) */}
+      {!isLiveMode && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 p-1.5 bg-slate-100/90 border border-slate-200/80 rounded-2xl">
+          <button
+            type="button"
+            disabled={isMutating}
+            onClick={() => {
+              if (isMutating) return;
+              setActiveTab('mock_fixture');
+              setStatusMessage(null);
+            }}
+            className={`py-3 px-4 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer ${
+              activeTab === 'mock_fixture'
+                ? 'bg-white text-[#1d63ed] shadow-sm ring-1 ring-slate-200/70'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            1. Nguồn Dữ liệu giả TEST (Fixture DataTables Nhiều Trang — Áp dụng TEST)
+          </button>
+          <button
+            type="button"
+            disabled={isMutating}
+            onClick={() => {
+              if (isMutating) return;
+              setActiveTab('real_source');
+              setStatusMessage(null);
+            }}
+            className={`py-3 px-4 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer ${
+              activeTab === 'real_source'
+                ? 'bg-[#1d63ed] text-white shadow-md shadow-blue-600/20'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            2. Nguồn Teaching MindX Thật (Xem trước Tổng hợp &amp; Đồng bộ Snapshot)
+          </button>
+        </div>
+      )}
 
       {/* TAB 1: Multi-Page Synthetic Fixture Preview & TEST Apply */}
       {activeTab === 'mock_fixture' && (
@@ -1108,7 +1115,7 @@ export default function AdminSyncPage() {
         </div>
       )}
 
-      {/* TAB 2: Real Teaching Source — Mốc 4 Aggregate Preview Only & Local Bookmarklet Utility */}
+      {/* TAB 2: Real Teaching Source */}
       {activeTab === 'real_source' && (
         <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_14px_40px_rgba(8,112,184,0.06)] space-y-6">
           <div className="flex items-start gap-4">
@@ -1117,208 +1124,195 @@ export default function AdminSyncPage() {
             </div>
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#1d63ed] border border-blue-100">
-                  Chế độ Xem trước Tổng hợp Mốc 4
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  Đồng bộ Chính thức (Có Xem Trước &amp; Xác Nhận)
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                  Chỉ đọc — Không ghi dữ liệu thật vào TEST (Chờ Mốc 6)
-                </span>
+                {!isLiveMode && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    Chỉ đọc — Không ghi dữ liệu thật vào TEST (Chờ Mốc 6)
+                  </span>
+                )}
               </div>
               <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                Đồng bộ có xem trước từ Phiên Teaching do Owner đăng nhập trực tiếp
+                Đồng bộ danh sách từ trang Teaching MindX của bạn
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Tuân thủ nghiêm ngặt quy tắc bảo mật và đồng bộ có xem trước:
+                Hệ thống tự động lọc các lớp Robotics (ROB), giữ nguyên mã PIN và điểm số hiện có của học sinh, đồng thời dừng lại báo Admin kiểm tra nếu phát hiện học sinh đổi lớp hoặc trùng tên.
               </p>
-              <ul className="list-disc list-inside text-xs text-slate-700 space-y-1 pl-1">
-                <li>
-                  <strong>Không hỏi mật khẩu hay cookie:</strong> Ứng dụng không bao giờ yêu cầu, lưu trữ hoặc gửi mật khẩu/cookie của Teaching lên bất kỳ máy chủ nào.
-                </li>
-                <li>
-                  <strong>Không cần F12, JSON hay lệnh Terminal:</strong> Owner chỉ tự đăng nhập Teaching bình thường trên Chrome và bấm nút giao diện/tiện ích dấu trang đã kiểm tra.
-                </li>
-                <li>
-                  <strong>Tôn trọng CORS / Same-Origin Policy:</strong> Nếu trình duyệt chặn đọc trực tiếp khác nguồn từ webapp sang <code className="font-mono">teachingmindx.top</code>, hệ thống dừng ngay và báo rõ lý do, tuyệt đối không vượt rào bảo mật.
-                </li>
-                <li>
-                  <strong>Báo cáo xem trước thật chỉ có số tổng hợp:</strong> Tại Mốc 4, kết quả đọc trên phiên thật chỉ hiển thị các con số tổng hợp (số trang, tổng dòng, số lớp ROB, số trạng thái hợp lệ/cần xem xét); tuyệt đối không lưu tên, mã học sinh thật hoặc payload vào TEST, tệp hay log.
-                </li>
-              </ul>
+              {!isLiveMode && (
+                <ul className="list-disc list-inside text-xs text-slate-700 space-y-1 pl-1">
+                  <li>
+                    <strong>Không hỏi mật khẩu hay cookie:</strong> Ứng dụng không bao giờ yêu cầu, lưu trữ hoặc gửi mật khẩu/cookie của Teaching lên bất kỳ máy chủ nào.
+                  </li>
+                  <li>
+                    <strong>Không cần F12, JSON hay lệnh Terminal:</strong> Owner chỉ tự đăng nhập Teaching bình thường trên Chrome và bấm nút giao diện/tiện ích dấu trang đã kiểm tra.
+                  </li>
+                </ul>
+              )}
             </div>
           </div>
 
-          {/* Direct Webapp-to-Teaching Probe & Aggregate Preview Verification */}
-          <div className="p-5 bg-[#f8fafc] rounded-2xl border border-slate-200/80 space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div>
+          {/* Direct Webapp-to-Teaching Probe & Aggregate Preview Verification (Test/Diagnostic mode only) */}
+          {!isLiveMode && (
+            <>
+              <div className="p-5 bg-[#f8fafc] rounded-2xl border border-slate-200/80 space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900">
+                      Bước 1: Kiểm tra đọc từ trình duyệt &amp; Xem mẫu báo cáo tổng hợp Mốc 4
+                    </h4>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      Kiểm chứng quy tắc cùng nguồn (Same-Origin Policy / CORS) ngay trên trình duyệt hoặc xem định dạng báo cáo tổng hợp Mốc 4 (0 dữ liệu cá nhân).
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleProbeDirectCrossOriginTeaching}
+                      className="px-4 py-2 bg-[#0f172a] hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      Kiểm tra nguồn hiện tại (Khác nguồn — chưa thử kết nối trực tiếp)
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isLoadingSampleAggregate}
+                      onClick={handlePreviewAggregateOnlyDemo}
+                      className="px-4 py-2 bg-[#1d63ed] hover:bg-[#154ec2] disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                    >
+                      {isLoadingSampleAggregate
+                        ? 'Đang tạo mẫu...'
+                        : 'Xem mẫu Báo cáo Tổng hợp (Minh họa bằng dữ liệu giả)'}
+                    </button>
+                  </div>
+                </div>
+
+                {liveProbeResult && (
+                  <div
+                    role="alert"
+                    className="p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-amber-900">
+                        ⚠ {liveProbeResult.title} ({liveProbeResult.code})
+                      </span>
+                      <span className="font-mono text-[10px] text-amber-700">{liveProbeResult.timestamp}</span>
+                    </div>
+                    <p className="leading-relaxed">{liveProbeResult.message}</p>
+                  </div>
+                )}
+
+                {sampleAggregatePreview && (
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-extrabold text-emerald-900">
+                        ✓ MẪU ĐỊNH DẠNG BÁO CÁO TỔNG HỢP MỐC 4 (MINH HỌA BẰNG DỮ LIỆU GIẢ — CHỈ CÓ CON SỐ, KHÔNG LƯU TÊN/MÃ HỌC SINH)
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 font-mono font-bold text-[10px]">
+                        Nguồn mẫu: dữ liệu giả (Synthetic Fixture) • piiStoredOrSent: false • realApplyAllowedInM4: false
+                      </span>
+                    </div>
+                    <p className="text-emerald-800">
+                      {sampleAggregatePreview.message} (Lưu ý: Đây là bản minh họa cấu trúc báo cáo tổng hợp từ dữ liệu giả. Để đọc phiên Teaching thật, vui lòng bấm dấu trang cục bộ ở Bước 2 ngay trên tab Teaching đã đăng nhập).
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Số trang đã đọc hết</div>
+                        <div className="text-sm font-extrabold text-slate-900">
+                          {sampleAggregatePreview.pagesRead} trang (cỡ {sampleAggregatePreview.pageLength})
+                        </div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Tổng bản ghi (Total / Filtered)</div>
+                        <div className="text-sm font-extrabold text-slate-900">
+                          {sampleAggregatePreview.recordsTotal} / {sampleAggregatePreview.recordsFiltered}
+                        </div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Số dòng trang cuối / Mã ID duy nhất</div>
+                        <div className="text-sm font-extrabold text-slate-900">
+                          {sampleAggregatePreview.lastPageRowCount ?? 0} dòng / {sampleAggregatePreview.uniqueIdCount} mã
+                        </div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Dòng lớp ROB / Ngoài ROB</div>
+                        <div className="text-sm font-extrabold text-slate-900">
+                          {sampleAggregatePreview.robClassRowCount} / {sampleAggregatePreview.nonRobClassRowCount}
+                        </div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Hợp lệ (ROB + Đang học + Running)</div>
+                        <div className="text-sm font-extrabold text-emerald-700">
+                          {sampleAggregatePreview.eligibleActiveRobCount} học sinh
+                        </div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Bỏ qua (Nghỉ / Đóng lớp)</div>
+                        <div className="text-sm font-extrabold text-slate-700">
+                          {sampleAggregatePreview.inactiveStatusRowCount} dòng
+                        </div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Trạng thái lạ cần xem xét</div>
+                        <div className="text-sm font-extrabold text-amber-700">
+                          {sampleAggregatePreview.unknownStatusRowCount} dòng
+                        </div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
+                        <div className="text-[10px] text-slate-500">Trùng tên khác mã ID cần đối chiếu</div>
+                        <div className="text-sm font-extrabold text-amber-700">
+                          {sampleAggregatePreview.sameNameDifferentIdCount} dòng
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-5 bg-blue-50/70 rounded-xl border border-blue-200 text-xs text-slate-700 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-200 text-blue-900 inline-block mb-1">
+                      Tiện ích Cục bộ Mốc 1 &amp; Mốc 4 [Chỉ đọc trên tab Teaching của Owner]
+                    </span>
+                    <h4 className="text-sm font-bold text-slate-900">
+                      Bước 2: Mở Hướng dẫn &amp; Nút Dấu trang Đọc thử toàn bộ phân trang trên Teaching
+                    </h4>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      Khi Owner đang mở tab <code className="font-mono font-semibold">https://teachingmindx.top/hocsinh.php</code> đã đăng nhập, bấm dấu trang cục bộ để đọc kiểm tra hết các trang DataTables và hiển thị báo cáo số lượng tổng hợp ngay tại chỗ.
+                    </p>
+                  </div>
+                  <a
+                    href="/teaching-readonly/index.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors whitespace-nowrap"
+                  >
+                    Mở Hướng dẫn Tiện ích ↗
+                  </a>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Official PROD Real Teaching Sync Card */}
+          <div className="p-5 sm:p-6 bg-emerald-50/70 rounded-2xl border border-emerald-200 text-xs text-slate-700 space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="space-y-1.5">
                 <h4 className="text-sm font-extrabold text-slate-900">
-                  Bước 1: Kiểm tra đọc từ trình duyệt & Xem mẫu báo cáo tổng hợp Mốc 4
+                  Các bước đồng bộ Danh sách Lớp ROB &amp; Học sinh từ Teaching
                 </h4>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Kiểm chứng quy tắc cùng nguồn (Same-Origin Policy / CORS) ngay trên trình duyệt hoặc xem định dạng báo cáo tổng hợp Mốc 4 (0 dữ liệu cá nhân).
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleProbeDirectCrossOriginTeaching}
-                  className="px-4 py-2 bg-[#0f172a] hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                >
-                  Kiểm tra nguồn hiện tại (Khác nguồn — chưa thử kết nối trực tiếp)
-                </button>
-                <button
-                  type="button"
-                  disabled={isLoadingSampleAggregate}
-                  onClick={handlePreviewAggregateOnlyDemo}
-                  className="px-4 py-2 bg-[#1d63ed] hover:bg-[#154ec2] disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
-                >
-                  {isLoadingSampleAggregate
-                    ? 'Đang tạo mẫu...'
-                    : 'Xem mẫu Báo cáo Tổng hợp (Minh họa bằng dữ liệu giả)'}
-                </button>
-              </div>
-            </div>
-
-            {liveProbeResult && (
-              <div
-                role="alert"
-                className="p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-extrabold text-amber-900">
-                    ⚠ {liveProbeResult.title} ({liveProbeResult.code})
-                  </span>
-                  <span className="font-mono text-[10px] text-amber-700">{liveProbeResult.timestamp}</span>
-                </div>
-                <p className="leading-relaxed">{liveProbeResult.message}</p>
-              </div>
-            )}
-
-            {sampleAggregatePreview && (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-extrabold text-emerald-900">
-                    ✓ MẪU ĐỊNH DẠNG BÁO CÁO TỔNG HỢP MỐC 4 (MINH HỌA BẰNG DỮ LIỆU GIẢ — CHỈ CÓ CON SỐ, KHÔNG LƯU TÊN/MÃ HỌC SINH)
-                  </span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 font-mono font-bold text-[10px]">
-                    Nguồn mẫu: dữ liệu giả (Synthetic Fixture) • piiStoredOrSent: false • realApplyAllowedInM4: false
-                  </span>
-                </div>
-                <p className="text-emerald-800">
-                  {sampleAggregatePreview.message} (Lưu ý: Đây là bản minh họa cấu trúc báo cáo tổng hợp từ dữ liệu giả. Để đọc phiên Teaching thật, vui lòng bấm dấu trang cục bộ ở Bước 2 ngay trên tab Teaching đã đăng nhập).
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Số trang đã đọc hết</div>
-                    <div className="text-sm font-extrabold text-slate-900">
-                      {sampleAggregatePreview.pagesRead} trang (cỡ {sampleAggregatePreview.pageLength})
-                    </div>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Tổng bản ghi (Total / Filtered)</div>
-                    <div className="text-sm font-extrabold text-slate-900">
-                      {sampleAggregatePreview.recordsTotal} / {sampleAggregatePreview.recordsFiltered}
-                    </div>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Số dòng trang cuối / Mã ID duy nhất</div>
-                    <div className="text-sm font-extrabold text-slate-900">
-                      {sampleAggregatePreview.lastPageRowCount ?? 0} dòng / {sampleAggregatePreview.uniqueIdCount} mã
-                    </div>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Dòng lớp ROB / Ngoài ROB</div>
-                    <div className="text-sm font-extrabold text-slate-900">
-                      {sampleAggregatePreview.robClassRowCount} / {sampleAggregatePreview.nonRobClassRowCount}
-                    </div>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Hợp lệ (ROB + Đang học + Running)</div>
-                    <div className="text-sm font-extrabold text-emerald-700">
-                      {sampleAggregatePreview.eligibleActiveRobCount} học sinh
-                    </div>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Bỏ qua (Nghỉ / Đóng lớp)</div>
-                    <div className="text-sm font-extrabold text-slate-700">
-                      {sampleAggregatePreview.inactiveStatusRowCount} dòng
-                    </div>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Trạng thái lạ cần xem xét</div>
-                    <div className="text-sm font-extrabold text-amber-700">
-                      {sampleAggregatePreview.unknownStatusRowCount} dòng
-                    </div>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-emerald-200">
-                    <div className="text-[10px] text-slate-500">Trùng tên khác mã ID cần đối chiếu</div>
-                    <div className="text-sm font-extrabold text-amber-700">
-                      {sampleAggregatePreview.sameNameDifferentIdCount} dòng
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Local Bookmarklet Guide Card for Same-Origin Execution on teachingmindx.top */}
-          <div className="p-5 bg-blue-50/70 rounded-xl border border-blue-200 text-xs text-slate-700 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-200 text-blue-900 inline-block mb-1">
-                  Tiện ích Cục bộ Mốc 1 & Mốc 4 [Chỉ đọc trên tab Teaching của Owner]
-                </span>
-                <h4 className="text-sm font-bold text-slate-900">
-                  Bước 2: Mở Hướng dẫn & Nút Dấu trang Đọc thử toàn bộ phân trang trên Teaching
-                </h4>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Khi Owner đang mở tab <code className="font-mono font-semibold">https://teachingmindx.top/hocsinh.php</code> đã đăng nhập, bấm dấu trang cục bộ để đọc kiểm tra hết các trang DataTables và hiển thị báo cáo số lượng tổng hợp ngay tại chỗ.
-                </p>
-              </div>
-              <a
-                href="/teaching-readonly/index.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors whitespace-nowrap"
-              >
-                Mở Hướng dẫn Tiện ích ↗
-              </a>
-            </div>
-            <div className="pt-2 border-t border-blue-100 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-blue-800">
-              <span>
-                • Đường dẫn hướng dẫn: <code className="font-mono font-semibold">/teaching-readonly/index.html</code>
-              </span>
-              <span>
-                • Nguồn mục tiêu: <code className="font-mono font-semibold">https://teachingmindx.top/hocsinh.php</code>
-              </span>
-              <span>
-                • Tuyệt đối không ghi dữ liệu học sinh thật vào TEST ở Mốc 4 (Chờ Mốc 6).
-              </span>
-            </div>
-          </div>
-
-          {/* Mốc 6 Official PROD Real Teaching Sync Card */}
-          <div className="p-5 bg-emerald-50/70 rounded-xl border border-emerald-200 text-xs text-slate-700 space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              <div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-900 inline-block mb-1">
-                  Mốc 6 — Đồng bộ Chính thức trên PROD [Có Xem Trước & Xác Nhận]
-                </span>
-                <h4 className="text-sm font-bold text-slate-900">
-                  Bước 3: Đồng bộ & Áp dụng Danh sách Lớp ROB & Học sinh Thật từ Teaching (PROD)
-                </h4>
-                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                  1) Kéo nút dấu trang màu xanh bên phải lên thanh Bookmark Chrome, mở{' '}
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong>Bước 1:</strong> Kéo nút xanh <strong>&ldquo;⚡ Đọc Teaching &amp; Tải Snapshot Đồng Bộ&rdquo;</strong> lên thanh Dấu trang (Bookmarks Bar) của Chrome, mở trang{' '}
                   <a
                     href="https://teachingmindx.top/hocsinh.php"
                     target="_blank"
                     rel="opener"
                     className="font-mono font-bold text-emerald-800 underline"
                   >
-                    https://teachingmindx.top/hocsinh.php ↗
+                    teachingmindx.top/hocsinh.php ↗
                   </a>{' '}
-                  đã đăng nhập rồi bấm dấu trang để đọc đủ các trang. 2) Chọn tệp{' '}
-                  <code className="font-mono font-semibold">teaching-snapshot.json</code> vừa tải (hoặc nhận tự động qua cửa sổ vừa mở) để Xem trước Chênh lệch rồi bấm <strong>Xác nhận Áp dụng Danh sách Thật</strong>.
+                  đã đăng nhập rồi bấm dấu trang để đọc danh sách.<br />
+                  <strong>Bước 2:</strong> Chọn tệp <code className="font-mono font-semibold">teaching-snapshot.json</code> vừa tải về (hoặc nhận tự động) để kiểm tra danh sách chênh lệch rồi bấm <strong>Xác nhận Áp dụng Danh sách Thật</strong>.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -1330,12 +1324,12 @@ export default function AdminSyncPage() {
                       'Hãy kéo nút này thả lên thanh Dấu trang (Bookmarks Bar) của Chrome, sau đó bấm vào dấu trang khi đang ở tab https://teachingmindx.top/hocsinh.php!'
                     );
                   }}
-                  className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors cursor-grab"
+                  className="px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition-colors cursor-grab"
                   title="Kéo thả nút này lên thanh Dấu trang (Bookmarks Bar) của Chrome"
                 >
-                  ⚡ Đọc Teaching & Tải Snapshot Đồng Bộ
+                  ⚡ Đọc Teaching &amp; Tải Snapshot Đồng Bộ
                 </a>
-                <label className="px-3.5 py-2 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold shadow-sm transition-colors cursor-pointer">
+                <label className="px-3.5 py-2.5 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold shadow-sm transition-colors cursor-pointer">
                   <span>{isLoadingRealPreview ? 'Đang đọc...' : '📂 Chọn tệp Snapshot (.json) để Xem trước'}</span>
                   <input
                     type="file"
@@ -1371,26 +1365,26 @@ export default function AdminSyncPage() {
                 className="p-4 rounded-xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-xs space-y-1.5"
               >
                 <div className="font-extrabold text-rose-800">
-                  ✕ HỦY TOÀN BỘ LƯỢT ĐỌC SNAPSHOT THẬT ({realAbortError.code}) — 0 BẢN GHI ĐƯỢC GHI
+                  ✕ ĐÃ DỪNG LƯỢT ĐỌC DO DỮ LIỆU CHƯA ĐỒNG NHẤT ({realAbortError.code}) — CHƯA LƯU THAY ĐỔI
                 </div>
                 <p>{realAbortError.message}</p>
               </div>
             )}
 
             {realDiffReport && !realAbortError && !isLoadingRealPreview && (
-              <div className="bg-white rounded-xl border border-emerald-200 p-4 space-y-4">
+              <div className="bg-white rounded-xl border border-emerald-200 p-4 sm:p-5 space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-3 border-b border-slate-200 gap-3">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-extrabold text-sm text-slate-900">
-                        Báo cáo Xem trước Chênh lệch Danh sách Thật (PROD)
+                        Báo cáo Xem trước Chênh lệch Danh sách Thật
                       </span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
                         {realSnapshotSourceLabel || 'Snapshot Teaching'} • {realDiffReport.pagination.pagesRead} trang ({realDiffReport.pagination.recordsFiltered} dòng)
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Lọc lớp ROB (không phân biệt hoa/thường), không tự cấp mã PIN, không xóa học sinh vắng mặt, giữ trường hợp trùng tên/đổi lớp ở mục Cần Admin đối chiếu.
+                      Kiểm tra danh sách lớp mới, học sinh thêm mới và các trường hợp cần đối chiếu trước khi lưu.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -1409,7 +1403,7 @@ export default function AdminSyncPage() {
                       className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold shadow-sm"
                     >
                       {isApplyingRealSync
-                        ? 'Đang lưu vào PROD...'
+                        ? 'Đang lưu...'
                         : `✓ Xác nhận Áp dụng Danh sách Thật (+${realDiffReport.counts.addedCount} mới, ${realDiffReport.counts.updatedCount} cập nhật)`}
                     </button>
                   </div>
@@ -1453,6 +1447,54 @@ export default function AdminSyncPage() {
                     </div>
                   </div>
                 </div>
+
+                {realDiffReport.newClassesToCreate.length > 0 && (
+                  <div className="pt-2">
+                    <div className="text-xs font-bold text-purple-800 mb-1.5">
+                      Lớp ROB mới sẽ được tạo ({realDiffReport.newClassesToCreate.length}):
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {realDiffReport.newClassesToCreate.map((cls) => (
+                        <span
+                          key={cls.code}
+                          className="px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 text-purple-900 font-mono font-bold text-xs"
+                        >
+                          {cls.code}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {realDiffReport.needsReview.length > 0 && (
+                  <div className="pt-2">
+                    <div className="text-xs font-bold text-amber-800 mb-1.5">
+                      Cần Admin kiểm tra thủ công ({realDiffReport.needsReview.length}):
+                    </div>
+                    <div className="border border-amber-200 rounded-lg overflow-x-auto max-h-48">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-amber-50 text-amber-900 font-bold border-b border-amber-200">
+                          <tr>
+                            <th className="px-3 py-1.5">Mã HS</th>
+                            <th className="px-3 py-1.5">Họ và tên</th>
+                            <th className="px-3 py-1.5">Lớp</th>
+                            <th className="px-3 py-1.5">Lý do</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-amber-100">
+                          {realDiffReport.needsReview.map((item) => (
+                            <tr key={item.id}>
+                              <td className="px-3 py-1.5 font-mono font-bold text-amber-900">{item.id}</td>
+                              <td className="px-3 py-1.5 font-semibold text-slate-900">{item.name}</td>
+                              <td className="px-3 py-1.5 font-mono">{item.classCode}</td>
+                              <td className="px-3 py-1.5 text-amber-900">{item.reason}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

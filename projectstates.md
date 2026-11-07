@@ -1,14 +1,14 @@
 # Trạng thái & Tiến độ Dự án MINDX LEARN (`projectstates.md`)
 
 > **Tệp theo dõi nhanh dành cho AI ở đầu mỗi phiên làm việc.**
-> - **Cập nhật lần cuối:** `27/10/2026`
+> - **Cập nhật lần cuối:** `07/11/2026`
 > - **Quy tắc bắt buộc cho AI:** Đọc tệp này cùng [`PROJECT_OVERVIEW.md`](./PROJECT_OVERVIEW.md) và [`changelog.md`](./changelog.md) đầu tiên khi vào phiên mới để nắm ngay tiến độ và sổ tay cách làm tính năng mà không cần đọc lại toàn bộ lịch sử. Sau mỗi lần thay đổi mã nguồn, cơ sở dữ liệu, triển khai hoặc hoàn thành hạng mục mới, AI **bắt buộc cập nhật lại cả `projectstates.md` và `changelog.md`**.
 
 ---
 
 ## 1. Trạng thái Môi trường Chính thức (PROD) Hiện tại
 
-Theo quyết định của Owner ngày `22/10/2026` (*"Dùng luôn Supabase MINDX_LEARN và Vercel sẵn có"* và *"không giữ lại khung 14 buổi của khóa mẫu, sẽ upload lại chính xác hơn"*), dự án đã hoàn tất chuyển đổi sạch sang **Môi trường Chính thức (PROD)** và ngày `27/10/2026` đã hoàn tất **Nâng cấp Giao diện Toàn Hệ thống (Hướng 3 — Redesign 19 màn hình theo Master Design System)**:
+Theo quyết định của Owner ngày `22/10/2026` (*"Dùng luôn Supabase MINDX_LEARN và Vercel sẵn có"* và *"không giữ lại khung 14 buổi của khóa mẫu, sẽ upload lại chính xác hơn"*), dự án đã hoàn tất chuyển đổi sạch sang **Môi trường Chính thức (PROD)**, ngày `27/10/2026` đã hoàn tất **Nâng cấp Giao diện Toàn Hệ thống**, và ngày `07/11/2026` đã hoàn tất **Tinh gọn UI & Ẩn toàn bộ chi tiết kỹ thuật/công cụ kiểm thử trên môi trường thật (`isLiveMode`)** trước khi nạp nội dung các bài học tiếp theo:
 
 | Thành phần | Định danh / Địa chỉ đang chạy | Trạng thái |
 |---|---|---|
