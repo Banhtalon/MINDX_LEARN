@@ -1,7 +1,7 @@
 # Trạng thái & Tiến độ Dự án MINDX LEARN (`projectstates.md`)
 
 > **Tệp theo dõi nhanh dành cho AI ở đầu mỗi phiên làm việc.**
-> - **Cập nhật lần cuối:** `07/11/2026`
+> - **Cập nhật lần cuối:** `13/11/2026`
 > - **Quy tắc bắt buộc cho AI:** Đọc tệp này cùng [`PROJECT_OVERVIEW.md`](./PROJECT_OVERVIEW.md) và [`changelog.md`](./changelog.md) đầu tiên khi vào phiên mới để nắm ngay tiến độ và sổ tay cách làm tính năng mà không cần đọc lại toàn bộ lịch sử. Sau mỗi lần thay đổi mã nguồn, cơ sở dữ liệu, triển khai hoặc hoàn thành hạng mục mới, AI **bắt buộc cập nhật lại cả `projectstates.md` và `changelog.md`**.
 
 ---
@@ -18,6 +18,7 @@ Theo quyết định của Owner ngày `22/10/2026` (*"Dùng luôn Supabase MIND
 | **Migration mới nhất trên DB** | `20261022153000_m6_jsb_course_session1_curriculum.sql` | Đã áp dụng trên `MINDX_LEARN` |
 | **Bộ kiểm thử tự động (`npm test`)** | **382 / 382 PASS** (`npx tsc --noEmit` = `0` lỗi) | Toàn bộ 23 tệp kiểm thử từ Mốc 1 → Mốc 6 đều xanh |
 | **Hệ thống Thiết kế (Design System)** | [`design-system/mindx-learn/MASTER.md`](./design-system/mindx-learn/MASTER.md) & [`src/app/globals.css`](./src/app/globals.css) | **HOÀN THÀNH 100%** — Đồng bộ toàn bộ 19 màn hình với phong cách bo tròn hiện đại (`rounded-2xl`/`rounded-3xl`, xanh dương `#1d63ed`, ẩn chi tiết kỹ thuật trên PROD) |
+| **Bản đồ Kiến trúc Mã nguồn (`graphify`)** | [`.graphifyignore`](./.graphifyignore) & `graphify-out/` (ẩn trong `.gitignore`) | **ĐÃ QUÉT SẠCH (`--code-only`, `GRAPHIFY_BACKEND=none`)** — `73/73` tệp mã nguồn (kể cả `12` tệp SQL), `938` nút, `2.519` liên kết, `33` cụm chức năng (`0` rò rỉ dữ liệu thật/session, `0` token gửi ra ngoài) |
 
 ### Số lượng dữ liệu thực tế trong Database `MINDX_LEARN` hiện tại:
 - **Tài khoản Quản trị viên (`profiles` / `auth.users`):** **`1`** (Chỉ giữ duy nhất tài khoản Owner: `quangctm07@gmail.com` — `Admin Quản Trị Hệ Thống`, `id: 2d99957f-8608-4366-ade3-094f0c40a904`).

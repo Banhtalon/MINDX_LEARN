@@ -8,6 +8,18 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-13] — Thiết lập `.graphifyignore` Bảo vệ Dữ liệu Thật/Session & Quét Bản đồ Mã nguồn Cục bộ (`graphify --code-only`, `GRAPHIFY_BACKEND=none`)
+- **Mục tiêu:** Thiết lập lớp chắn [`.graphifyignore`](./.graphifyignore) ngăn toàn bộ dữ liệu thật của học sinh/lớp học, phiên đăng nhập (cookie/session), khóa bí mật và tệp khảo sát thực tế đi vào bộ chỉ mục; ẩn `graphify-out/` trong [`.gitignore`](./.gitignore); tạo bản đồ kiến trúc mã nguồn cục bộ hoàn toàn không gọi AI bên ngoài (`GRAPHIFY_BACKEND=none`).
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Tạo [`.graphifyignore`](./.graphifyignore):** Chặn 4 nhóm nhạy cảm/tạm thời gồm: biến môi trường & khóa bí mật (`.env*`, `.envrc*`, `*.pem`, `*.key`, `.netrc`, `.pgpass`, `.npmrc`, `_private/`, `supabase/.temp/`), phiên đăng nhập & nhật ký thực thi (`.workflow-local/`, `scratch/`, `*cookie*.json`, `*session*.json`, `*storageState*.json`, `docs/*RUNTIME_RESULTS*.json`), dữ liệu thật & tệp xuất (`teachingmindx-sync-trial.html`, `teachingmindx-*`, `*.csv`, `*.xlsx`, `*.sqlite`, `*.dump`), cùng thư mục build/lockfile (`node_modules/`, `.next/`, `graphify-out/`, `package-lock.json`).
+  2. **Cập nhật [`.gitignore`](./.gitignore):** Bổ sung `graphify-out/` để giữ sạch kho Git.
+  3. **Bật hỗ trợ SQL AST (`tree-sitter-sql`) & Quét bản đồ mã nguồn cục bộ (`GRAPHIFY_BACKEND=none graphify extract . --code-only` & `graphify cluster-only .`):** Trích xuất cấu trúc AST cục bộ đủ `73/73` tệp mã nguồn (bao gồm cả `12` tệp migration PostgreSQL trong `supabase/migrations/`), tạo `graphify-out/graph.json`, `GRAPH_REPORT.md`, `graph.html`, `extract.log` và `extract_receipt.json` (`938` nút, `2.519` liên kết, `33` cụm chức năng được đặt tên rõ ràng, `0` token gửi ra ngoài, `0` rò rỉ tệp nhạy cảm).
+- **Kiểm thử & Nghiệm thu:**
+  - Đối chiếu rò rỉ trên `graph.json` và `manifest.json`: `0` rò rỉ (kể cả khi thử `gitignore=False`).
+  - `npm run typecheck`: `0` lỗi; `npm test`: `382 / 382 PASS`.
+
+---
+
 ### [2026-11-07] — Nâng cấp Bản vá Bảo mật Next.js (`16.4.0 → 16.4.5`)
 - **Mục tiêu:** Nâng cấp `next` từ `16.4.0` lên `16.4.5` theo khuyến nghị bản vá bảo mật chính thức của Next.js và bật cấu hình `experimental.agentUpgrade = 'security'` trong [`next.config.mjs`](./next.config.mjs).
 - **Kiểm thử & Nghiệm thu:**

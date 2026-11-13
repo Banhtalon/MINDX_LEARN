@@ -48,3 +48,6 @@ teachingmindx-sync-trial.html
 
 # Temporary scratch
 scratch/
+
+# Graphify knowledge graph output
+graphify-out/

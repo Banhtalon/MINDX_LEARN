@@ -1,0 +1,84 @@
+# ============================================================================
+# .graphifyignore — MINDX LEARN
+# Chặn sạch dữ liệu thật học sinh/lớp học, phiên đăng nhập (session/cookie),
+# khóa bí mật, bản chụp Teaching MindX, tệp xuất CSV/JSON và thư mục tạm/build.
+# ============================================================================
+
+# 1. Biến môi trường, khóa bí mật & cấu hình cục bộ
+.env*
+.envrc*
+*.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+*.der
+*.p8
+.netrc
+.pgpass
+.npmrc
+_private/
+**/_private/
+.vercel/
+supabase/.temp/
+supabase/.branches/
+
+# 2. Phiên đăng nhập (Session), Cookie, Browser State & Nhật ký chạy thực tế
+.workflow-local/
+scratch/
+.playwright/
+playwright-report/
+test-results/
+cookies.txt
+*cookie*.json
+*cookies*.json
+*session*.json
+*storageState*.json
+*storage-state*.json
+*auth-state*.json
+*token*.json
+*.har
+*.trace.zip
+*.log
+docs/*RUNTIME_RESULTS*.json
+docs/*RESUME*.md
+docs/handoff/
+
+# 3. Dữ liệu thật Học sinh / Lớp học, Bản chụp Teaching MindX & Tệp xuất (PIN/CSV)
+teachingmindx-sync-trial.html
+teachingmindx-*.html
+teachingmindx-*.json
+*teaching*snapshot*.json
+*teaching-sync*.json
+*students_of_class*.json
+*real*sync*.json
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
+*.sql.gz
+uploads/
+exports/
+backups/
+snapshots/
+raw/
+
+# 4. Phụ thuộc, Build Output, Lockfiles & Đầu ra của Graphify
+node_modules/
+.next/
+out/
+build/
+coverage/
+graphify-out/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+*.tsbuildinfo
+next-env.d.ts
