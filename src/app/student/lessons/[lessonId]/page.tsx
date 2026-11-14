@@ -177,8 +177,8 @@ export default function StudentLessonDetailPage() {
       }
       blocks.push({
         type: 'code',
-        lang: (match[1] || 'html').toLowerCase(),
-        content: match[2].trim(),
+        lang: (match[1] || 'text').toLowerCase(),
+        content: match[2].replace(/\r\n/g, '\n').replace(/^\n+|\s+$/g, ''),
       });
       lastIndex = regex.lastIndex;
     }
@@ -188,7 +188,7 @@ export default function StudentLessonDetailPage() {
     return blocks;
   };
 
-  // Render inline formatting: **bold**, `code`, and [link](url)
+  // Render inline formatting: **bold**, `code`, and safe [link](url)
   const renderInlineTokens = (line: string) => {
     const parts = line.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g);
     return parts.map((part, i) => {
@@ -210,13 +210,13 @@ export default function StudentLessonDetailPage() {
         );
       }
       const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-      if (linkMatch) {
+      if (linkMatch && /^(https?:\/\/|\/(?!\/))/i.test(linkMatch[2].trim())) {
         return (
           <a
             key={i}
-            href={linkMatch[2]}
+            href={linkMatch[2].trim()}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="text-[#1d63ed] hover:text-[#154ec2] font-bold underline"
           >
             {linkMatch[1]}
@@ -225,6 +225,65 @@ export default function StudentLessonDetailPage() {
       }
       return <React.Fragment key={i}>{part}</React.Fragment>;
     });
+  };
+
+  const renderInlineWithBreaks = (text: string) => {
+    const segments = text.split(/<br\s*\/?>/gi);
+    if (segments.length === 1) return renderInlineTokens(text);
+    return segments.map((seg, idx) => (
+      <React.Fragment key={idx}>
+        {idx > 0 && <br />}
+        {renderInlineTokens(seg.trim())}
+      </React.Fragment>
+    ));
+  };
+
+  const isTableRow = (s: string) => s.startsWith('|') && s.endsWith('|') && s.length >= 2;
+
+  const splitTableCells = (rowLine: string): string[] => {
+    const inner = rowLine.trim().replace(/^\|/, '').replace(/\|$/, '');
+    const cells: string[] = [];
+    let current = '';
+    let inCode = false;
+    for (let c = 0; c < inner.length; c++) {
+      const ch = inner[c];
+      if (ch === '\\' && c + 1 < inner.length && inner[c + 1] === '|') {
+        current += '|';
+        c++;
+        continue;
+      }
+      if (ch === '`') {
+        inCode = !inCode;
+        current += ch;
+        continue;
+      }
+      if (ch === '|' && !inCode) {
+        cells.push(current.trim());
+        current = '';
+        continue;
+      }
+      current += ch;
+    }
+    cells.push(current.trim());
+    return cells;
+  };
+
+  const parseTableSeparator = (
+    sepLine: string,
+    expectedCols: number
+  ): Array<'left' | 'center' | 'right'> | null => {
+    const trimmed = sepLine.trim();
+    if (!isTableRow(trimmed) || expectedCols === 0) return null;
+    const cells = splitTableCells(trimmed);
+    if (cells.length !== expectedCols) return null;
+    const alignments: Array<'left' | 'center' | 'right'> = [];
+    for (const cell of cells) {
+      if (!/^:?-{3,}:?$/.test(cell)) return null;
+      if (cell.startsWith(':') && cell.endsWith(':')) alignments.push('center');
+      else if (cell.endsWith(':')) alignments.push('right');
+      else alignments.push('left');
+    }
+    return alignments;
   };
 
   const materialBlocks = parseMaterialBlocks(lesson.materials || '');
@@ -430,73 +489,166 @@ export default function StudentLessonDetailPage() {
               );
             }
 
-            // Text block: split by lines and render headings, callouts, lists, and paragraphs cleanly
+            // Text block: split by lines and render headings, tables, callouts, lists, and paragraphs cleanly
             const lines = block.content.split(/\r?\n/);
+            const renderedNodes: React.ReactNode[] = [];
+
+            for (let lIdx = 0; lIdx < lines.length; lIdx++) {
+              const rawLine = lines[lIdx];
+              const line = rawLine.trim();
+
+              if (!line) {
+                renderedNodes.push(<div key={lIdx} className="h-1" />);
+                continue;
+              }
+
+              if (line === '---') {
+                renderedNodes.push(<hr key={lIdx} className="border-slate-100 my-4" />);
+                continue;
+              }
+
+              if (isTableRow(line) && lIdx + 1 < lines.length) {
+                const headerCells = splitTableCells(line);
+                const alignments = parseTableSeparator(lines[lIdx + 1], headerCells.length);
+                if (alignments) {
+                  const tableKey = `tbl-${lIdx}`;
+                  const bodyRows: string[][] = [];
+                  lIdx += 2;
+                  while (lIdx < lines.length && isTableRow(lines[lIdx].trim())) {
+                    bodyRows.push(splitTableCells(lines[lIdx].trim()));
+                    lIdx++;
+                  }
+                  lIdx--;
+
+                  renderedNodes.push(
+                    <div
+                      key={tableKey}
+                      className="my-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-xs"
+                    >
+                      <table className="w-full min-w-[520px] border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-800">
+                            {headerCells.map((hCell, cIdx) => (
+                              <th
+                                key={cIdx}
+                                className={`px-4 py-3 font-extrabold ${
+                                  alignments[cIdx] === 'center'
+                                    ? 'text-center'
+                                    : alignments[cIdx] === 'right'
+                                      ? 'text-right'
+                                      : 'text-left'
+                                }`}
+                              >
+                                {renderInlineWithBreaks(hCell)}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {bodyRows.map((rowCells, rIdx) => (
+                            <tr key={rIdx} className="hover:bg-blue-50/30 transition-colors align-top">
+                              {headerCells.map((_, cIdx) => (
+                                <td
+                                  key={cIdx}
+                                  className={`px-4 py-3 text-slate-700 leading-relaxed ${
+                                    alignments[cIdx] === 'center'
+                                      ? 'text-center'
+                                      : alignments[cIdx] === 'right'
+                                        ? 'text-right'
+                                        : 'text-left'
+                                  }`}
+                                >
+                                  {renderInlineWithBreaks(rowCells[cIdx] ?? '')}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                  continue;
+                }
+              }
+
+              if (line.startsWith('# ')) {
+                renderedNodes.push(
+                  <div
+                    key={lIdx}
+                    className="pt-5 pb-2.5 border-b-2 border-blue-100 flex items-center gap-2.5 text-base font-black text-slate-900 tracking-tight"
+                  >
+                    <span className="w-2 h-5 rounded-full bg-[#1d63ed] inline-block shrink-0" />
+                    <span>{renderInlineWithBreaks(line.slice(2))}</span>
+                  </div>
+                );
+                continue;
+              }
+
+              if (line.startsWith('## ')) {
+                renderedNodes.push(
+                  <div
+                    key={lIdx}
+                    className="pt-4 pb-2 border-b border-slate-100 flex items-center gap-2.5 text-sm font-black text-slate-900"
+                  >
+                    <span className="w-1.5 h-4 rounded-full bg-[#1d63ed] inline-block shrink-0" />
+                    <span>{renderInlineWithBreaks(line.slice(3))}</span>
+                  </div>
+                );
+                continue;
+              }
+
+              if (line.startsWith('### ')) {
+                renderedNodes.push(
+                  <h3 key={lIdx} className="pt-2 font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                    <span className="text-[#1d63ed]">▸</span>
+                    <span>{renderInlineWithBreaks(line.slice(4))}</span>
+                  </h3>
+                );
+                continue;
+              }
+
+              if (line.startsWith('> ')) {
+                renderedNodes.push(
+                  <div
+                    key={lIdx}
+                    className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-amber-950 text-xs leading-relaxed"
+                  >
+                    {renderInlineWithBreaks(line.slice(2))}
+                  </div>
+                );
+                continue;
+              }
+
+              if (line.startsWith('- ') || line.startsWith('* ')) {
+                const isIndented = /^ {2,}[-*]\s+/.test(rawLine);
+                renderedNodes.push(
+                  <div key={lIdx} className={`flex items-start gap-2.5 ${isIndented ? 'pl-6' : 'pl-2'}`}>
+                    <span className="text-[#1d63ed] font-bold mt-0.5">•</span>
+                    <div className="flex-1">{renderInlineWithBreaks(line.slice(2))}</div>
+                  </div>
+                );
+                continue;
+              }
+
+              const numMatch = line.match(/^(\d+)\.\s+(.*)$/);
+              if (numMatch) {
+                renderedNodes.push(
+                  <div key={lIdx} className="flex items-start gap-2.5 pl-2">
+                    <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-[#1d63ed] border border-blue-100 font-mono font-bold text-[11px] shrink-0 mt-0.5">
+                      {numMatch[1]}
+                    </span>
+                    <div className="flex-1">{renderInlineWithBreaks(numMatch[2])}</div>
+                  </div>
+                );
+                continue;
+              }
+
+              renderedNodes.push(<p key={lIdx}>{renderInlineWithBreaks(line)}</p>);
+            }
+
             return (
               <div key={bIdx} className="space-y-2.5 text-xs text-slate-700 leading-relaxed">
-                {lines.map((rawLine, lIdx) => {
-                  const line = rawLine.trim();
-                  if (!line) return <div key={lIdx} className="h-1" />;
-
-                  if (line === '---') {
-                    return <hr key={lIdx} className="border-slate-100 my-4" />;
-                  }
-
-                  if (line.startsWith('## ')) {
-                    return (
-                      <div
-                        key={lIdx}
-                        className="pt-4 pb-2 border-b border-slate-100 flex items-center gap-2.5 text-sm font-black text-slate-900"
-                      >
-                        <span className="w-1.5 h-4 rounded-full bg-[#1d63ed] inline-block shrink-0" />
-                        <span>{renderInlineTokens(line.slice(3))}</span>
-                      </div>
-                    );
-                  }
-
-                  if (line.startsWith('### ')) {
-                    return (
-                      <h3 key={lIdx} className="pt-2 font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                        <span className="text-[#1d63ed]">▸</span>
-                        <span>{renderInlineTokens(line.slice(4))}</span>
-                      </h3>
-                    );
-                  }
-
-                  if (line.startsWith('> ')) {
-                    return (
-                      <div
-                        key={lIdx}
-                        className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-amber-950 text-xs leading-relaxed"
-                      >
-                        {renderInlineTokens(line.slice(2))}
-                      </div>
-                    );
-                  }
-
-                  if (line.startsWith('- ') || line.startsWith('* ')) {
-                    return (
-                      <div key={lIdx} className="flex items-start gap-2.5 pl-2">
-                        <span className="text-[#1d63ed] font-bold mt-0.5">•</span>
-                        <div className="flex-1">{renderInlineTokens(line.slice(2))}</div>
-                      </div>
-                    );
-                  }
-
-                  const numMatch = line.match(/^(\d+)\.\s+(.*)$/);
-                  if (numMatch) {
-                    return (
-                      <div key={lIdx} className="flex items-start gap-2.5 pl-2">
-                        <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-[#1d63ed] border border-blue-100 font-mono font-bold text-[11px] shrink-0 mt-0.5">
-                          {numMatch[1]}
-                        </span>
-                        <div className="flex-1">{renderInlineTokens(numMatch[2])}</div>
-                      </div>
-                    );
-                  }
-
-                  return <p key={lIdx}>{renderInlineTokens(line)}</p>;
-                })}
+                {renderedNodes}
               </div>
             );
           })}

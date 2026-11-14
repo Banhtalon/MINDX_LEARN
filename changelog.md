@@ -8,6 +8,25 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-14] — Bổ sung Bài Thực hành 1 Buổi 2 Khóa PTI (`Ứng dụng Bộ Đếm Số — Click Counter`) & Nâng cấp Hiển thị Bảng Markdown trên Trang Bài học (`UI-12`)
+- **Mục tiêu:**
+  1. Bổ sung trọn vẹn đề bài và hướng dẫn thực hành **`BÀI THỰC HÀNH 1: ỨNG DỤNG BỘ ĐẾM SỐ (CLICK COUNTER)`** (Qt Designer `counter.ui` + Python PyQt6 OOP `main_bai1.py`) vào **Buổi 2 khóa PTI** (`55555555-5555-4555-8555-555555555602`), giữ nguyên trạng thái **Bản nháp (`draft`)** và giữ nguyên đủ **20 câu trắc nghiệm**.
+  2. Đảm bảo trang chi tiết bài học ([`src/app/student/lessons/[lessonId]/page.tsx`](./src/app/student/lessons/[lessonId]/page.tsx)) hiển thị chuẩn các bảng thông số Markdown, tiêu đề `# `, ngắt dòng `<br>` trong ô bảng và các khối mã CSS / Python mà không mở nhầm khung xem trước HTML (`<iframe>`).
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Database Migration ([`20261114103000_m6_pti_session2_practice.sql`](./supabase/migrations/20261114103000_m6_pti_session2_practice.sql)):**
+     - Cập nhật `description` và `materials` cho Buổi 2 khóa PTI (`55555555-5555-4555-8555-555555555602`) gồm: Mục tiêu bài học, lưu ý làm 20 câu trắc nghiệm, toàn văn 4 phần **Bài Thực hành 1: Ứng dụng Bộ Đếm Số (Click Counter)** (bảng thiết kế `txt_display`, `btn_inc`, `btn_dec`, `btn_reset` trong Qt Designer, 2 khối `styleSheet` CSS, mã nguồn lớp `CounterApp(QMainWindow)` nạp `uic.loadUi("counter.ui", self)` trong `main_bai1.py`, giải thích kiến thức trọng tâm) và hướng dẫn đóng gói `.zip` (`counter.ui` + `main_bai1.py`, `<= 2 MB`) hoặc nộp `.py` / đường link.
+     - Giữ nguyên `status = 'draft'`, `has_quiz = true`, `has_practice = true`, `practice_mode = 'file_allowed'`, kèm khối kiểm tra `DO $$ ... $$` bảo toàn đúng `20` câu `quiz_questions` và ghi nhận vào `supabase_migrations.schema_migrations`.
+  2. **Trang Chi tiết Bài học Học sinh ([`src/app/student/lessons/[lessonId]/page.tsx`](./src/app/student/lessons/[lessonId]/page.tsx)):**
+     - Đổi ngôn ngữ mặc định của khối mã không gắn nhãn từ `'html'` sang `'text'` (vẫn giữ xem trước trực tiếp cho bài HTML có nhãn `html` hoặc `<!DOCTYPE html>`, đồng thời hiển thị khung mã tối màu kèm nút sao chép cho CSS/Python mà không sinh `<iframe>`) và giữ nguyên thụt lề dòng đầu tiên.
+     - Hỗ trợ dựng an toàn bằng phần tử React (không dùng `dangerouslySetInnerHTML`) cho bảng Markdown (`| ... |` + dòng căn lề `:---`), thẻ `<br>` trong ô bảng, tiêu đề cấp 1 (`# `) và danh sách con thụt đầu dòng; siết chặt bộ lọc liên kết `[nhãn](url)` chỉ nhận `http(s)://` hoặc đường dẫn nội bộ `/...` (chặn `javascript:` và `//...`) kèm `rel="noopener noreferrer"`.
+- **Kiểm thử & Nghiệm thu:**
+  - Mở rộng [`tests/pti-session2-quiz.test.mjs`](./tests/pti-session2-quiz.test.mjs) với `Test 1c` (kiểm tra migration thực hành), `Test 4b` (kiểm thử JSDOM hiển thị bảng Qt Designer, 3 khối code không mở `<iframe>`, chế độ Admin xem trước bài nháp và chặn học sinh xem bài nháp) và `Test 5` (chạy lặp cả 3 migration trên PostgreSQL 17 thật + dọn sạch tiến trình/thư mục tạm).
+  - Đã áp dụng lên Supabase PROD `eythjapspkoyqdxlxtcd` và đối chiếu `--read-only` (`status = 'draft'`, `q_count = 20`, `practice_mode = 'file_allowed'`, `materials_len = 5029`).
+  - `npm run typecheck`: `0` lỗi; `npm test`: **`390 / 390 PASS`** (`24` bộ kiểm thử, `0` bị bỏ qua); `npm run build`: thành công.
+  - Kiểm định độc lập bằng Codex CLI (`gpt-6-luna` `xhigh` `-s read-only`): **`VERDICT: GO`**.
+
+---
+
 ### [2026-11-14] — Khởi tạo Khóa học PTI (14 Buổi), Nạp 20 Câu Trắc nghiệm Buổi 2 (Bản nháp) & Cơ chế Ẩn/Hiện Đáp án Trắc nghiệm Theo Lượt Làm bài
 - **Mục tiêu:**
   1. Tạo khóa học chính thức **`PTI — Lập trình Ứng dụng Python Chuyên sâu (Python OOP & PyQt6)`** (đủ 14 buổi cố định theo lộ trình `PTB -> PTA -> PTI`).

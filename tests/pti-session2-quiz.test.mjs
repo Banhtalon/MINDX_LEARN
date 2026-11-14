@@ -17,8 +17,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const MIGRATION_PATH = path.resolve(__dirname, '../supabase/migrations/20261114090000_m6_pti_course_session2_quiz.sql');
 const ATOMIC_RPC_MIGRATION_PATH = path.resolve(__dirname, '../supabase/migrations/20261114093000_m6_submit_quiz_atomic_review.sql');
+const PRACTICE_MIGRATION_PATH = path.resolve(__dirname, '../supabase/migrations/20261114103000_m6_pti_session2_practice.sql');
 const INDEX_PATH = path.resolve(__dirname, '../supabase/functions/m2-backend/index.ts');
 const ADMIN_EDIT_PATH = path.resolve(__dirname, '../src/app/admin/lessons/[lessonId]/edit/page.tsx');
+const STUDENT_LESSON_PATH = path.resolve(__dirname, '../src/app/student/lessons/[lessonId]/page.tsx');
 
 const savedDeno = globalThis.Deno;
 const savedMockEdgeAdminClient = globalThis.__mockEdgeAdminClient;
@@ -141,6 +143,29 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
     const idxClose = sql.indexOf("hashtext('m5_close:' || v_class_id::text)");
     const idxKeyShare = sql.indexOf('FOR KEY SHARE', idxClose);
     assert.ok(idxGlobal > 0 && idxStudent > idxGlobal && idxClose > idxStudent && idxKeyShare > idxClose);
+  });
+
+  test('1c. Practice migration adds Click Counter lab (Qt Designer + PyQt6) to PTI Session 2 while keeping draft status & 20 quiz questions', async () => {
+    const sql = await fsp.readFile(PRACTICE_MIGRATION_PATH, 'utf8');
+
+    assert.ok(sql.includes("WHERE id = '55555555-5555-4555-8555-555555555602';"));
+    assert.ok(sql.includes("status = 'draft'"), 'PTI Session 2 must remain in draft status');
+    assert.ok(sql.includes('has_quiz = true'));
+    assert.ok(sql.includes('has_practice = true'));
+    assert.ok(sql.includes("practice_mode = 'file_allowed'"));
+
+    assert.ok(sql.includes('# BÀI THỰC HÀNH 1: ỨNG DỤNG BỘ ĐẾM SỐ (CLICK COUNTER)'));
+    assert.ok(sql.includes('| Thành phần (Widget) | Tên đối tượng (objectName) | Văn bản hiển thị (text) | Thuộc tính bổ sung |'));
+    assert.ok(sql.includes('`txt_display`'));
+    assert.ok(sql.includes('`btn_inc`'));
+    assert.ok(sql.includes('`btn_dec`'));
+    assert.ok(sql.includes('`btn_reset`'));
+    assert.ok(sql.includes('`counter.ui`'));
+    assert.ok(sql.includes('`main_bai1.py`'));
+    assert.ok(sql.includes('uic.loadUi("counter.ui", self)'));
+    assert.ok(sql.includes('self.btn_inc.clicked.connect(self.increase_count)'));
+    assert.ok(sql.includes('PTI_SESSION_2_QUIZ_COUNT_MISMATCH'));
+    assert.ok(sql.includes("VALUES ('20261114103000', 'm6_pti_session2_practice')"));
   });
 
   test('2. sanitizeBootstrapDto strips correctOptionIndex and explanation for students while preserving for staff', () => {
@@ -658,7 +683,235 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
     }
   });
 
-  test('5. Real PostgreSQL engine executes both migrations and enforces m3_update_lesson + m3_submit_quiz_attempt invariants', async (t) => {
+  test('4b. UI StudentLessonDetailPage renders Click Counter Markdown table, CSS/Python code blocks without HTML iframe, safe links, and draft gating', async () => {
+    const savedGlobals = new Map();
+    const setGlobal = (key, val) => {
+      if (!savedGlobals.has(key)) savedGlobals.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
+      Object.defineProperty(globalThis, key, { value: val, configurable: true, writable: true });
+    };
+    const restoreGlobals = () => {
+      for (const [key, desc] of savedGlobals.entries()) {
+        if (desc === undefined) delete globalThis[key];
+        else Object.defineProperty(globalThis, key, desc);
+      }
+      savedGlobals.clear();
+    };
+
+    const practiceSql = await fsp.readFile(PRACTICE_MIGRATION_PATH, 'utf8');
+    const matMatch = practiceSql.match(/\$PTI_B2_PRACTICE\$([\s\S]*?)\$PTI_B2_PRACTICE\$/);
+    assert.ok(matMatch, 'Expected $PTI_B2_PRACTICE$ dollar-quoted materials block');
+    const actualMaterials = `${matMatch[1]}\n\n[Thử XSS](javascript:alert(1))`;
+
+    const LESSON_ID = '55555555-5555-4555-8555-555555555602';
+    const COURSE_ID = '44444444-4444-4444-8444-444444444423';
+    const ADMIN_USER = {
+      id: 'adm_pti_01',
+      name: 'Admin MindX',
+      email: 'admin@mindx.local',
+      role: 'admin',
+      status: 'active',
+    };
+    const STUDENT_USER = {
+      id: 'stu_pti_01',
+      name: 'Học sinh PTI',
+      studentCode: 'PTI01',
+      role: 'student',
+      status: 'active',
+    };
+
+    let activeMockUser = ADMIN_USER;
+    const makeBootstrap = () => ({
+      currentUser: activeMockUser,
+      users: [ADMIN_USER, STUDENT_USER],
+      students: [],
+      classes: [],
+      courses: [{ id: COURSE_ID, title: 'PTI', description: 'Python Intensive', status: 'active' }],
+      lessons: [
+        {
+          id: LESSON_ID,
+          courseId: COURSE_ID,
+          sessionNumber: 2,
+          title: 'Buổi 2: Python OOP & PyQt6',
+          description: 'Ôn tập Python OOP, 20 câu trắc nghiệm và thực hành Click Counter.',
+          materials:
+            actualMaterials +
+            '\n\nTham khảo: [Tài liệu PyQt6](https://doc.qt.io/qtforpython-6/) | [BadJS](javascript:alert(1)) | [BadProto](//evil.example.com)',
+          videoUrl: '',
+          status: 'draft',
+          hasQuiz: true,
+          hasPractice: true,
+          practiceMode: 'file_allowed',
+          questions: [],
+        },
+      ],
+      quizResults: [],
+      submissions: [],
+    });
+
+    const prevDemoEnv = process.env.NEXT_PUBLIC_MINDX_DEMO;
+    process.env.NEXT_PUBLIC_MINDX_DEMO = '0';
+
+    const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
+      url: 'http://localhost:3000/student/lessons/' + LESSON_ID,
+      pretendToBeVisual: true,
+    });
+    dom.window.scrollTo = () => {};
+
+    setGlobal('window', dom.window);
+    setGlobal('document', dom.window.document);
+    setGlobal('HTMLElement', dom.window.HTMLElement);
+    setGlobal('HTMLInputElement', dom.window.HTMLInputElement);
+    setGlobal('HTMLButtonElement', dom.window.HTMLButtonElement);
+    setGlobal('getComputedStyle', dom.window.getComputedStyle.bind(dom.window));
+    setGlobal('requestAnimationFrame', (cb) => setTimeout(cb, 0));
+    setGlobal('cancelAnimationFrame', (id) => clearTimeout(id));
+    setGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    setGlobal('fetch', async (url) => {
+      const target = typeof url === 'string' ? url : url?.url || '';
+      const pathname = target.startsWith('http') ? new URL(target).pathname : target;
+      if (pathname === '/api/m2/session') {
+        return new Response(JSON.stringify({ success: true, user: activeMockUser }), { status: 200 });
+      }
+      if (pathname === '/api/m2/bootstrap') {
+        return new Response(JSON.stringify({ success: true, data: makeBootstrap() }), { status: 200 });
+      }
+      throw new Error(`Unexpected fetch URL: ${target}`);
+    });
+
+    const moduleCache = new Map();
+    const loadModule = (filePath) => {
+      const abs = path.resolve(filePath);
+      if (moduleCache.has(abs)) return moduleCache.get(abs).exports;
+      const code = fs.readFileSync(abs, 'utf8');
+      const { outputText } = ts.transpileModule(code, {
+        compilerOptions: {
+          target: ts.ScriptTarget.ES2022,
+          module: ts.ModuleKind.CommonJS,
+          jsx: ts.JsxEmit.React,
+          esModuleInterop: true,
+        },
+        fileName: abs,
+      });
+      const mod = { exports: {} };
+      moduleCache.set(abs, mod);
+      const customRequire = (spec) => {
+        if (spec === 'react') return { ...React, default: React };
+        if (spec === 'next/link') {
+          const Link = ({ href, children, ...rest }) => React.createElement('a', { href, ...rest }, children);
+          return { default: Link, __esModule: true };
+        }
+        if (spec === 'next/navigation') {
+          return {
+            __esModule: true,
+            useRouter: () => ({ push: () => {}, replace: () => {} }),
+            usePathname: () => `/student/lessons/${LESSON_ID}`,
+            useParams: () => ({ lessonId: LESSON_ID }),
+          };
+        }
+        if (spec.startsWith('@/')) {
+          const sub = spec.slice(2);
+          for (const ext of ['.tsx', '.ts', '.jsx', '.js', '/index.tsx', '/index.ts']) {
+            const cand = path.resolve('src', sub + ext);
+            if (fs.existsSync(cand) && fs.statSync(cand).isFile()) return loadModule(cand);
+          }
+        }
+        if (spec.startsWith('.')) {
+          const dir = path.dirname(abs);
+          for (const ext of ['.tsx', '.ts', '.jsx', '.js', '/index.tsx', '/index.ts']) {
+            const cand = path.resolve(dir, spec + ext);
+            if (fs.existsSync(cand) && fs.statSync(cand).isFile()) return loadModule(cand);
+          }
+        }
+        throw new Error(`Unexpected import: ${spec}`);
+      };
+      new Function('require', 'module', 'exports', '__filename', '__dirname', outputText)(
+        customRequire,
+        mod,
+        mod.exports,
+        abs,
+        path.dirname(abs)
+      );
+      return mod.exports;
+    };
+
+    const { createRoot } = await import('react-dom/client');
+    const { StoreProvider } = loadModule('src/lib/store.tsx');
+    const StudentLessonDetailPage = loadModule(STUDENT_LESSON_PATH).default;
+    const rootEl = dom.window.document.getElementById('root');
+    let root = null;
+
+    try {
+      // 1) Staff preview renders draft Session 2 with full Click Counter lab, table, code blocks, and practice tabs
+      root = createRoot(rootEl);
+      await act(async () => {
+        root.render(React.createElement(StoreProvider, null, React.createElement(StudentLessonDetailPage)));
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
+
+      const fullText = rootEl.textContent || '';
+      assert.ok(fullText.includes('Đang ở trạng thái Bản nháp'));
+      assert.ok(fullText.includes('BÀI THỰC HÀNH 1: ỨNG DỤNG BỘ ĐẾM SỐ (CLICK COUNTER)'));
+      assert.equal(fullText.includes(':---'), false, 'GFM table separator row must not render as raw text');
+      assert.equal(fullText.includes('<br>'), false, '<br> inside table cells must convert to DOM <br> elements');
+
+      const tables = rootEl.querySelectorAll('table');
+      assert.equal(tables.length, 1, 'Expected 1 rendered HTML table for Qt Designer Property Editor');
+      assert.equal(tables[0].querySelectorAll('thead th').length, 4);
+      assert.equal(tables[0].querySelectorAll('tbody tr').length, 4);
+      assert.ok(tables[0].querySelectorAll('tbody tr')[0].querySelectorAll('br').length >= 1);
+      assert.ok((tables[0].textContent || '').includes('txt_display'));
+      assert.ok((tables[0].textContent || '').includes('btn_inc'));
+      assert.ok((tables[0].textContent || '').includes('btn_dec'));
+      assert.ok((tables[0].textContent || '').includes('btn_reset'));
+
+      const codeBlocks = rootEl.querySelectorAll('pre code');
+      assert.equal(codeBlocks.length, 3, 'Expected 2 CSS styleSheet blocks + 1 Python CounterApp block');
+      assert.ok((codeBlocks[2].textContent || '').includes('uic.loadUi("counter.ui", self)'));
+      assert.ok((codeBlocks[2].textContent || '').includes('    def increase_count(self):'));
+      assert.equal(rootEl.querySelectorAll('iframe').length, 0, 'CSS/Python blocks must not open an HTML iframe');
+
+      assert.ok(fullText.includes('3. Nộp bài thực hành'));
+      assert.ok(fullText.includes('Nộp đường link'));
+      assert.ok(fullText.includes('Tải tệp (<= 2MB)'));
+      const safeDocLink = rootEl.querySelector('a[href="https://doc.qt.io/qtforpython-6/"]');
+      assert.ok(safeDocLink, 'Valid https:// markdown link must render as an anchor');
+      assert.equal(safeDocLink.getAttribute('rel'), 'noopener noreferrer');
+      assert.equal(rootEl.querySelector('a[href^="javascript:"]'), null, 'javascript: links must be rejected');
+      assert.equal(rootEl.querySelector('a[href^="//"]'), null, 'protocol-relative // links must be rejected');
+
+      await act(async () => {
+        root.unmount();
+      });
+      root = null;
+
+      // 2) Student role is blocked while Session 2 remains in draft
+      activeMockUser = STUDENT_USER;
+      root = createRoot(rootEl);
+      await act(async () => {
+        root.render(React.createElement(StoreProvider, null, React.createElement(StudentLessonDetailPage)));
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
+      const studentDraftText = rootEl.textContent || '';
+      assert.ok(studentDraftText.includes('Bài học chưa xuất bản'));
+      assert.equal(studentDraftText.includes('BÀI THỰC HÀNH 1'), false);
+    } finally {
+      if (root) {
+        try {
+          await act(async () => { root.unmount(); });
+        } catch {}
+      }
+      restoreGlobals();
+      try { dom.window.close(); } catch {}
+      if (prevDemoEnv === undefined) delete process.env.NEXT_PUBLIC_MINDX_DEMO;
+      else process.env.NEXT_PUBLIC_MINDX_DEMO = prevDemoEnv;
+    }
+  });
+
+  test('5. Real PostgreSQL engine executes all PTI Session 2 migrations and enforces m3_update_lesson + m3_submit_quiz_attempt invariants', async (t) => {
     const { initdb, pgCtl, psql, skipReason } = resolvePostgresBinaries();
     if (skipReason) {
       t.skip(skipReason);
@@ -851,11 +1104,13 @@ CREATE TABLE IF NOT EXISTS public.m5_course_close_operations (
       fs.writeFileSync(bootstrapSqlPath, bootstrapSql, 'utf8');
       runPsqlFile(bootstrapSqlPath);
 
-      // Apply both real migrations, then re-apply to confirm idempotency
+      // Apply all real PTI Session 2 migrations in chronological order, then re-apply to confirm idempotency
       runPsqlFile(MIGRATION_PATH);
       runPsqlFile(ATOMIC_RPC_MIGRATION_PATH);
+      runPsqlFile(PRACTICE_MIGRATION_PATH);
       runPsqlFile(MIGRATION_PATH);
       runPsqlFile(ATOMIC_RPC_MIGRATION_PATH);
+      runPsqlFile(PRACTICE_MIGRATION_PATH);
 
       const verifySql = `
 DO $$
@@ -897,9 +1152,24 @@ BEGIN
 
   SELECT count(*)::INT INTO v_count
   FROM public.lessons
-  WHERE id = v_lesson_id AND status = 'draft' AND has_quiz = true AND has_practice = true;
+  WHERE id = v_lesson_id
+    AND status = 'draft'
+    AND has_quiz = true
+    AND has_practice = true
+    AND practice_mode = 'file_allowed'
+    AND materials LIKE '%BÀI THỰC HÀNH 1: ỨNG DỤNG BỘ ĐẾM SỐ (CLICK COUNTER)%'
+    AND materials LIKE '%uic.loadUi("counter.ui", self)%'
+    AND materials LIKE '%main_bai1.py%';
   IF v_count <> 1 THEN
-    RAISE EXCEPTION 'Session 2 must be in draft state with quiz & practice enabled';
+    RAISE EXCEPTION 'Session 2 must be in draft state with quiz & Click Counter practice materials enabled';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM supabase_migrations.schema_migrations
+    WHERE version = '20261114103000' AND name = 'm6_pti_session2_practice'
+  ) THEN
+    RAISE EXCEPTION 'Migration 20261114103000 not recorded in schema_migrations';
   END IF;
 
   SELECT count(*)::INT INTO v_count
