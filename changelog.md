@@ -8,6 +8,28 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-14] — Khởi tạo Khóa học JSA (14 Buổi) & Nạp Trọn bộ Buổi 2 (Bản nháp: 20 Câu Trắc nghiệm + Thực hành Đề bài 1 & 2)
+- **Mục tiêu:**
+  1. Khởi tạo khóa học chính thức **`JSA — Lập trình Web Nâng cao (JavaScript Advanced & Web App)`** (`id: 44444444-4444-4444-8444-444444444412`, đủ `14` buổi cố định theo lộ trình `JSB -> JSA -> JSI`, `is_fixture = false`), giữ toàn bộ 14 buổi ở trạng thái **Bản nháp (`draft`)**.
+  2. Nạp trọn bộ **Buổi 2: Biến, Kiểu dữ liệu & Xử lý chuỗi trong JavaScript** (`id: 55555555-5555-4555-8555-555555555702`, `status = 'draft'`, `has_quiz = true`, `has_practice = true`, `practice_mode = 'file_allowed'`) gồm tóm tắt kiến thức trọng tâm, **2 bài Thực hành (`Đề bài 1: bai1.js` & `Đề bài 2: bai2.js`)** hiển thị trên khung code tối màu Antigravity IDE và đủ **20 câu trắc nghiệm** (`10` câu gốc + `10` câu mở rộng từ Thực hành Đề 1 & 2) theo cơ chế ẩn đáp án khi làm bài / làm lại, chỉ hiện đáp án + lời giải thích sau khi nộp đủ 20 câu.
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Database Migration ([`20261114160000_m6_jsa_course_session2_quiz_practice.sql`](./supabase/migrations/20261114160000_m6_jsa_course_session2_quiz_practice.sql)):**
+     - Tạo khóa `JSA` (`44444444-4444-4444-8444-444444444412`) và 14 buổi nháp (`55555555-5555-4555-8555-555555555701` → `5714`).
+     - Cập nhật giáo trình Buổi 2 (`55555555-5555-4555-8555-555555555702`) với 2 bảng tra cứu nhanh (`var`/`let`/`const` và các phương thức chuỗi `.length`, `.toUpperCase()`, `.toLowerCase()`, `.replace()`, `.substring()`, `prompt()`), **Đề bài 1 (`bai1.js`)**, **Đề bài 2 (`bai2.js`)** và hướng dẫn chạy thử Console `F12` + nộp tệp `.zip`/`.js` (`<= 2 MB`) hoặc đường link (tuyệt đối không nhúng `new Function`/`eval` chạy mã tùy ý cùng nguồn trên LMS).
+     - Nạp đủ `20` câu hỏi trắc nghiệm (`66666666-6666-4666-8666-666666666801` → `6820`, `order_index` `0..19`, trong đó `13` câu có khối mã ```` ```js ````) kèm lời giải thích `explanation` chuẩn xác về cú pháp JavaScript thực tế (chuẩn hóa khởi tạo `const myVariable = 10;` ở Câu 1 và làm rõ yêu cầu giữ hằng số `const number = 5;` ở Câu 10) cùng khối `DO $$ ... $$` kiểm tra toàn vẹn.
+  2. **Bộ Phân tích Markdown Nội tuyến Tuyến tính $O(N)$ & Tô màu Cú pháp JS (`UI-12` & `UI-13`):**
+     - [`src/lib/inline-markdown.ts`](./src/lib/inline-markdown.ts): Tách bộ phân tích khối mã rào ```` ``` ```` (`parseFencedCodeBlocks`, `trimCodeBlockContent`) và mã nội tuyến (`tokenizeInlineMarkdown`) sử dụng con trỏ đơn điệu không quay lui biểu thức chính quy, đảm bảo thời gian tuyến tính $O(N)$ tuyệt đối cho cả thẻ `<code>` dấu huyền kép (như `` `` `...${biến}...` `` `` ở Câu 18), thẻ `<code>` lồng trong `**...**` và liên kết an toàn `[nhãn](url)`.
+     - [`src/lib/code-highlight.ts`](./src/lib/code-highlight.ts): Bổ sung tập đối tượng toàn cục trình duyệt (`console`, `document`, `window`, `localStorage`...) tô màu thuộc tính `#7fdbca` và mở rộng nhận diện tự động JavaScript cho `var` / `console.log(...)`.
+     - [`src/app/student/lessons/[lessonId]/quiz/page.tsx`](./src/app/student/lessons/[lessonId]/quiz/page.tsx) & [`src/app/student/lessons/[lessonId]/page.tsx`](./src/app/student/lessons/[lessonId]/page.tsx): Tích hợp `inline-markdown.ts`, tra cứu lời giải theo `Map` $O(Q)$ trên trang Quiz và hiển thị tiêu đề `Mã nguồn (JAVASCRIPT)` chuẩn xác.
+- **Kiểm thử & Nghiệm thu:**
+  - Bộ kiểm thử mới [`tests/jsa-session2-quiz-practice.test.mjs`](./tests/jsa-session2-quiz-practice.test.mjs) (gồm kiểm chứng thực thi V8 `node:vm` cho `bai1.js`, `bai2.js` và bộ 20 câu hỏi JS, kiểm thử JSDOM đủ 20 câu Quiz + 2 bài Thực hành JSA, kiểm thử độ phức tạp tuyến tính $O(N)$ 64k ký tự bất lợi và kiểm thử chạy lặp migration + chấm điểm qua PostgreSQL 17 thật).
+  - Đã áp dụng lên Supabase PROD `eythjapspkoyqdxlxtcd` và đối chiếu `--read-only` (`official_courses = 3`, `total_lessons = 42`, `jsa_b2_status = 'draft'`, `jsa_b2_q_count = 20`, `classes = 0`, `students = 0`).
+  - Cập nhật bản đồ cục bộ `$env:GRAPHIFY_BACKEND="none"; graphify update .` (`83/83` tệp mã nguồn).
+  - `git diff --check`: `0` cảnh báo; `npm run typecheck`: `0` lỗi; `npm test`: **`396 / 396 PASS`** (`25` bộ kiểm thử, `0` bị bỏ qua); `npm run build`: thành công.
+  - Kiểm định độc lập bằng Codex CLI (`gpt-6.1-sol` `xhigh` `-s read-only`): **`VERDICT: GO`**.
+
+---
+
 ### [2026-11-14] — Hoàn tất Bước 3 Tự động hóa Quy tắc Tra cứu & Cập nhật Bản đồ Mã nguồn Offline (`graphify` Rules)
 - **Mục tiêu:** Thiết lập cơ chế để mọi AI (Antigravity, Codex, Gemini và các Subagent) tự động tra cứu bản đồ `graphify-out/graph.json` trước khi đọc tràn lan các tệp mã nguồn, tự động chạy `graphify update .` sau khi sửa code, bảo toàn tuyệt đối [`.graphifyignore`](./.graphifyignore) và chỉ chạy ở chế độ offline 100% (`$env:GRAPHIFY_BACKEND="none"`, `--code-only`).
 - **Tính năng & Thay đổi đã thực hiện:**

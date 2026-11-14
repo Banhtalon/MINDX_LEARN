@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { Question, QuizAnswerReviewItem } from '@/lib/types';
 import { CodeBlock } from '@/components/code-block';
+import { parseFencedCodeBlocks, tokenizeInlineMarkdown } from '@/lib/inline-markdown';
 import {
   IconArrowLeft,
   IconCheckCircle,
@@ -87,49 +88,35 @@ export default function StudentQuizPage() {
   const isReviewMode = Boolean(lastResult);
   const displayedQuestions = isReviewMode && submittedQuestions ? submittedQuestions : lesson.questions;
 
-  const renderInlinePromptTokens = (text: string) => {
-    const parts = text.split(/(`[^`]+`)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('`') && part.endsWith('`')) {
-        return (
-          <code
-            key={i}
-            className="px-1.5 py-0.5 mx-0.5 rounded-md bg-blue-50 text-[#1d63ed] border border-blue-200/70 font-mono text-xs font-semibold"
-          >
-            {part.slice(1, -1)}
-          </code>
-        );
+  const reviewByQuestionId = new Map<string, QuizAnswerReviewItem>();
+  if (isReviewMode && answerReview) {
+    for (const item of answerReview) {
+      if (item.questionId) {
+        reviewByQuestionId.set(item.questionId, item);
       }
-      return <React.Fragment key={i}>{part}</React.Fragment>;
-    });
-  };
+    }
+  }
+
+  const renderInlinePromptTokens = (text: string) =>
+    tokenizeInlineMarkdown(text).map((tok, i) =>
+      tok.kind === 'code' ? (
+        <code
+          key={i}
+          className="px-1.5 py-0.5 mx-0.5 rounded-md bg-blue-50 text-[#1d63ed] border border-blue-200/70 font-mono text-xs font-semibold"
+        >
+          {tok.value}
+        </code>
+      ) : tok.kind === 'text' ? (
+        <React.Fragment key={i}>{tok.value}</React.Fragment>
+      ) : null
+    );
 
   const renderQuestionPrompt = (promptText: string) => {
-    const blocks: Array<{ type: 'text' | 'code'; lang?: string; content: string }> = [];
-    const regex = /```([a-zA-Z0-9_-]*)\r?\n([\s\S]*?)```/g;
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = regex.exec(promptText)) !== null) {
-      if (match.index > lastIndex) {
-        const textPart = promptText.slice(lastIndex, match.index).trim();
-        if (textPart) {
-          blocks.push({ type: 'text', content: textPart });
-        }
-      }
-      blocks.push({
-        type: 'code',
-        lang: (match[1] || 'python').toLowerCase(),
-        content: match[2].replace(/^(?:\r?\n)+|\s+$/g, ''),
-      });
-      lastIndex = regex.lastIndex;
-    }
-    if (lastIndex < promptText.length) {
-      const tail = promptText.slice(lastIndex).trim();
-      if (tail) {
-        blocks.push({ type: 'text', content: tail });
-      }
-    }
+    const blocks = parseFencedCodeBlocks(promptText, { trimTextBlocks: true });
     if (blocks.length === 0) {
+      return <span className="whitespace-pre-line">{renderInlinePromptTokens(promptText)}</span>;
+    }
+    if (blocks.length === 1 && blocks[0].type === 'text') {
       return <span className="whitespace-pre-line">{renderInlinePromptTokens(promptText)}</span>;
     }
 
@@ -140,7 +127,7 @@ export default function StudentQuizPage() {
             <CodeBlock
               key={bIdx}
               code={block.content}
-              lang={block.lang || 'python'}
+              lang={block.lang || 'text'}
               compact
             />
           ) : (
@@ -384,7 +371,7 @@ export default function StudentQuizPage() {
           const selectedOption = isReviewMode ? submittedAnswers?.[q.id] : selectedAnswers[q.id];
           const review =
             isReviewMode && answerReview
-              ? answerReview.find((item) => item.questionId === q.id) ??
+              ? reviewByQuestionId.get(q.id) ??
                 (!answerReview[qIndex]?.questionId ? answerReview[qIndex] : undefined)
               : undefined;
           const hasCorrectIndex = typeof review?.correctOptionIndex === 'number';
@@ -476,7 +463,7 @@ export default function StudentQuizPage() {
               {isReviewMode && review?.explanation && review.explanation.trim() !== '' && (
                 <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-slate-700 leading-relaxed">
                   <span className="font-extrabold text-[#1d63ed]">Giải thích: </span>
-                  <span>{review.explanation}</span>
+                  <span>{renderInlinePromptTokens(review.explanation)}</span>
                 </div>
               )}
             </div>

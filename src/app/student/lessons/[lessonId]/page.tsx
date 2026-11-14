@@ -6,6 +6,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { SubmissionType } from '@/lib/types';
 import { CodeBlock } from '@/components/code-block';
+import { getCodeLangLabel } from '@/lib/code-highlight';
+import {
+  InlineMarkdownToken,
+  parseFencedCodeBlocks,
+  tokenizeInlineMarkdown,
+} from '@/lib/inline-markdown';
 import {
   IconArrowLeft,
   IconCheckCircle,
@@ -164,68 +170,47 @@ export default function StudentLessonDetailPage() {
     }, qaState.delayMs || 300);
   };
 
-  // Parse materials into structured blocks (text sections and fenced code blocks)
-  const parseMaterialBlocks = (raw: string) => {
-    if (!raw) return [];
-    const blocks: Array<{ type: 'text' | 'code'; lang?: string; content: string }> = [];
-    const regex = /```([a-zA-Z0-9_-]*)\r?\n([\s\S]*?)```/g;
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = regex.exec(raw)) !== null) {
-      if (match.index > lastIndex) {
-        blocks.push({ type: 'text', content: raw.slice(lastIndex, match.index) });
-      }
-      blocks.push({
-        type: 'code',
-        lang: (match[1] || 'text').toLowerCase(),
-        content: match[2].replace(/^(?:\r?\n)+|\s+$/g, ''),
-      });
-      lastIndex = regex.lastIndex;
-    }
-    if (lastIndex < raw.length) {
-      blocks.push({ type: 'text', content: raw.slice(lastIndex) });
-    }
-    return blocks;
-  };
+  // Parse materials into structured blocks (text sections and fenced code blocks) in O(N) time
+  const parseMaterialBlocks = (raw: string) => parseFencedCodeBlocks(raw, { trimTextBlocks: false });
 
-  // Render inline formatting: **bold**, `code`, and safe [link](url)
-  const renderInlineTokens = (line: string) => {
-    const parts = line.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return (
-          <strong key={i} className="font-bold text-slate-900">
-            {part.slice(2, -2)}
-          </strong>
-        );
-      }
-      if (part.startsWith('`') && part.endsWith('`')) {
+  const renderMarkdownTokenNodes = (tokens: InlineMarkdownToken[]): React.ReactNode[] =>
+    tokens.map((tok, idx) => {
+      if (tok.kind === 'code') {
         return (
           <code
-            key={i}
+            key={idx}
             className="px-1.5 py-0.5 mx-0.5 rounded-md bg-blue-50 text-[#1d63ed] border border-blue-200/70 font-mono text-[11px] font-semibold"
           >
-            {part.slice(1, -1)}
+            {tok.value}
           </code>
         );
       }
-      const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-      if (linkMatch && /^(https?:\/\/|\/(?!\/))/i.test(linkMatch[2].trim())) {
+      if (tok.kind === 'link') {
         return (
           <a
-            key={i}
-            href={linkMatch[2].trim()}
+            key={idx}
+            href={tok.href}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#1d63ed] hover:text-[#154ec2] font-bold underline"
           >
-            {linkMatch[1]}
+            {tok.label}
           </a>
         );
       }
-      return <React.Fragment key={i}>{part}</React.Fragment>;
+      if (tok.kind === 'bold') {
+        return (
+          <strong key={idx} className="font-bold text-slate-900">
+            {renderMarkdownTokenNodes(tok.children)}
+          </strong>
+        );
+      }
+      return <React.Fragment key={idx}>{tok.value}</React.Fragment>;
     });
-  };
+
+  // Render inline formatting: `` `code` ``, `code`, **bold** (including nested `code`), and safe [link](url) in O(N)
+  const renderInlineTokens = (line: string) =>
+    renderMarkdownTokenNodes(tokenizeInlineMarkdown(line, { allowBold: true, allowLinks: true }));
 
   const renderInlineWithBreaks = (text: string) => {
     const segments = text.split(/<br\s*\/?>/gi);
@@ -244,7 +229,7 @@ export default function StudentLessonDetailPage() {
     const inner = rowLine.trim().replace(/^\|/, '').replace(/\|$/, '');
     const cells: string[] = [];
     let current = '';
-    let inCode = false;
+    let codeTickLen = 0;
     for (let c = 0; c < inner.length; c++) {
       const ch = inner[c];
       if (ch === '\\' && c + 1 < inner.length && inner[c + 1] === '|') {
@@ -253,11 +238,19 @@ export default function StudentLessonDetailPage() {
         continue;
       }
       if (ch === '`') {
-        inCode = !inCode;
-        current += ch;
+        if (inner[c + 1] === '`') {
+          if (codeTickLen === 0) codeTickLen = 2;
+          else if (codeTickLen === 2) codeTickLen = 0;
+          current += '``';
+          c++;
+          continue;
+        }
+        if (codeTickLen === 0) codeTickLen = 1;
+        else if (codeTickLen === 1) codeTickLen = 0;
+        current += '`';
         continue;
       }
-      if (ch === '|' && !inCode) {
+      if (ch === '|' && codeTickLen === 0) {
         cells.push(current.trim());
         current = '';
         continue;
@@ -424,12 +417,13 @@ export default function StudentLessonDetailPage() {
           {materialBlocks.map((block, bIdx) => {
             if (block.type === 'code') {
               const isHtmlCode = block.lang === 'html' || block.content.includes('<!DOCTYPE html>');
+              const langLabel = getCodeLangLabel(block.lang, block.content);
               return (
                 <CodeBlock
                   key={bIdx}
                   code={block.content}
                   lang={block.lang}
-                  title={isHtmlCode ? 'index.html (HTML5 Chuẩn)' : `Mã nguồn (${block.lang?.toUpperCase()})`}
+                  title={isHtmlCode ? 'index.html (HTML5 Chuẩn)' : `Mã nguồn (${langLabel})`}
                   showCopyButton
                   className="my-4"
                   headerActions={

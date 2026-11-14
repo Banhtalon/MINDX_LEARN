@@ -154,6 +154,16 @@ const JS_KEYWORDS = new Set([
 
 const JS_CONSTANTS = new Set(['true', 'false', 'null', 'undefined', 'NaN', 'Infinity']);
 
+const JS_GLOBALS = new Set([
+  'console',
+  'document',
+  'window',
+  'navigator',
+  'localStorage',
+  'sessionStorage',
+  'globalThis',
+]);
+
 const SQL_KEYWORDS = new Set([
   'ADD',
   'ALL',
@@ -357,7 +367,10 @@ export function normalizeCodeLang(rawLang?: string, code = ''): NormalizedCodeLa
     if (/^[ \t]*(?:from[ \t]+[A-Za-z_]|import[ \t]+[A-Za-z_]|class[ \t]+[A-Za-z_]\w*[ \t]*[:(]|def[ \t]+[A-Za-z_]\w*[ \t]*\()/m.test(sample)) {
       return 'python';
     }
-    if (/^[ \t]*(?:const|let|function|export)[ \t]+[A-Za-z_$]/m.test(sample)) {
+    if (
+      /^[ \t]*(?:const|let|var|function|export)[ \t]+[A-Za-z_$]/m.test(sample) ||
+      /\bconsole\.log[ \t]*\(/.test(sample)
+    ) {
       return 'js';
     }
     if (/^[ \t]*[a-z-]+:[ \t]*[^\s;\r\n{}][^;\r\n{}]*;[ \t]*$/m.test(sample)) {
@@ -627,6 +640,8 @@ function tokenizeScript(code: string, mode: 'python' | 'js' | 'json' | 'sql'): C
           kind = 'number';
         } else if (JS_KEYWORDS.has(ident)) {
           kind = 'keyword';
+        } else if (JS_GLOBALS.has(ident)) {
+          kind = 'prop';
         } else if (nextChar === '(') {
           kind = /^[A-Z]/.test(ident) ? 'class' : 'func';
         } else if (/^[A-Z][A-Za-z0-9_$]*$/.test(ident)) {
