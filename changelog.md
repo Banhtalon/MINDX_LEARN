@@ -8,6 +8,18 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-14] — Hoàn tất Bước 3 Tự động hóa Quy tắc Tra cứu & Cập nhật Bản đồ Mã nguồn Offline (`graphify` Rules)
+- **Mục tiêu:** Thiết lập cơ chế để mọi AI (Antigravity, Codex, Gemini và các Subagent) tự động tra cứu bản đồ `graphify-out/graph.json` trước khi đọc tràn lan các tệp mã nguồn, tự động chạy `graphify update .` sau khi sửa code, bảo toàn tuyệt đối [`.graphifyignore`](./.graphifyignore) và chỉ chạy ở chế độ offline 100% (`$env:GRAPHIFY_BACKEND="none"`, `--code-only`).
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Tạo quy tắc luôn bật [`.agents/rules/graphify.md`](./.agents/rules/graphify.md) (`trigger: always_on`):** Quy định rõ 3 bước bắt buộc: (1) Tra cứu `graphify query` / `explain` / `path` trên `graphify-out/graph.json` trước khi tìm kiếm hoặc đọc tràn lan tệp code (áp dụng cho cả Subagent); (2) Chạy `$env:GRAPHIFY_BACKEND="none"; graphify update .` sau mỗi lần thêm/sửa/xóa code; (3) Giữ nguyên `.graphifyignore`, luôn chạy offline 100% (`$env:GRAPHIFY_BACKEND="none"`, `--code-only`) và cấm gọi bất kỳ API bên ngoài nào.
+  2. **Đồng bộ quy tắc ngắn gọn vào [`AGENTS.md`](./AGENTS.md) (mục 4) & [`GEMINI.md`](./GEMINI.md):** Đảm bảo mọi môi trường AI mở kho mã đều áp dụng thống nhất cùng một chuẩn an toàn và tra cứu cục bộ.
+  3. **Chạy kiểm chứng thực tế `$env:GRAPHIFY_BACKEND="none"; graphify update .`:** Cập nhật bản đồ cục bộ khớp toàn bộ `81/81` tệp mã nguồn hiện có trên kho (gồm `16` tệp migration SQL), đạt `1.006` nút, `2.660` liên kết, `39` cụm chức năng (`0` API ngoài, `0` rò rỉ dữ liệu thật/session).
+- **Kiểm thử & Nghiệm thu:**
+  - Thử trực tiếp `graphify query`, `graphify explain`, `graphify path` và `graphify update .` ở chế độ `GRAPHIFY_BACKEND=none`: hoạt động chính xác, tức thì.
+  - `git diff --check`: `0` cảnh báo; `teachingmindx-sync-trial.html` giữ nguyên SHA-256 gốc.
+
+---
+
 ### [2026-11-14] — Nâng cấp Khung Mã nguồn Tối màu Đa sắc Chuẩn Antigravity IDE (`CodeBlock` & `code-highlight`) trên Trang Bài học (`UI-12`) & Trang Trắc nghiệm (`UI-13`)
 - **Mục tiêu:**
   1. Cập nhật toàn bộ khung hiển thị mã nguồn nền tối trên cả **Trang chi tiết bài học & thực hành** ([`src/app/student/lessons/[lessonId]/page.tsx`](./src/app/student/lessons/[lessonId]/page.tsx)) lẫn **Trang làm bài trắc nghiệm** ([`src/app/student/lessons/[lessonId]/quiz/page.tsx`](./src/app/student/lessons/[lessonId]/quiz/page.tsx)) sang giao diện đa màu sắc theo phong cách **Antigravity Dark IDE**.
