@@ -428,7 +428,7 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
             },
             {
               id: 'q_pti_2',
-              prompt: 'Đâu là kết quả in ra màn hình:\n\n```python\nclass Test:\n    def __init__(self, a="Hello World"):\n        self.a = a\n```',
+              prompt: 'Đâu là kết quả in ra màn hình:\r\n\r\n```python\r\nclass Test:\r\n    def __init__(self, a="Hello World"):\r\n        self.a = a\r\n```',
               options: ['Lỗi', 'Không hiện gì', 'Hello World', 'Lỗi display'],
             },
           ],
@@ -592,9 +592,19 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
         });
       }
 
-      // 1) Before submitting: code block rendered, answers & explanations hidden
+      // 1) Before submitting: Antigravity dark syntax-highlighted code block rendered, answers & explanations hidden
       assert.ok((rootEl.textContent || '').includes('Buổi 2: Python OOP & PyQt6'));
-      assert.ok(rootEl.querySelector('pre code')?.textContent.includes('def __init__(self, a="Hello World"):'));
+      const quizCodeEl = rootEl.querySelector('pre code');
+      assert.equal(
+        quizCodeEl?.textContent,
+        'class Test:\r\n    def __init__(self, a="Hello World"):\r\n        self.a = a',
+        'Quiz code block preserves exact CRLF line endings & keeps line numbers outside pre code'
+      );
+      assert.ok(quizCodeEl.querySelectorAll('.agy-tok-keyword').length >= 2, 'Quiz Python code highlights keywords');
+      assert.ok(quizCodeEl.querySelectorAll('.agy-tok-class').length >= 1, 'Quiz Python code highlights class Test');
+      assert.ok(quizCodeEl.querySelectorAll('.agy-tok-self').length >= 2, 'Quiz Python code highlights self');
+      assert.ok(quizCodeEl.querySelectorAll('.agy-tok-string').length >= 1, 'Quiz Python code highlights strings');
+      assert.ok(rootEl.querySelector('.agy-code-gutter[aria-hidden="true"]'), 'Non-selectable line number gutter rendered');
       assert.equal((rootEl.textContent || '').includes('Đáp án đúng'), false);
       assert.equal((rootEl.textContent || '').includes('Giải thích câu 1 OOP.'), false);
 
@@ -720,6 +730,7 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
     };
 
     let activeMockUser = ADMIN_USER;
+    const crlfSnippet = 'x = 1 # crlf\r\nprint(x)';
     const makeBootstrap = () => ({
       currentUser: activeMockUser,
       users: [ADMIN_USER, STUDENT_USER],
@@ -734,8 +745,10 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
           title: 'Buổi 2: Python OOP & PyQt6',
           description: 'Ôn tập Python OOP, 20 câu trắc nghiệm và thực hành Click Counter.',
           materials:
-            actualMaterials +
-            '\n\nTham khảo: [Tài liệu PyQt6](https://doc.qt.io/qtforpython-6/) | [BadJS](javascript:alert(1)) | [BadProto](//evil.example.com)',
+            actualMaterials.replace(/\r\n/g, '\n') +
+            '\r\n\r\n```python\r\n' +
+            crlfSnippet +
+            '\r\n```\r\n\r\nTham khảo: [Tài liệu PyQt6](https://doc.qt.io/qtforpython-6/) | [BadJS](javascript:alert(1)) | [BadProto](//evil.example.com)',
           videoUrl: '',
           status: 'draft',
           hasQuiz: true,
@@ -757,6 +770,18 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
     });
     dom.window.scrollTo = () => {};
 
+    let copiedClipboardText = null;
+    const mockClipboard = {
+      writeText: (txt) => {
+        copiedClipboardText = txt;
+        return Promise.resolve();
+      },
+    };
+    Object.defineProperty(dom.window.navigator, 'clipboard', {
+      value: mockClipboard,
+      configurable: true,
+    });
+    setGlobal('navigator', dom.window.navigator);
     setGlobal('window', dom.window);
     setGlobal('document', dom.window.document);
     setGlobal('HTMLElement', dom.window.HTMLElement);
@@ -867,10 +892,30 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
       assert.ok((tables[0].textContent || '').includes('btn_reset'));
 
       const codeBlocks = rootEl.querySelectorAll('pre code');
-      assert.equal(codeBlocks.length, 3, 'Expected 2 CSS styleSheet blocks + 1 Python CounterApp block');
+      assert.equal(codeBlocks.length, 4, 'Expected 2 CSS styleSheet blocks + 1 Python CounterApp block + 1 CRLF Python block');
       assert.ok((codeBlocks[2].textContent || '').includes('uic.loadUi("counter.ui", self)'));
       assert.ok((codeBlocks[2].textContent || '').includes('    def increase_count(self):'));
+      assert.equal((codeBlocks[2].textContent || '').startsWith('import sys'), true, 'Line numbers must not pollute pre code textContent');
+      assert.equal(codeBlocks[3].textContent, crlfSnippet, 'CRLF line endings preserved verbatim in rendered code');
+      assert.ok(codeBlocks[0].querySelectorAll('.agy-tok-prop').length >= 5, 'CSS block highlights properties');
+      assert.ok(codeBlocks[1].querySelectorAll('.agy-tok-number').length >= 4, 'CSS block highlights hex color & px units');
+      assert.ok(codeBlocks[2].querySelectorAll('.agy-tok-keyword').length >= 5, 'Python block highlights import/from/class/def/if');
+      assert.ok(codeBlocks[2].querySelectorAll('.agy-tok-class').length >= 3, 'Python block highlights CounterApp/QMainWindow/QApplication');
+      assert.ok(codeBlocks[2].querySelectorAll('.agy-tok-func').length >= 5, 'Python block highlights methods & calls');
+      assert.ok(codeBlocks[2].querySelectorAll('.agy-tok-self').length >= 5, 'Python block highlights self/super');
+      assert.ok(codeBlocks[2].querySelectorAll('.agy-tok-comment').length >= 5, 'Python block highlights # comments');
+      assert.ok(codeBlocks[2].querySelectorAll('.agy-tok-string').length >= 2, 'Python block highlights string literals');
+      assert.equal(rootEl.querySelectorAll('.agy-code-gutter').length, 4, 'All 4 multi-line code blocks render line number gutters');
       assert.equal(rootEl.querySelectorAll('iframe').length, 0, 'CSS/Python blocks must not open an HTML iframe');
+
+      const copyButtons = Array.from(rootEl.querySelectorAll('button')).filter((b) =>
+        (b.textContent || '').includes('Sao chép code')
+      );
+      assert.equal(copyButtons.length, 4, 'Each Lesson code block renders a Sao chép code button');
+      await act(async () => {
+        copyButtons[3].click();
+      });
+      assert.equal(copiedClipboardText, crlfSnippet, 'Copy button preserves exact CRLF line endings');
 
       assert.ok(fullText.includes('3. Nộp bài thực hành'));
       assert.ok(fullText.includes('Nộp đường link'));
@@ -909,6 +954,130 @@ describe('PTI Course & Session 2 Quiz (Python OOP & PyQt6)', () => {
       if (prevDemoEnv === undefined) delete process.env.NEXT_PUBLIC_MINDX_DEMO;
       else process.env.NEXT_PUBLIC_MINDX_DEMO = prevDemoEnv;
     }
+  });
+
+  test('4c. Antigravity code-highlight tokenizer is 100% lossless and classifies Python, CSS, HTML5, JS, JSON, SQL, and malformed inputs', async () => {
+    const hlSource = await fsp.readFile(path.resolve(__dirname, '../src/lib/code-highlight.ts'), 'utf8');
+    const { outputText } = ts.transpileModule(hlSource, {
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+    });
+    const mod = { exports: {} };
+    new Function('module', 'exports', outputText)(mod, mod.exports);
+    const { tokenizeCode, normalizeCodeLang } = mod.exports;
+
+    const assertLossless = (sample, lang) => {
+      const toks = tokenizeCode(sample, lang);
+      assert.equal(
+        toks.map((t) => t.value).join(''),
+        sample,
+        `Tokenizer must be 100% lossless for lang=${lang}`
+      );
+      return toks;
+    };
+
+    // Python OOP + PyQt6 sample
+    const pySample = [
+      'from PyQt6.QtWidgets import QApplication, QMainWindow',
+      'class CounterApp(QMainWindow):',
+      '    @staticmethod',
+      '    def helper(x=True):',
+      '        return f"val={x}" # inline comment',
+      '    def __init__(self):',
+      '        super().__init__()',
+      '        self.count = 0',
+      '        self.txt_display.setText(str(self.count))',
+      "if __name__ == '__main__':",
+      '    pass',
+    ].join('\n');
+    const pyToks = assertLossless(pySample, 'python');
+    const byKind = (toks, kind) => toks.filter((t) => t.kind === kind).map((t) => t.value);
+    assert.ok(byKind(pyToks, 'keyword').includes('class'));
+    assert.ok(byKind(pyToks, 'keyword').includes('def'));
+    assert.ok(byKind(pyToks, 'class').includes('CounterApp'));
+    assert.ok(byKind(pyToks, 'class').includes('QMainWindow'));
+    assert.ok(byKind(pyToks, 'self').includes('self'));
+    assert.ok(byKind(pyToks, 'self').includes('super'));
+    assert.ok(byKind(pyToks, 'func').includes('__init__'));
+    assert.ok(byKind(pyToks, 'func').includes('setText'));
+    assert.ok(byKind(pyToks, 'func').includes('str'));
+    assert.ok(byKind(pyToks, 'prop').includes('count'));
+    assert.ok(byKind(pyToks, 'prop').includes('__name__'));
+    assert.ok(byKind(pyToks, 'string').includes('f"val={x}"'));
+    assert.ok(byKind(pyToks, 'comment').some((c) => c.includes('# inline comment')));
+
+    // CSS standalone declarations + hex color swatch + selector rule
+    const cssSample = '#card:hover {\n  background-color: #4CAF50;\n  padding: 10px;\n  color: white !important;\n}';
+    const cssToks = assertLossless(cssSample, 'css');
+    assert.ok(byKind(cssToks, 'prop').includes('background-color'));
+    const greenHex = cssToks.find((t) => t.value === '#4CAF50');
+    assert.equal(greenHex?.swatch, '#4CAF50');
+    assert.equal(cssToks.find((t) => t.value === 'card')?.swatch, undefined);
+
+    // HTML5 with embedded <style> and <script> (JSB Session 1 compatibility)
+    const htmlSample = [
+      '<!DOCTYPE html>',
+      '<html lang="vi">',
+      '<head><style>body { background-color: #f0f9ff; }</style></head>',
+      '<body><!-- chú thích --><h1 class="title">Xin chào</h1><script>const x = 42;</script></body>',
+      '</html>',
+    ].join('\n');
+    const htmlToks = assertLossless(htmlSample, 'html');
+    assert.ok(byKind(htmlToks, 'tag').includes('h1'));
+    assert.ok(byKind(htmlToks, 'prop').includes('background-color'), 'Embedded <style> highlighted as CSS');
+    assert.ok(byKind(htmlToks, 'keyword').includes('const'), 'Embedded <script> highlighted as JS');
+
+    // JSON, SQL, auto-detection, and unclosed/malformed strings & comments
+    const jsonToks = assertLossless('{"name": "PTI", "sessions": 14, "draft": true}', 'json');
+    assert.ok(byKind(jsonToks, 'prop').includes('"name"'));
+    const sqlToks = assertLossless("SELECT count(*) FROM public.lessons WHERE status = 'draft'; -- check", 'sql');
+    assert.ok(byKind(sqlToks, 'keyword').includes('SELECT'));
+    assert.equal(normalizeCodeLang('text', 'def hello():\n    return 1'), 'python');
+    assert.equal(normalizeCodeLang('text', 'background-color: #333;\ncolor: white;'), 'css');
+
+    assertLossless('unclosed = "hello\n"""still open', 'python');
+    assertLossless('/* unclosed css comment #123', 'css');
+    assertLossless('<div attr="unclosed><style>body{color:red', 'html');
+
+    // CRLF preservation across languages
+    assertLossless('def add(a, b):\r\n    # sum\r\n    return a + b\r\n', 'python');
+    assertLossless('background-color: #333;\r\ncolor: white;\r\n', 'css');
+    assertLossless('<div>\r\n  <STYLE>p { color: #123; }</STYLE>\r\n</div>', 'html');
+
+    // Linear-time O(N) guarantees on chained CSS pseudo-classes, many <STYLE>/<SCRIPT> tags, and Unicode \u0130 ('İ')
+    const manyPseudosCss = '.btn' + ':hover'.repeat(2500) + ' {\r\n  background-color: #4CAF50;\r\n}';
+    const tCss0 = Date.now();
+    const manyPseudoToks = assertLossless(manyPseudosCss, 'css');
+    assert.ok(Date.now() - tCss0 < 500, 'Chained CSS pseudo-classes must tokenize in linear time');
+    assert.equal(manyPseudoToks.find((t) => t.value === '#4CAF50')?.swatch, '#4CAF50');
+
+    const manyTagsHtml =
+      '<p>İİİ Unicode header</p>' +
+      '<STYLE>a { color: #abc; }</STYLE><SCRIPT>const v = 1;</SCRIPT>'.repeat(400);
+    const tHtml0 = Date.now();
+    const manyHtmlToks = assertLossless(manyTagsHtml, 'html');
+    assert.ok(Date.now() - tHtml0 < 500, 'Repeated <STYLE>/<SCRIPT> blocks must tokenize in linear time');
+    assert.ok(byKind(manyHtmlToks, 'keyword').includes('const'));
+
+    // Unclosed single-line Python strings stop at CRLF/LF without bleeding into next line, while triple-quoted span lines
+    const unclosedSinglePy = assertLossless('x = "oops\r\nprint(1)\r\ny = f\'bad\nprint(2)', 'python');
+    assert.deepEqual(byKind(unclosedSinglePy, 'string'), ['"oops', "f'bad"]);
+    assert.deepEqual(byKind(unclosedSinglePy, 'func'), ['print', 'print']);
+    assert.deepEqual(byKind(unclosedSinglePy, 'number'), ['1', '2']);
+
+    const triplePy = assertLossless('doc = """line1\r\nline2"""\r\nprint(3)', 'python');
+    assert.deepEqual(byKind(triplePy, 'string'), ['"""line1\r\nline2"""']);
+    assert.deepEqual(byKind(triplePy, 'func'), ['print']);
+    assert.deepEqual(byKind(triplePy, 'number'), ['3']);
+
+    // Unclosed <!DOCTYPE without '>' stops at next '<' and runs in strict O(N) linear time
+    const unclosedDoctypeHtml = assertLossless('<!DOCTYPE html\r\n<html><body>Hi</body></html>', 'html');
+    assert.ok(byKind(unclosedDoctypeHtml, 'tag').includes('html'));
+    assert.ok(byKind(unclosedDoctypeHtml, 'tag').includes('body'));
+
+    const repeatedUnclosedDoctype = '<!DOCTYPE '.repeat(16000);
+    const tDoc0 = Date.now();
+    assertLossless(repeatedUnclosedDoctype, 'html');
+    assert.ok(Date.now() - tDoc0 < 150, 'Repeated unclosed <!DOCTYPE must tokenize in strict linear time');
   });
 
   test('5. Real PostgreSQL engine executes all PTI Session 2 migrations and enforces m3_update_lesson + m3_submit_quiz_attempt invariants', async (t) => {

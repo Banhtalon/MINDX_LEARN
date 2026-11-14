@@ -188,6 +188,100 @@
   background: #0f233a;
 }
 
+/* Antigravity Dark IDE Code Block & Syntax Highlighting */
+.agy-code-card {
+  background-color: #0d1117;
+  border: 1px solid #262f3d;
+  border-radius: 0.625rem !important;
+  overflow: hidden;
+}
+
+.agy-code-header {
+  background-color: #161b24;
+  border-bottom: 1px solid #262f3d;
+}
+
+.agy-code-gutter {
+  background-color: #0b0f16;
+  border-right: 1px solid #1c2432;
+  color: #556277;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.agy-code-pre {
+  background-color: #0d1117;
+  color: #e6edf3;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  tab-size: 4;
+}
+
+.agy-code-scroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.agy-code-scroll::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+.agy-code-scroll::-webkit-scrollbar-thumb {
+  background: #2b3547;
+  border-radius: 4px;
+}
+
+.agy-code-scroll::-webkit-scrollbar-thumb:hover {
+  background: #3d4b63;
+}
+
+.agy-tok-comment {
+  color: #768396;
+  font-style: italic;
+}
+
+.agy-tok-keyword {
+  color: #c792ea;
+  font-weight: 600;
+}
+
+.agy-tok-self {
+  color: #ff7b72;
+  font-style: italic;
+}
+
+.agy-tok-class {
+  color: #ffcb6b;
+}
+
+.agy-tok-func {
+  color: #82aaff;
+}
+
+.agy-tok-string {
+  color: #c3e88d;
+}
+
+.agy-tok-number {
+  color: #f78c6c;
+}
+
+.agy-tok-prop {
+  color: #7fdbca;
+}
+
+.agy-tok-tag {
+  color: #ff7b72;
+}
+
+.agy-tok-op {
+  color: #89ddff;
+}
+
+.agy-tok-punct {
+  color: #94a3b8;
+}
+
 /* Animations */
 @keyframes spinSlow {
   from {

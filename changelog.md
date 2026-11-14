@@ -8,6 +8,26 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-14] — Nâng cấp Khung Mã nguồn Tối màu Đa sắc Chuẩn Antigravity IDE (`CodeBlock` & `code-highlight`) trên Trang Bài học (`UI-12`) & Trang Trắc nghiệm (`UI-13`)
+- **Mục tiêu:**
+  1. Cập nhật toàn bộ khung hiển thị mã nguồn nền tối trên cả **Trang chi tiết bài học & thực hành** ([`src/app/student/lessons/[lessonId]/page.tsx`](./src/app/student/lessons/[lessonId]/page.tsx)) lẫn **Trang làm bài trắc nghiệm** ([`src/app/student/lessons/[lessonId]/quiz/page.tsx`](./src/app/student/lessons/[lessonId]/quiz/page.tsx)) sang giao diện đa màu sắc theo phong cách **Antigravity Dark IDE**.
+  2. Không cài thêm thư viện ngoài (giữ sạch phụ thuộc Ponytail), không dùng `dangerouslySetInnerHTML`, đảm bảo thời gian phân tích cú pháp tuyến tính $O(N)$ và giữ nguyên 100% nội dung mã gốc (kể cả `CRLF` `\r\n` và `LF` `\n`) khi học sinh bôi đen hoặc bấm **Sao chép code** (không bị dính số dòng).
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Bộ phân tích cú pháp không mất mát tuyến tính $O(N)$ ([`src/lib/code-highlight.ts`](./src/lib/code-highlight.ts)):**
+     - Hỗ trợ tô màu đa ngôn ngữ gồm `python`, `css` (`styleSheet` Qt Designer), `html` (tự động ủy quyền phần bên trong `<style>` sang CSS và `<script>` sang JS qua bản sao chữ thường bảo toàn độ dài), `js`/`ts`, `json`, `sql`, kèm tự nhận diện ngôn ngữ giới hạn an toàn `4 KB` đầu tiên khi khối mã không khai báo nhãn.
+     - Phân biệt rõ ràng bảng màu Antigravity Dark IDE: từ khóa (`#c792ea`), `self`/`cls`/`super` (`#ff7b72`), tên lớp/kiểu PascalCase (`#ffcb6b`), tên hàm & lời gọi hàm (`#82aaff`), thuộc tính/dunder `__init__` (`#7fdbca`), chuỗi ký tự `f""` / `"""..."""` (`#c3e88d`), số & hằng (`#f78c6c`), decorator/toán tử (`#89ddff`), chú thích `# ...` / `/* ... */` (`#768396`) và ô xem trước màu mã hex `#rgb`/`#rrggbb` trực tiếp trong CSS.
+  2. **Thành phần Khung Mã dùng chung ([`src/components/code-block.tsx`](./src/components/code-block.tsx)) & Bảng màu CSS ([`src/app/globals.css`](./src/app/globals.css)):**
+     - Dựng khung cửa sổ tối màu (`#0d1117` / thanh tiêu đề `#161b24`) với 3 chấm cửa sổ, huy hiệu ngôn ngữ, cột số dòng `1..N` tách riêng ngoài `<pre><code>` (`user-select: none`, `aria-hidden="true"`), nút **Sao chép code** tự dọn bộ đếm thời gian khi rời trang, và khe `footer` giữ nguyên khung xem trước trực tiếp `<iframe>` cho giáo trình HTML5 (như JSB Buổi 1).
+     - Sử dụng hệ lớp `.agy-code-*` và `.agy-tok-*` độc lập để không xung đột với các quy tắc `!important` của bảng màu sáng trong `globals.css`.
+  3. **Tích hợp trên `UI-12` & `UI-13` ([`src/app/student/lessons/[lessonId]/page.tsx`](./src/app/student/lessons/[lessonId]/page.tsx), [`src/app/student/lessons/[lessonId]/quiz/page.tsx`](./src/app/student/lessons/[lessonId]/quiz/page.tsx)):**
+     - Đồng bộ hiển thị `<CodeBlock />` cho mọi khối mã trong giáo trình/bài thực hành và trong câu hỏi trắc nghiệm (như các câu Python OOP Buổi 2 PTI), bảo toàn nguyên vẹn ký tự xuống dòng gốc.
+- **Kiểm thử & Nghiệm thu:**
+  - Nâng cấp `Test 4`, `Test 4b` và bổ sung `Test 4c` trong [`tests/pti-session2-quiz.test.mjs`](./tests/pti-session2-quiz.test.mjs) kiểm tra tô màu không mất mát, giữ nguyên `CRLF` khi hiển thị/sao chép, chuỗi Python đơn dòng chưa đóng vs chuỗi 3 dấu nháy, `<!DOCTYPE` thiếu `>` và hiệu năng tuyến tính $O(N)$.
+  - `git diff --check`: `0` cảnh báo; `npm run typecheck`: `0` lỗi; `npm test`: **`391 / 391 PASS`** (`24` bộ kiểm thử, `0` bị bỏ qua); `npm run build`: thành công.
+  - Kiểm định độc lập bằng Codex CLI (`gpt-6.1-sol` `xhigh` `-s read-only`): **`VERDICT: GO`**.
+
+---
+
 ### [2026-11-14] — Bổ sung Bài Thực hành 1 Buổi 2 Khóa PTI (`Ứng dụng Bộ Đếm Số — Click Counter`) & Nâng cấp Hiển thị Bảng Markdown trên Trang Bài học (`UI-12`)
 - **Mục tiêu:**
   1. Bổ sung trọn vẹn đề bài và hướng dẫn thực hành **`BÀI THỰC HÀNH 1: ỨNG DỤNG BỘ ĐẾM SỐ (CLICK COUNTER)`** (Qt Designer `counter.ui` + Python PyQt6 OOP `main_bai1.py`) vào **Buổi 2 khóa PTI** (`55555555-5555-4555-8555-555555555602`), giữ nguyên trạng thái **Bản nháp (`draft`)** và giữ nguyên đủ **20 câu trắc nghiệm**.

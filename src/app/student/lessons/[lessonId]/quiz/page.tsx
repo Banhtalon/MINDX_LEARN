@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { Question, QuizAnswerReviewItem } from '@/lib/types';
+import { CodeBlock } from '@/components/code-block';
 import {
   IconArrowLeft,
   IconCheckCircle,
@@ -118,7 +119,7 @@ export default function StudentQuizPage() {
       blocks.push({
         type: 'code',
         lang: (match[1] || 'python').toLowerCase(),
-        content: match[2].replace(/\s+$/, ''),
+        content: match[2].replace(/^(?:\r?\n)+|\s+$/g, ''),
       });
       lastIndex = regex.lastIndex;
     }
@@ -136,17 +137,12 @@ export default function StudentQuizPage() {
       <div className="space-y-3">
         {blocks.map((block, bIdx) =>
           block.type === 'code' ? (
-            <div
+            <CodeBlock
               key={bIdx}
-              className="rounded-2xl overflow-hidden border border-slate-800 bg-[#0f172a] shadow-sm"
-            >
-              <div className="px-3.5 py-1.5 bg-slate-800/90 border-b border-slate-700 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">
-                {block.lang || 'python'}
-              </div>
-              <pre className="p-4 text-xs font-mono text-slate-100 overflow-x-auto leading-relaxed">
-                <code>{block.content}</code>
-              </pre>
-            </div>
+              code={block.content}
+              lang={block.lang || 'python'}
+              compact
+            />
           ) : (
             <div key={bIdx} className="whitespace-pre-line">
               {renderInlinePromptTokens(block.content)}

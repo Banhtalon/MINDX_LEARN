@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { SubmissionType } from '@/lib/types';
+import { CodeBlock } from '@/components/code-block';
 import {
   IconArrowLeft,
   IconCheckCircle,
@@ -37,7 +38,6 @@ export default function StudentLessonDetailPage() {
 
   const [alertNotice, setAlertNotice] = useState<{ text: string; isError: boolean } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [copiedCodeIdx, setCopiedCodeIdx] = useState<number | null>(null);
   const [showLiveHtmlPreview, setShowLiveHtmlPreview] = useState<boolean>(true);
 
   if (!currentUser) {
@@ -178,7 +178,7 @@ export default function StudentLessonDetailPage() {
       blocks.push({
         type: 'code',
         lang: (match[1] || 'text').toLowerCase(),
-        content: match[2].replace(/\r\n/g, '\n').replace(/^\n+|\s+$/g, ''),
+        content: match[2].replace(/^(?:\r?\n)+|\s+$/g, ''),
       });
       lastIndex = regex.lastIndex;
     }
@@ -425,67 +425,48 @@ export default function StudentLessonDetailPage() {
             if (block.type === 'code') {
               const isHtmlCode = block.lang === 'html' || block.content.includes('<!DOCTYPE html>');
               return (
-                <div key={bIdx} className="rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-md my-4">
-                  <div className="px-4 py-3 bg-slate-800/90 border-b border-slate-700 flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" />
-                      <span className="ml-2 font-mono font-bold text-slate-200 text-[11px]">
-                        {isHtmlCode ? 'index.html (HTML5 Chuẩn)' : `Mã nguồn (${block.lang?.toUpperCase()})`}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {isHtmlCode && (
-                        <button
-                          type="button"
-                          onClick={() => setShowLiveHtmlPreview((prev) => !prev)}
-                          className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-semibold text-[11px] transition-colors cursor-pointer"
-                        >
-                          {showLiveHtmlPreview ? 'Ẩn kết quả chạy thử' : 'Xem kết quả trang web'}
-                        </button>
-                      )}
+                <CodeBlock
+                  key={bIdx}
+                  code={block.content}
+                  lang={block.lang}
+                  title={isHtmlCode ? 'index.html (HTML5 Chuẩn)' : `Mã nguồn (${block.lang?.toUpperCase()})`}
+                  showCopyButton
+                  className="my-4"
+                  headerActions={
+                    isHtmlCode ? (
                       <button
                         type="button"
-                        onClick={() => {
-                          if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                            navigator.clipboard.writeText(block.content);
-                            setCopiedCodeIdx(bIdx);
-                            setTimeout(() => setCopiedCodeIdx(null), 2000);
-                          }
-                        }}
-                        className="px-3 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold text-[11px] transition-colors cursor-pointer"
+                        onClick={() => setShowLiveHtmlPreview((prev) => !prev)}
+                        className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-semibold text-[11px] transition-colors cursor-pointer"
                       >
-                        {copiedCodeIdx === bIdx ? '✓ Đã sao chép' : 'Sao chép code'}
+                        {showLiveHtmlPreview ? 'Ẩn kết quả chạy thử' : 'Xem kết quả trang web'}
                       </button>
-                    </div>
-                  </div>
-                  <pre className="p-4 sm:p-5 text-xs font-mono text-slate-100 overflow-x-auto leading-relaxed">
-                    <code>{block.content}</code>
-                  </pre>
-
-                  {isHtmlCode && showLiveHtmlPreview && (
-                    <div className="bg-slate-100 border-t border-slate-300 p-4 space-y-2.5">
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
-                        <div className="flex items-center gap-2 font-semibold text-slate-800">
-                          <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
-                            Kết quả hiển thị trên Trình duyệt
-                          </span>
-                          <span className="font-mono text-slate-500">
-                            🔒 https://hocsinh.mindx.edu.vn/gioi-thieu-ban-than/index.html
-                          </span>
+                    ) : undefined
+                  }
+                  footer={
+                    isHtmlCode && showLiveHtmlPreview ? (
+                      <div className="bg-slate-100 border-t border-slate-300 p-4 space-y-2.5">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
+                          <div className="flex items-center gap-2 font-semibold text-slate-800">
+                            <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
+                              Kết quả hiển thị trên Trình duyệt
+                            </span>
+                            <span className="font-mono text-slate-500">
+                              🔒 https://hocsinh.mindx.edu.vn/gioi-thieu-ban-than/index.html
+                            </span>
+                          </div>
+                          <span className="text-slate-400">Xem trực tiếp</span>
                         </div>
-                        <span className="text-slate-400">Xem trực tiếp</span>
+                        <iframe
+                          title={`Xem trước HTML ${bIdx + 1}`}
+                          sandbox=""
+                          srcDoc={block.content}
+                          className="w-full h-72 rounded-xl bg-white border border-slate-300 shadow-inner"
+                        />
                       </div>
-                      <iframe
-                        title={`Xem trước HTML ${bIdx + 1}`}
-                        sandbox=""
-                        srcDoc={block.content}
-                        className="w-full h-72 rounded-xl bg-white border border-slate-300 shadow-inner"
-                      />
-                    </div>
-                  )}
-                </div>
+                    ) : undefined
+                  }
+                />
               );
             }
 
