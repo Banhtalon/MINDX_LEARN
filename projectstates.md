@@ -1,32 +1,35 @@
 # Trạng thái & Tiến độ Dự án MINDX LEARN (`projectstates.md`)
 
 > **Tệp theo dõi nhanh dành cho AI ở đầu mỗi phiên làm việc.**
-> - **Cập nhật lần cuối:** `13/11/2026`
+> - **Cập nhật lần cuối:** `14/11/2026`
 > - **Quy tắc bắt buộc cho AI:** Đọc tệp này cùng [`PROJECT_OVERVIEW.md`](./PROJECT_OVERVIEW.md) và [`changelog.md`](./changelog.md) đầu tiên khi vào phiên mới để nắm ngay tiến độ và sổ tay cách làm tính năng mà không cần đọc lại toàn bộ lịch sử. Sau mỗi lần thay đổi mã nguồn, cơ sở dữ liệu, triển khai hoặc hoàn thành hạng mục mới, AI **bắt buộc cập nhật lại cả `projectstates.md` và `changelog.md`**.
 
 ---
 
 ## 1. Trạng thái Môi trường Chính thức (PROD) Hiện tại
 
-Theo quyết định của Owner ngày `22/10/2026` (*"Dùng luôn Supabase MINDX_LEARN và Vercel sẵn có"* và *"không giữ lại khung 14 buổi của khóa mẫu, sẽ upload lại chính xác hơn"*), dự án đã hoàn tất chuyển đổi sạch sang **Môi trường Chính thức (PROD)**, ngày `27/10/2026` đã hoàn tất **Nâng cấp Giao diện Toàn Hệ thống**, và ngày `07/11/2026` đã hoàn tất **Tinh gọn UI & Ẩn toàn bộ chi tiết kỹ thuật/công cụ kiểm thử trên môi trường thật (`isLiveMode`)** trước khi nạp nội dung các bài học tiếp theo:
+Theo quyết định của Owner ngày `22/10/2026` (*"Dùng luôn Supabase MINDX_LEARN và Vercel sẵn có"* và *"không giữ lại khung 14 buổi của khóa mẫu, sẽ upload lại chính xác hơn"*), dự án đã hoàn tất chuyển đổi sạch sang **Môi trường Chính thức (PROD)**, ngày `27/10/2026` đã hoàn tất **Nâng cấp Giao diện Toàn Hệ thống**, ngày `07/11/2026` hoàn tất **Tinh gọn UI trên `isLiveMode`**, và ngày `14/11/2026` đã khởi tạo khóa chính thức **PTI (14 buổi)** kèm **bộ 20 câu trắc nghiệm Buổi 2 (Bản nháp)** và cơ chế **ẩn đáp án khi làm bài / làm lại, hiện đáp án + lời giải thích ngay sau khi nộp đủ bài**:
 
 | Thành phần | Định danh / Địa chỉ đang chạy | Trạng thái |
 |---|---|---|
-| **Web chính thức (Vercel PROD)** | `https://mindx-learn-test.vercel.app` | **READY** (Đã đồng bộ giao diện mới toàn hệ thống `UI-01`..`UI-13` theo [`design-system/mindx-learn/MASTER.md`](./design-system/mindx-learn/MASTER.md)) |
+| **Web chính thức (Vercel PROD)** | `https://mindx-learn-test.vercel.app` | **READY** (Đồng bộ qua `main` trên GitHub với toàn bộ giao diện `UI-01`..`UI-13` và quy trình ẩn/hiện đáp án Quiz mới) |
 | **Supabase PROD** | Project `MINDX_LEARN` (`eythjapspkoyqdxlxtcd`) | **ACTIVE** (`environment_mode = 'production'`, khóa cứng toàn bộ thao tác tạo dữ liệu giả `fixture`) |
-| **Edge Function (`m2-backend`)** | **Version `18`** (`status: ACTIVE`, `verify_jwt: false`) | Đã bật `coordinatorFixtureLock` (`HTTP 403 PRODUCTION_ENVIRONMENT_LOCKED` với mọi yêu cầu tạo/reset fixture) |
-| **Migration mới nhất trên DB** | `20261022153000_m6_jsb_course_session1_curriculum.sql` | Đã áp dụng trên `MINDX_LEARN` |
-| **Bộ kiểm thử tự động (`npm test`)** | **382 / 382 PASS** (`npx tsc --noEmit` = `0` lỗi) | Toàn bộ 23 tệp kiểm thử từ Mốc 1 → Mốc 6 đều xanh |
+| **Edge Function (`m2-backend`)** | **Version `22`** (`status: ACTIVE`, `verify_jwt: false`) | Bật `coordinatorFixtureLock` (`HTTP 403`), ẩn `explanation` với học sinh khi bootstrap và trả `answerReview` nguyên tử qua `submit-quiz` |
+| **Migration mới nhất trên DB** | `20261114093000_m6_submit_quiz_atomic_review.sql` (cùng `20261114090000_m6_pti_course_session2_quiz.sql`) | Đã áp dụng trên `MINDX_LEARN` |
+| **Bộ kiểm thử tự động (`npm test`)** | **388 / 388 PASS** (`npx tsc --noEmit` = `0` lỗi) | Toàn bộ `24` tệp kiểm thử đều xanh (`0` bỏ qua, gồm kiểm thử chạy trực tiếp trên PostgreSQL 17) |
 | **Hệ thống Thiết kế (Design System)** | [`design-system/mindx-learn/MASTER.md`](./design-system/mindx-learn/MASTER.md) & [`src/app/globals.css`](./src/app/globals.css) | **HOÀN THÀNH 100%** — Đồng bộ toàn bộ 19 màn hình với phong cách bo tròn hiện đại (`rounded-2xl`/`rounded-3xl`, xanh dương `#1d63ed`, ẩn chi tiết kỹ thuật trên PROD) |
 | **Bản đồ Kiến trúc Mã nguồn (`graphify`)** | [`.graphifyignore`](./.graphifyignore) & `graphify-out/` (ẩn trong `.gitignore`) | **ĐÃ QUÉT SẠCH (`--code-only`, `GRAPHIFY_BACKEND=none`)** — `73/73` tệp mã nguồn (kể cả `12` tệp SQL), `938` nút, `2.519` liên kết, `33` cụm chức năng (`0` rò rỉ dữ liệu thật/session, `0` token gửi ra ngoài) |
 
 ### Số lượng dữ liệu thực tế trong Database `MINDX_LEARN` hiện tại:
 - **Tài khoản Quản trị viên (`profiles` / `auth.users`):** **`1`** (Chỉ giữ duy nhất tài khoản Owner: `quangctm07@gmail.com` — `Admin Quản Trị Hệ Thống`, `id: 2d99957f-8608-4366-ade3-094f0c40a904`).
 - **Khóa học (`courses`) & Buổi học (`lessons`):**
-  - **`1` khóa học chính thức:** **`JSB — Lập trình Web Cơ bản (HTML5, CSS3 & JavaScript Basic)`** (`id: 44444444-4444-4444-8444-444444444411`, `total_sessions = 14`, `is_fixture = false`).
-  - **`14` buổi học (`lessons`):**
-    - **Buổi 1 (`published`):** **`Buổi 1: Website hoạt động như thế nào`** (`id: 55555555-5555-4555-8555-555555555511`, `has_quiz = true`, `has_practice = true`, `practice_mode = 'file_allowed'`) — đã có giáo trình chi tiết 4 mục tiêu, ví dụ trang web HTML5 giới thiệu bản thân kèm khung xem trước trực tiếp trên trình duyệt, đề bài thực hành và **`6` câu trắc nghiệm (`quiz_questions`)**.
-    - **Buổi 2 → Buổi 14 (`draft`):** Đã khởi tạo khung tên 13 buổi tiếp theo của lộ trình JSB (`55555555-5555-4555-8555-555555555512` → `5524`).
+  - **`2` khóa học chính thức (`28` buổi học):**
+    1. **`JSB — Lập trình Web Cơ bản (HTML5, CSS3 & JavaScript Basic)`** (`id: 44444444-4444-4444-8444-444444444411`, `total_sessions = 14`, `is_fixture = false`):
+       - **Buổi 1 (`published`):** **`Buổi 1: Website hoạt động như thế nào`** (`id: 55555555-5555-4555-8555-555555555511`, `has_quiz = true`, `has_practice = true`, `practice_mode = 'file_allowed'`) — đã có giáo trình HTML5 kèm khung xem trước trực tiếp và **`6` câu trắc nghiệm (`quiz_questions`)**.
+       - **Buổi 2 → Buổi 14 (`draft`):** Khung 13 buổi tiếp theo của lộ trình JSB (`55555555-5555-4555-8555-555555555512` → `5524`).
+    2. **`PTI — Lập trình Ứng dụng Python Chuyên sâu (Python OOP & PyQt6)`** (`id: 44444444-4444-4444-8444-444444444423`, `total_sessions = 14`, `is_fixture = false`):
+       - **Toàn bộ `14` buổi (`55555555-5555-4555-8555-555555555601` → `5614`) đang ở trạng thái Bản nháp (`draft`)** theo yêu cầu kiểm tra trước của Owner.
+       - **Buổi 2 (`draft`):** **`Buổi 2: Python OOP & PyQt6`** (`id: 55555555-5555-4555-8555-555555555602`, `status = 'draft'`, `has_quiz = true`, `has_practice = true`, `practice_mode = 'file_allowed'`) — đã nạp đủ **`20` câu trắc nghiệm (`Ôn Tập Buổi 2: Python OOP & PyQt6`) kèm lời giải thích (`explanation`) và khối mã Python nhiều dòng**.
 - **Lớp học (`classes`) & Học sinh (`students`):** **`0` lớp**, **`0` học sinh**.
 - **Bài nộp & Kết quả (`quiz_results`, `practice_submissions`, `m3_upload_reservations`):** **`0`**.
 - **Cấu hình hạn mức Storage (`m5_storage_quota_config`):** `environment_mode = 'production'`, `warning_threshold_bytes = 734,003,200` (700 MB), `hard_limit_bytes = 838,860,800` (800 MB).

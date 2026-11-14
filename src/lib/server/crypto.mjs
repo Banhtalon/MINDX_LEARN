@@ -1007,6 +1007,7 @@ export function sanitizeBootstrapDto(dto) {
             if (isStudent) {
               delete cleanQ.correctOptionIndex;
               delete cleanQ.correct_option_index;
+              delete cleanQ.explanation;
             }
             return cleanQ;
           });

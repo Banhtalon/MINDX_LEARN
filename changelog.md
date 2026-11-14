@@ -8,6 +8,30 @@
 
 ## Phần 1 — Nhật ký Phát triển Sản phẩm (Theo thứ tự mới nhất ở trên)
 
+### [2026-11-14] — Khởi tạo Khóa học PTI (14 Buổi), Nạp 20 Câu Trắc nghiệm Buổi 2 (Bản nháp) & Cơ chế Ẩn/Hiện Đáp án Trắc nghiệm Theo Lượt Làm bài
+- **Mục tiêu:**
+  1. Tạo khóa học chính thức **`PTI — Lập trình Ứng dụng Python Chuyên sâu (Python OOP & PyQt6)`** (đủ 14 buổi cố định theo lộ trình `PTB -> PTA -> PTI`).
+  2. Nạp bộ **20 câu trắc nghiệm `"Ôn Tập Buổi 2: Python OOP & PyQt6"`** (kèm lời giải thích `explanation` và khối mã Python nhiều dòng cho các câu 2, 3, 4, 11) vào **Buổi 2** ở trạng thái **Bản nháp (`draft`)** để Owner kiểm tra trước khi xuất bản.
+  3. Áp dụng chặt chẽ vòng đời hiển thị đáp án cho học sinh: **ẩn hoàn toàn đáp án đúng và lời giải thích khi đang làm bài (kể cả khi tải lại trang) -> bắt buộc chọn đủ mọi câu mới được nộp -> hiện điểm, đánh dấu Đúng/Chưa đúng, đáp án đúng và lời giải thích ngay sau khi nộp -> ẩn lại toàn bộ khi học sinh bấm `"Làm lại lần nữa"`**.
+- **Tính năng & Thay đổi đã thực hiện:**
+  1. **Database Migrations ([`20261114090000_m6_pti_course_session2_quiz.sql`](./supabase/migrations/20261114090000_m6_pti_course_session2_quiz.sql), [`20261114093000_m6_submit_quiz_atomic_review.sql`](./supabase/migrations/20261114093000_m6_submit_quiz_atomic_review.sql)):**
+     - Bổ sung cột `public.quiz_questions.explanation` và cập nhật hàm `public.m3_update_lesson` (giữ nguyên toàn bộ khóa tuần tự `R18-02`) để lưu và cập nhật trường lời giải thích.
+     - Khởi tạo khóa chính thức `PTI` (`44444444-4444-4444-8444-444444444423`, `14` buổi ở trạng thái `draft`) và nạp đủ `20` câu trắc nghiệm (`66666666-6666-4666-8666-666666666701` → `6720`) vào Buổi 2 (`55555555-5555-4555-8555-555555555602`), làm rõ câu chữ Câu 17 để `QLineEdit` là đáp án đúng duy nhất.
+     - Cập nhật nguyên tử hàm `public.m3_submit_quiz_attempt` (xóa sạch cả 2 overload cũ để tránh trùng hàm trên `pg_proc`, giữ nguyên thứ tự khóa M5 và quyền chỉ cấp cho `service_role`): kiểm tra đầy đủ số câu, chặn phần tử `NULL`/âm/ngoài giới hạn (`INCOMPLETE_QUIZ_ANSWERS`), đối chiếu snapshot danh sách mã câu hỏi `p_expected_question_ids` chống lệch đề khi giáo viên sửa giữa chừng (`QUIZ_CHANGED_MID_ATTEMPT`), và trả trực tiếp cột `answer_review JSONB` khớp 100% với bộ câu vừa chấm.
+  2. **Backend Edge, BFF & Tầng Bảo mật ([`supabase/functions/m2-backend/domain.ts`](./supabase/functions/m2-backend/domain.ts), [`supabase/functions/m2-backend/index.ts`](./supabase/functions/m2-backend/index.ts), [`src/app/api/m2/[action]/route.ts`](./src/app/api/m2/[action]/route.ts), [`src/lib/server/crypto.mjs`](./src/lib/server/crypto.mjs)):**
+     - Triển khai `m2-backend` **Version `22`** (`ACTIVE`, `verify_jwt: false`) lên Supabase `eythjapspkoyqdxlxtcd`: ẩn `correctOptionIndex` và `explanation` trong `bootstrap` & `sanitizeBootstrapDto` đối với `student`; chuyển `submit-quiz` sang trả nguyên tử `answerReview` từ `m3_submit_quiz_attempt` (không đọc rời `quiz_questions`), ánh xạ lỗi `QUIZ_CHANGED_MID_ATTEMPT` -> HTTP `409` và `INCOMPLETE_QUIZ_ANSWERS` -> HTTP `400`.
+     - Sửa BFF `/api/m2/[action]` không ép nhầm `null`/`""` thành đáp án `0` (chuyển sang `-1`) và truyền tiếp `questionIds`.
+  3. **Giao diện Học sinh & Quản trị ([`src/lib/types.ts`](./src/lib/types.ts), [`src/lib/store.tsx`](./src/lib/store.tsx), [`src/app/student/lessons/[lessonId]/quiz/page.tsx`](./src/app/student/lessons/[lessonId]/quiz/page.tsx), [`src/app/admin/lessons/[lessonId]/edit/page.tsx`](./src/app/admin/lessons/[lessonId]/edit/page.tsx)):**
+     - Trang làm bài trắc nghiệm học sinh định danh lựa chọn theo `question.id`, đóng băng danh sách `submittedQuestions` khi xem kết quả, hiển thị khối code Python có thụt lề, bắt buộc chọn đủ câu mới mở nút nộp, hiện `Đáp án đúng` + `Lựa chọn của bạn` + `Giải thích:` ngay sau khi nộp, và tự xóa toàn bộ trạng thái kết quả/giải thích khi bấm **"Làm lại lần nữa"** hoặc khi nhận mã `409 QUIZ_CHANGED_MID_ATTEMPT`.
+     - Trang soạn bài Admin hỗ trợ ô nhập đề bài nhiều dòng và ô `Giải thích đáp án`, đồng thời bỏ gợi ý `(Đáp án đúng)` khỏi placeholder mặc định của Lựa chọn A.
+- **Kiểm thử & Nghiệm thu:**
+  - Bộ kiểm thử mới [`tests/pti-session2-quiz.test.mjs`](./tests/pti-session2-quiz.test.mjs) (gồm kiểm tra chạy cả 2 migration & RPC trực tiếp trên PostgreSQL 17 thật + dọn dẹp server/thư mục tạm nghiêm ngặt).
+  - `npm run typecheck`: `0` lỗi; `npm test`: **`388 / 388 PASS`** (`24` bộ kiểm thử, `0` bị bỏ qua); `npm run build`: thành công.
+  - Kiểm tra rollback giao dịch (`BEGIN ... ROLLBACK`) trực tiếp trên `eythjapspkoyqdxlxtcd`: xác nhận Buổi 2 PTI giữ nguyên trạng thái `draft` (`20` câu hỏi), `0` lớp / `0` học sinh / `0` kết quả làm bài.
+  - Kiểm định độc lập bằng Codex CLI (`gpt-6-luna` `xhigh` `-s read-only`): **`VERDICT: GO`**.
+
+---
+
 ### [2026-11-13] — Thiết lập `.graphifyignore` Bảo vệ Dữ liệu Thật/Session & Quét Bản đồ Mã nguồn Cục bộ (`graphify --code-only`, `GRAPHIFY_BACKEND=none`)
 - **Mục tiêu:** Thiết lập lớp chắn [`.graphifyignore`](./.graphifyignore) ngăn toàn bộ dữ liệu thật của học sinh/lớp học, phiên đăng nhập (cookie/session), khóa bí mật và tệp khảo sát thực tế đi vào bộ chỉ mục; ẩn `graphify-out/` trong [`.gitignore`](./.gitignore); tạo bản đồ kiến trúc mã nguồn cục bộ hoàn toàn không gọi AI bên ngoài (`GRAPHIFY_BACKEND=none`).
 - **Tính năng & Thay đổi đã thực hiện:**

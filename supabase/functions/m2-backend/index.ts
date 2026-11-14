@@ -17,6 +17,7 @@ import {
   CourseDTO,
   LessonDTO,
   QuestionDTO,
+  QuizAnswerReviewItemDTO,
   QuizResultDTO,
   PracticeSubmissionDTO,
   isValidUUID,
@@ -2216,7 +2217,7 @@ export async function handleRequest(req: Request): Promise<Response> {
           const { data: qData, error: questionsErr } = await withTransientQueryRetry(() =>
             adminClient
               .from('quiz_questions')
-              .select('id, lesson_id, prompt, options, correct_option_index, order_index')
+              .select('id, lesson_id, prompt, options, correct_option_index, explanation, order_index')
               .in('lesson_id', lessonIds)
               .order('order_index', { ascending: true })
           );
@@ -2235,6 +2236,7 @@ export async function handleRequest(req: Request): Promise<Response> {
             prompt: q.prompt,
             options: q.options,
             correctOptionIndex: q.correct_option_index,
+            explanation: typeof q.explanation === 'string' ? q.explanation : '',
           });
           questionsByLesson.set(q.lesson_id, list);
         }
@@ -4141,10 +4143,39 @@ export async function handleRequest(req: Request): Promise<Response> {
         );
       }
 
-      const { lessonId, answers } = payload as { lessonId?: string; answers?: number[] };
+      const { lessonId, answers, questionIds } = payload as {
+        lessonId?: string;
+        answers?: number[];
+        questionIds?: unknown;
+      };
       if (!isValidUUID(lessonId) || !Array.isArray(answers)) {
         return jsonResponse(
           { success: false, message: 'Dữ liệu nộp bài trắc nghiệm không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      if (
+        questionIds !== undefined &&
+        (!Array.isArray(questionIds) ||
+          questionIds.some((id) => typeof id !== 'string' || id.trim().length === 0 || id.length > 100))
+      ) {
+        return jsonResponse(
+          { success: false, message: 'Dữ liệu nộp bài trắc nghiệm không hợp lệ.', code: 'INVALID_PAYLOAD' },
+          400
+        );
+      }
+
+      if (
+        answers.length === 0 ||
+        answers.some((a) => typeof a !== 'number' || !Number.isInteger(a) || a < 0)
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            message: 'Vui lòng chọn đáp án cho tất cả các câu hỏi trước khi nộp bài.',
+            code: 'INCOMPLETE_QUIZ_ANSWERS',
+          },
           400
         );
       }
@@ -4153,27 +4184,64 @@ export async function handleRequest(req: Request): Promise<Response> {
         p_student_profile_id: actor.profileId,
         p_lesson_id: lessonId,
         p_answers: answers,
+        ...(Array.isArray(questionIds) ? { p_expected_question_ids: questionIds } : {}),
       });
 
       if (quizErr || !quizRes || quizRes.length === 0) {
+        const errMsg = quizErr?.message || '';
+        if (errMsg.includes('QUIZ_CHANGED_MID_ATTEMPT')) {
+          return jsonResponse(
+            {
+              success: false,
+              message:
+                'Nội dung bài trắc nghiệm đã được giáo viên cập nhật trong lúc bạn đang làm bài. Hệ thống đã tải lại bộ câu hỏi mới nhất, vui lòng kiểm tra và nộp lại.',
+              code: 'QUIZ_CHANGED_MID_ATTEMPT',
+            },
+            409
+          );
+        }
+        if (errMsg.includes('INCOMPLETE_QUIZ_ANSWERS')) {
+          return jsonResponse(
+            {
+              success: false,
+              message: 'Vui lòng chọn đáp án cho tất cả các câu hỏi trước khi nộp bài.',
+              code: 'INCOMPLETE_QUIZ_ANSWERS',
+            },
+            400
+          );
+        }
         return jsonResponse(
-          { success: false, message: quizErr?.message || 'Không thể nộp bài trắc nghiệm.', code: 'QUIZ_SUBMIT_FAILED' },
+          { success: false, message: errMsg || 'Không thể nộp bài trắc nghiệm.', code: 'QUIZ_SUBMIT_FAILED' },
           400
         );
       }
 
       const res = quizRes[0];
+      const rawReview = Array.isArray(res.answer_review) ? res.answer_review : [];
+      const answerReview: QuizAnswerReviewItemDTO[] = rawReview.map((item: any) => ({
+        questionId: String(item?.questionId ?? item?.question_id ?? ''),
+        correctOptionIndex:
+          typeof item?.correctOptionIndex === 'number'
+            ? item.correctOptionIndex
+            : typeof item?.correct_option_index === 'number'
+              ? item.correct_option_index
+              : 0,
+        explanation: typeof item?.explanation === 'string' ? item.explanation : '',
+      }));
+
       return jsonResponse({
         success: true,
         score: res.score,
         passed: res.passed,
         highestScore: res.highest_score,
         attemptsCount: res.attempts_count,
+        answerReview,
         data: {
           score: res.score,
           passed: res.passed,
           highestScore: res.highest_score,
           attemptsCount: res.attempts_count,
+          answerReview,
         },
         message: res.passed
           ? 'Chúc mừng! Bạn đã đạt bài trắc nghiệm.'

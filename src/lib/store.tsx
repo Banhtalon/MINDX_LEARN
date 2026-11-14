@@ -8,6 +8,7 @@ import {
   QAState,
   Course,
   Lesson,
+  QuizAnswerReviewItem,
   ClassItem,
   StudentProfile,
   QuizResult,
@@ -195,12 +196,15 @@ export interface StoreContextType {
   submitQuizAttempt: (
     studentId: string,
     lessonId: string,
-    answers: number[]
+    answers: number[],
+    questionIds?: string[]
   ) => Promise<{
     success: boolean;
     message: string;
+    code?: string;
     score: number;
     passed: boolean;
+    answerReview?: QuizAnswerReviewItem[];
   }>;
   submitPractice: (
     studentId: string,
@@ -2991,27 +2995,55 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const submitQuizAttempt = async (
     studentId: string,
     lessonId: string,
-    answers: number[]
+    answers: number[],
+    questionIds?: string[]
   ) => {
+    if (
+      !Array.isArray(answers) ||
+      answers.length === 0 ||
+      answers.some((a) => typeof a !== 'number' || !Number.isInteger(a) || a < 0)
+    ) {
+      return {
+        success: false,
+        message: 'Vui lòng chọn đáp án cho tất cả các câu hỏi trước khi nộp bài.',
+        score: 0,
+        passed: false,
+      };
+    }
+
     if (isLiveMode) {
       try {
         const res = await fetch('/api/m2/submit-quiz', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lessonId, answers }),
+          body: JSON.stringify({
+            lessonId,
+            answers,
+            ...(Array.isArray(questionIds) ? { questionIds } : {}),
+          }),
         });
         const d = await res.json().catch(() => null);
         if (res.ok && d?.success) {
           await fetchBootstrapData();
+          const answerReview: QuizAnswerReviewItem[] | undefined = Array.isArray(d.answerReview)
+            ? d.answerReview
+            : Array.isArray(d.data?.answerReview)
+            ? d.data.answerReview
+            : undefined;
           return {
             success: true,
             message: d.message || 'Nộp bài trắc nghiệm thành công.',
             score: d.score ?? d.data?.score ?? 0,
             passed: d.passed ?? d.data?.passed ?? false,
+            answerReview,
           };
+        }
+        if (d?.code === 'QUIZ_CHANGED_MID_ATTEMPT') {
+          await fetchBootstrapData();
         }
         return {
           success: false,
+          code: typeof d?.code === 'string' ? d.code : undefined,
           message: d?.message || 'Không thể nộp bài trắc nghiệm.',
           score: 0,
           passed: false,
@@ -3032,6 +3064,30 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       return { success: false, message: 'Bài học không có câu hỏi trắc nghiệm.', score: 0, passed: false };
     }
 
+    if (
+      Array.isArray(questionIds) &&
+      (questionIds.length !== targetLesson.questions.length ||
+        targetLesson.questions.some((q, idx) => q.id !== questionIds[idx]))
+    ) {
+      return {
+        success: false,
+        code: 'QUIZ_CHANGED_MID_ATTEMPT',
+        message:
+          'Nội dung bài trắc nghiệm đã được giáo viên cập nhật trong lúc bạn đang làm bài. Hệ thống đã tải lại bộ câu hỏi mới nhất, vui lòng kiểm tra và nộp lại.',
+        score: 0,
+        passed: false,
+      };
+    }
+
+    if (answers.length !== targetLesson.questions.length) {
+      return {
+        success: false,
+        message: 'Vui lòng chọn đáp án cho tất cả các câu hỏi trước khi nộp bài.',
+        score: 0,
+        passed: false,
+      };
+    }
+
     let correctCount = 0;
     targetLesson.questions.forEach((q, idx) => {
       if (answers[idx] === q.correctOptionIndex) {
@@ -3041,6 +3097,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     const score = Math.round((correctCount / targetLesson.questions.length) * 100);
     const passed = score >= 70;
+    const answerReview: QuizAnswerReviewItem[] = targetLesson.questions.map((q) => ({
+      questionId: q.id,
+      correctOptionIndex: q.correctOptionIndex,
+      explanation: q.explanation || '',
+    }));
 
     const student = students.find((s) => s.id === studentId);
     setQuizResults((prev) => {
@@ -3082,6 +3143,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         : 'Bạn chưa đạt ngưỡng 70%. Bạn có thể làm lại bài không giới hạn số lần.',
       score,
       passed,
+      answerReview,
     };
   };
 

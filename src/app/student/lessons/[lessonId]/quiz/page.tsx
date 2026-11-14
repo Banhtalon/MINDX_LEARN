@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
+import { Question, QuizAnswerReviewItem } from '@/lib/types';
 import {
   IconArrowLeft,
   IconCheckCircle,
@@ -22,8 +23,12 @@ export default function StudentQuizPage() {
 
   const lesson = lessons.find((l) => l.id === lessonId);
 
-  // Student selected answers (index of option chosen for each question)
-  const [selectedAnswers, setSelectedAnswers] = useState<{ [qIndex: number]: number }>({});
+  // Student selected answers keyed by question.id (option index chosen for each question)
+  const [selectedAnswers, setSelectedAnswers] = useState<{ [qId: string]: number }>({});
+  const [submittedAnswers, setSubmittedAnswers] = useState<{ [qId: string]: number } | null>(null);
+  const [submittedQuestions, setSubmittedQuestions] = useState<Question[] | null>(null);
+  const [answerReview, setAnswerReview] = useState<QuizAnswerReviewItem[] | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastResult, setLastResult] = useState<{ score: number; passed: boolean; message: string } | null>(null);
 
@@ -74,15 +79,96 @@ export default function StudentQuizPage() {
     (q) => q.studentId === currentUser.id && q.lessonId === lesson.id
   );
 
-  const handleSelectOption = (questionIndex: number, optionIndex: number) => {
+  const answeredCount = lesson.questions.reduce(
+    (count, q) => (selectedAnswers[q.id] !== undefined ? count + 1 : count),
+    0
+  );
+  const isReviewMode = Boolean(lastResult);
+  const displayedQuestions = isReviewMode && submittedQuestions ? submittedQuestions : lesson.questions;
+
+  const renderInlinePromptTokens = (text: string) => {
+    const parts = text.split(/(`[^`]+`)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return (
+          <code
+            key={i}
+            className="px-1.5 py-0.5 mx-0.5 rounded-md bg-blue-50 text-[#1d63ed] border border-blue-200/70 font-mono text-xs font-semibold"
+          >
+            {part.slice(1, -1)}
+          </code>
+        );
+      }
+      return <React.Fragment key={i}>{part}</React.Fragment>;
+    });
+  };
+
+  const renderQuestionPrompt = (promptText: string) => {
+    const blocks: Array<{ type: 'text' | 'code'; lang?: string; content: string }> = [];
+    const regex = /```([a-zA-Z0-9_-]*)\r?\n([\s\S]*?)```/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(promptText)) !== null) {
+      if (match.index > lastIndex) {
+        const textPart = promptText.slice(lastIndex, match.index).trim();
+        if (textPart) {
+          blocks.push({ type: 'text', content: textPart });
+        }
+      }
+      blocks.push({
+        type: 'code',
+        lang: (match[1] || 'python').toLowerCase(),
+        content: match[2].replace(/\s+$/, ''),
+      });
+      lastIndex = regex.lastIndex;
+    }
+    if (lastIndex < promptText.length) {
+      const tail = promptText.slice(lastIndex).trim();
+      if (tail) {
+        blocks.push({ type: 'text', content: tail });
+      }
+    }
+    if (blocks.length === 0) {
+      return <span className="whitespace-pre-line">{renderInlinePromptTokens(promptText)}</span>;
+    }
+
+    return (
+      <div className="space-y-3">
+        {blocks.map((block, bIdx) =>
+          block.type === 'code' ? (
+            <div
+              key={bIdx}
+              className="rounded-2xl overflow-hidden border border-slate-800 bg-[#0f172a] shadow-sm"
+            >
+              <div className="px-3.5 py-1.5 bg-slate-800/90 border-b border-slate-700 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">
+                {block.lang || 'python'}
+              </div>
+              <pre className="p-4 text-xs font-mono text-slate-100 overflow-x-auto leading-relaxed">
+                <code>{block.content}</code>
+              </pre>
+            </div>
+          ) : (
+            <div key={bIdx} className="whitespace-pre-line">
+              {renderInlinePromptTokens(block.content)}
+            </div>
+          )
+        )}
+      </div>
+    );
+  };
+
+  const handleSelectOption = (questionId: string, optionIndex: number) => {
+    if (isReviewMode) return;
+    setValidationError(null);
     setSelectedAnswers({
       ...selectedAnswers,
-      [questionIndex]: optionIndex,
+      [questionId]: optionIndex,
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isReviewMode) return;
 
     // Check if quiz changed mid-attempt
     if (quizChangedMidAttempt) {
@@ -91,13 +177,32 @@ export default function StudentQuizPage() {
       );
       setQuizChangedMidAttempt(false);
       setSelectedAnswers({});
+      setSubmittedAnswers(null);
+      setSubmittedQuestions(null);
+      setAnswerReview(null);
+      setValidationError(null);
       return;
     }
 
-    // Convert to array of selected indices
-    const answersArray: number[] = lesson.questions.map((_, idx) =>
-      selectedAnswers[idx] !== undefined ? selectedAnswers[idx] : -1
+    const unansweredNumbers = lesson.questions
+      .map((q, idx) => (selectedAnswers[q.id] === undefined ? idx + 1 : null))
+      .filter((num): num is number => num !== null);
+
+    if (unansweredNumbers.length > 0) {
+      setValidationError(
+        `Vui lòng chọn đáp án cho tất cả các câu hỏi trước khi nộp bài (còn ${unansweredNumbers.length} câu chưa chọn: Câu ${unansweredNumbers.join(', ')}).`
+      );
+      return;
+    }
+
+    setValidationError(null);
+
+    const questionIds = lesson.questions.map((q) => q.id);
+    const answersArray: number[] = lesson.questions.map((q) =>
+      selectedAnswers[q.id] !== undefined ? selectedAnswers[q.id] : -1
     );
+    const frozenQuestions = [...lesson.questions];
+    const frozenSelection = { ...selectedAnswers };
 
     if (isStaffPreview) {
       let correctCount = 0;
@@ -108,6 +213,14 @@ export default function StudentQuizPage() {
       });
       const score = Math.round((correctCount / lesson.questions.length) * 100);
       const passed = score >= 70;
+      const previewReview: QuizAnswerReviewItem[] = lesson.questions.map((q) => ({
+        questionId: q.id,
+        correctOptionIndex: typeof q.correctOptionIndex === 'number' ? q.correctOptionIndex : 0,
+        explanation: q.explanation || '',
+      }));
+      setSubmittedQuestions(frozenQuestions);
+      setSubmittedAnswers(frozenSelection);
+      setAnswerReview(previewReview);
       setLastResult({
         score,
         passed,
@@ -120,8 +233,22 @@ export default function StudentQuizPage() {
 
     setIsSubmitting(true);
     setTimeout(async () => {
-      const res = await submitQuizAttempt(currentUser.id, lesson.id, answersArray);
+      const res = await submitQuizAttempt(currentUser.id, lesson.id, answersArray, questionIds);
       setIsSubmitting(false);
+      if (!res.success) {
+        if (res.code === 'QUIZ_CHANGED_MID_ATTEMPT') {
+          setSelectedAnswers({});
+          setSubmittedAnswers(null);
+          setSubmittedQuestions(null);
+          setAnswerReview(null);
+          setLastResult(null);
+        }
+        setValidationError(res.message || 'Không thể nộp bài trắc nghiệm.');
+        return;
+      }
+      setSubmittedQuestions(frozenQuestions);
+      setSubmittedAnswers(frozenSelection);
+      setAnswerReview(Array.isArray(res.answerReview) ? res.answerReview : []);
       setLastResult({
         score: res.score,
         passed: res.passed,
@@ -132,7 +259,14 @@ export default function StudentQuizPage() {
 
   const handleResetForm = () => {
     setSelectedAnswers({});
+    setSubmittedAnswers(null);
+    setSubmittedQuestions(null);
+    setAnswerReview(null);
     setLastResult(null);
+    setValidationError(null);
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -172,20 +306,19 @@ export default function StudentQuizPage() {
       </div>
 
       {/* Rules Notice */}
-      <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-xs text-xs text-slate-600 space-y-1.5">
-        <div className="font-extrabold text-slate-900 text-xs">Chọn 1 đáp án đúng cho mỗi câu • Đạt từ 70% • Được làm lại nhiều lần (lưu điểm cao nhất)</div>
-        <div className="hidden">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
-          <span>Mỗi câu hỏi có 1 đáp án đúng duy nhất, các câu hỏi có trọng số điểm bằng nhau.</span>
+      <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-xs text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="font-extrabold text-slate-900 text-xs">
+          Chọn đủ {lesson.questions.length} câu (1 đáp án đúng/câu) • Đạt từ 70% • Làm xong mới xem đáp án, làm lại tự ẩn đáp án
         </div>
-        <div className="hidden">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
-          <span>Ngưỡng hoàn thành ĐẠT: từ <strong>70%</strong> trở lên.</span>
-        </div>
-        <div className="hidden">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#1d63ed]" />
-          <span>Được phép làm lại không giới hạn số lần, hệ thống luôn lưu giữ điểm số cao nhất.</span>
-        </div>
+        <span
+          className={`px-3 py-1 rounded-full font-bold text-[11px] shrink-0 self-start sm:self-auto ${
+            answeredCount === lesson.questions.length
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              : 'bg-blue-50 text-[#1d63ed] border border-blue-100'
+          }`}
+        >
+          Đã chọn {answeredCount} / {lesson.questions.length} câu
+        </span>
       </div>
 
       {/* Mid-attempt change simulator banner (only visible in Demo/QA mode) */}
@@ -251,8 +384,15 @@ export default function StudentQuizPage() {
 
       {/* Quiz Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
-        {lesson.questions.map((q, qIndex) => {
-          const selectedOption = selectedAnswers[qIndex];
+        {displayedQuestions.map((q, qIndex) => {
+          const selectedOption = isReviewMode ? submittedAnswers?.[q.id] : selectedAnswers[q.id];
+          const review =
+            isReviewMode && answerReview
+              ? answerReview.find((item) => item.questionId === q.id) ??
+                (!answerReview[qIndex]?.questionId ? answerReview[qIndex] : undefined)
+              : undefined;
+          const hasCorrectIndex = typeof review?.correctOptionIndex === 'number';
+          const isQuestionCorrect = hasCorrectIndex && selectedOption === review.correctOptionIndex;
 
           return (
             <div
@@ -263,44 +403,96 @@ export default function StudentQuizPage() {
                 <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-[#1d63ed] border border-blue-100 font-bold font-mono shrink-0">
                   Câu {qIndex + 1}
                 </span>
-                <h3 className="font-extrabold text-slate-900 text-sm leading-relaxed flex-1 pt-0.5">{q.prompt}</h3>
+                <div className="font-extrabold text-slate-900 text-sm leading-relaxed flex-1 pt-0.5 min-w-0">
+                  {renderQuestionPrompt(q.prompt)}
+                </div>
+                {isReviewMode && hasCorrectIndex && (
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 ${
+                      isQuestionCorrect
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-rose-50 text-rose-700 border border-rose-200'
+                    }`}
+                  >
+                    {isQuestionCorrect ? 'Đúng' : 'Chưa đúng'}
+                  </span>
+                )}
               </div>
 
               <div className="space-y-2.5 pt-1">
                 {q.options.map((opt, optIndex) => {
                   const isChecked = selectedOption === optIndex;
+                  const isCorrectOption = isReviewMode && hasCorrectIndex && optIndex === review.correctOptionIndex;
+                  const isWrongUserChoice =
+                    isReviewMode && hasCorrectIndex && isChecked && optIndex !== review.correctOptionIndex;
+
+                  let optionStyle = 'border-slate-200/80 hover:bg-slate-50 text-slate-700 cursor-pointer';
+                  let badgeStyle = 'bg-slate-100 text-slate-500';
+                  if (isReviewMode) {
+                    if (isCorrectOption) {
+                      optionStyle = 'border-emerald-400 bg-emerald-50/80 text-emerald-950 font-bold cursor-default';
+                      badgeStyle = 'bg-emerald-600 text-white';
+                    } else if (isWrongUserChoice) {
+                      optionStyle = 'border-rose-300 bg-rose-50/80 text-rose-900 font-semibold cursor-default';
+                      badgeStyle = 'bg-rose-600 text-white';
+                    } else {
+                      optionStyle = 'border-slate-200/70 bg-slate-50/40 text-slate-500 cursor-default';
+                    }
+                  } else if (isChecked) {
+                    optionStyle = 'border-[#1d63ed] bg-blue-50/70 ring-2 ring-blue-500/15 font-bold text-slate-900 cursor-pointer';
+                    badgeStyle = 'bg-[#1d63ed] text-white';
+                  }
 
                   return (
                     <label
                       key={optIndex}
-                      className={`flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                        isChecked
-                          ? 'border-[#1d63ed] bg-blue-50/70 ring-2 ring-blue-500/15 font-bold text-slate-900'
-                          : 'border-slate-200/80 hover:bg-slate-50 text-slate-700'
-                      }`}
+                      className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all ${optionStyle}`}
                     >
                       <input
                         type="radio"
                         name={`question_${q.id}`}
                         checked={isChecked}
-                        onChange={() => handleSelectOption(qIndex, optIndex)}
+                        disabled={isReviewMode}
+                        onChange={() => handleSelectOption(q.id, optIndex)}
                         className="w-4 h-4 text-[#1d63ed] focus:ring-[#1d63ed]"
                       />
                       <span
-                        className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono text-[11px] font-bold shrink-0 ${
-                          isChecked ? 'bg-[#1d63ed] text-white' : 'bg-slate-100 text-slate-500'
-                        }`}
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono text-[11px] font-bold shrink-0 ${badgeStyle}`}
                       >
                         {String.fromCharCode(65 + optIndex)}
                       </span>
                       <span className="flex-1 leading-relaxed">{opt}</span>
+                      {isCorrectOption && (
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold shrink-0">
+                          Đáp án đúng
+                        </span>
+                      )}
+                      {isWrongUserChoice && (
+                        <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 text-[10px] font-extrabold shrink-0">
+                          Lựa chọn của bạn
+                        </span>
+                      )}
                     </label>
                   );
                 })}
               </div>
+
+              {isReviewMode && review?.explanation && review.explanation.trim() !== '' && (
+                <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-slate-700 leading-relaxed">
+                  <span className="font-extrabold text-[#1d63ed]">Giải thích: </span>
+                  <span>{review.explanation}</span>
+                </div>
+              )}
             </div>
           );
         })}
+
+        {validationError && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-2.5">
+            <IconAlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <span className="leading-relaxed">{validationError}</span>
+          </div>
+        )}
 
         {/* Submit Actions */}
         <div className="flex items-center justify-between pt-2">
@@ -311,14 +503,25 @@ export default function StudentQuizPage() {
             Quay lại bài học
           </Link>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-3 bg-[#1d63ed] hover:bg-[#154ec2] disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer"
-          >
-            {isSubmitting && <IconRefreshCw className="w-4 h-4 animate-spin" />}
-            <span>Nộp bài chấm điểm</span>
-          </button>
+          {isReviewMode ? (
+            <button
+              type="button"
+              onClick={handleResetForm}
+              className="px-6 py-3 bg-[#1d63ed] hover:bg-[#154ec2] text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <IconRotateCcw className="w-4 h-4" />
+              <span>Làm lại lần nữa</span>
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-3 bg-[#1d63ed] hover:bg-[#154ec2] disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              {isSubmitting && <IconRefreshCw className="w-4 h-4 animate-spin" />}
+              <span>Nộp bài chấm điểm</span>
+            </button>
+          )}
         </div>
       </form>
     </div>

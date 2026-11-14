@@ -136,6 +136,13 @@ export interface QuestionDTO {
   prompt: string;
   options: string[];
   correctOptionIndex?: number;
+  explanation?: string;
+}
+
+export interface QuizAnswerReviewItemDTO {
+  questionId: string;
+  correctOptionIndex: number;
+  explanation?: string;
 }
 
 export interface LessonDTO {

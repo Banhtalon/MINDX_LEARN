@@ -1517,7 +1517,18 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
   } else if (action === 'submit-quiz') {
     cleanPayload = {
       lessonId: body.lessonId,
-      answers: Array.isArray(body.answers) ? body.answers.map((a: any) => Number(a)) : [],
+      answers: Array.isArray(body.answers)
+        ? body.answers.map((a: unknown) =>
+            typeof a === 'number' && Number.isInteger(a) ? a : -1
+          )
+        : undefined,
+      ...(body.questionIds !== undefined
+        ? {
+            questionIds: Array.isArray(body.questionIds)
+              ? body.questionIds.map((id: unknown) => (typeof id === 'string' ? id.trim() : id))
+              : body.questionIds,
+          }
+        : {}),
     };
   } else if (action === 'submit-practice') {
     cleanPayload = {

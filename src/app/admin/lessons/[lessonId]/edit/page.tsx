@@ -132,8 +132,9 @@ export default function EditLessonPage() {
     const newQ: Question = {
       id: `q_${lesson.sessionNumber}_${Date.now()}`,
       prompt: `Câu hỏi trắc nghiệm mới số ${questions.length + 1}`,
-      options: ['Lựa chọn A (Đáp án đúng)', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
+      options: ['Lựa chọn A', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
       correctOptionIndex: 0,
+      explanation: '',
     };
     setQuestions([...questions, newQ]);
     setIsDirty(true);
@@ -416,18 +417,21 @@ export default function EditLessonPage() {
                     </button>
                   </div>
 
-                  <input
-                    type="text"
+                  <textarea
+                    rows={q.prompt.includes('\n') ? 6 : 2}
                     required
                     value={q.prompt}
                     onChange={(e) => {
-                      const updated = [...questions];
-                      updated[qIndex].prompt = e.target.value;
+                      const updated = questions.map((item, idx) =>
+                        idx === qIndex ? { ...item, prompt: e.target.value } : item
+                      );
                       setQuestions(updated);
                       setIsDirty(true);
                     }}
-                    placeholder="Nhập nội dung câu hỏi..."
-                    className="w-full px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl bg-white font-semibold focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10"
+                    placeholder="Nhập nội dung câu hỏi (có thể dùng ```python ... ``` cho đoạn mã)..."
+                    className={`w-full px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 leading-relaxed ${
+                      q.prompt.includes('\n') ? 'font-mono' : 'font-semibold'
+                    }`}
                   />
 
                   <div className="space-y-2 pt-1">
@@ -441,8 +445,9 @@ export default function EditLessonPage() {
                           name={`correct_${q.id}`}
                           checked={q.correctOptionIndex === optIndex}
                           onChange={() => {
-                            const updated = [...questions];
-                            updated[qIndex].correctOptionIndex = optIndex;
+                            const updated = questions.map((item, idx) =>
+                              idx === qIndex ? { ...item, correctOptionIndex: optIndex } : item
+                            );
                             setQuestions(updated);
                             setIsDirty(true);
                           }}
@@ -453,8 +458,14 @@ export default function EditLessonPage() {
                           required
                           value={opt}
                           onChange={(e) => {
-                            const updated = [...questions];
-                            updated[qIndex].options[optIndex] = e.target.value;
+                            const updated = questions.map((item, idx) =>
+                              idx === qIndex
+                                ? {
+                                    ...item,
+                                    options: item.options.map((o, oIdx) => (oIdx === optIndex ? e.target.value : o)),
+                                  }
+                                : item
+                            );
                             setQuestions(updated);
                             setIsDirty(true);
                           }}
@@ -463,6 +474,25 @@ export default function EditLessonPage() {
                         />
                       </div>
                     ))}
+                  </div>
+
+                  <div className="pt-1">
+                    <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                      Giải thích đáp án (tùy chọn — chỉ hiện sau khi học sinh nộp bài):
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={q.explanation || ''}
+                      onChange={(e) => {
+                        const updated = questions.map((item, idx) =>
+                          idx === qIndex ? { ...item, explanation: e.target.value } : item
+                        );
+                        setQuestions(updated);
+                        setIsDirty(true);
+                      }}
+                      placeholder="Nhập lời giải thích ngắn gọn giúp học sinh hiểu lý do đáp án đúng..."
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-[#1d63ed] focus:ring-4 focus:ring-blue-500/10 leading-relaxed"
+                    />
                   </div>
                 </div>
               ))}

@@ -44,6 +44,13 @@ export interface Question {
   prompt: string;
   options: string[];
   correctOptionIndex: number;
+  explanation?: string;
+}
+
+export interface QuizAnswerReviewItem {
+  questionId: string;
+  correctOptionIndex: number;
+  explanation?: string;
 }
 
 export interface Lesson {
